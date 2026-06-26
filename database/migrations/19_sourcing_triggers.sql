@@ -1,0 +1,9 @@
+-- 19_sourcing_triggers.sql
+-- Triggers for Sourcing & Margin Domain
+-- 
+-- [요건 분석]
+-- - sourcing_intelligences, margin_optimizations: 분석 후 적재되는 데이터셋으로 updated_at 컬럼이 없음.
+-- - 마진 계산 원칙: 트리거, Generated Column, SP 등을 통한 연산을 전면 배제하고, Application Layer에서 산출된 값을 단순 저장하도록 고정함.
+-- 
+-- 이에 따라 본 Sprint 대상 테이블에는 fn_update_updated_at() 트리거 및 마진 연산 트리거를 생성하지 않으며,
+-- 파일은 마이그레이션 실행 순서 보장을 위해 빈 멱등성 스크립트로 유지합니다.

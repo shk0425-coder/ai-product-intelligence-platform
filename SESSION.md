@@ -30,6 +30,6 @@
 ---
 
 ## 3. 다음 세션 이어받을 포인트 (Next Steps)
-* **ChatGPT PM 최종 코드 리뷰 및 승인 획득**:
-  - 루트 경로에 생성된 `REVIEW.md` 및 `CONTEXT.md` 문서를 단일 기준으로 제출하여 ChatGPT PM의 최종 승인을 요청합니다.
-  - 승인 후 다음 단계인 **`Sprint 2-5` (Strategy/Creative 도메인 DDL 구현 - product_strategies, creative_briefs 등)**로 진입합니다.
+* **Sprint 2-4 최종 승인 완료 및 다음 스프린트 이행**:
+  - Sprint 2-3 및 2-4 DDL 승인이 완료되어 `main` 브랜치 머지 및 푸시가 완료되었습니다.
+  - 다음 세션에서는 PM의 세부 작업 지시서 발부에 맞춰 **`Sprint 2-5` (Strategy/Creative 도메인 DDL 구현 - product_strategies, creative_briefs 등)** 개발을 시작합니다.

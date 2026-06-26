@@ -7,7 +7,7 @@
 ## 1. Project Summary
 * **프로젝트명**: AI Product Intelligence Platform
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
-* **현재 버전**: v0.5.1
+* **현재 버전**: v0.5.2
 * **현재 단계**: Phase 2 - Database Schema & Migration DDL
 * **현재 Sprint**: Sprint 2 - Supabase DDL 및 데이터베이스 구조체 셋업
 
@@ -15,13 +15,13 @@
 
 ## 2. Current Goal
 * **현재 Sprint**: Sprint 2 (Supabase DDL 및 데이터베이스 구조체 셋업)
-* **현재 작업 (Task)**: Sprint 2-3 & 2-4 DDL 및 CONTEXT.md v2.5 규칙 개선 완료 및 ChatGPT Review 대기
+* **현재 작업 (Task)**: Sprint 2-5 Strategy / Creative Domain Database DDL 구현 준비
 * **완료 조건 (Definition of Done)**:
-  1. `database/migrations/` 폴더 내의 12~19번 마이그레이션 SQL 스크립트 작성 및 로컬 검증 완료.
-  2. `customer_reviews`와 `review_embeddings` 간의 1:1 관계 제약조건(`UNIQUE`) 설정 완료.
-  3. 금액(Money) 컬럼의 `NUMERIC` 데이터 타입 지정 완료.
-  4. 마진 계산 원칙 준수(DB 연산 전면 배제) 완료.
-  5. CONTEXT.md v2.5 자동 갱신 및 자가 검증(Self Check) 규칙 수립 및 반영 완료.
+  1. `database/migrations/` 폴더 내의 20~23번 마이그레이션 SQL 스크립트 작성 완료.
+  2. `product_strategies` 및 `creative_briefs` 테이블 선언 및 세부 컬럼 한글 Comment 추가 완료.
+  3. 1:1 관계 비즈니스 룰 준수를 위한 UNIQUE(run_id) 및 외래키(ON DELETE CASCADE) 설정 완료.
+  4. 상세페이지 스토리보드 등 대용량 JSONB 필드 검색 최적화를 위한 GIN 인덱스 생성 완료.
+  5. Sprint 2-5 요약 문서인 `REVIEW.md` 작성 및 업데이트 완료.
   6. Git 자율 규격에 따라 로컬 커밋 및 원격 GitHub `develop` 브랜치 Push 완료.
   7. ChatGPT PM의 `REVIEW.md` 기준 최종 승인 획득.
 
@@ -55,15 +55,13 @@
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **Sprint 2-3 및 Sprint 2-4 DDL 스크립트 코드 리뷰**: 루트 경로에 생성된 `REVIEW.md`를 바탕으로 12~19번 DDL 마이그레이션 스크립트의 Supabase PostgreSQL 16 적합성, 1:1 무결성 제약조건 매핑 상태 검사.
-* **CONTEXT.md v2.5 자동 갱신 규칙**: 새로 제정된 자가 검증(Self Check) 및 "현재 시점" 동기화 프로세스 적정성 검토.
+* **None** (이전 스프린트 2-3 및 2-4 DDL 최종 승인 완료됨)
 
 ---
 
 ## 7. Next Action
 * **ChatGPT (PM)**: 
-  1. 루트 경로에 마련된 `REVIEW.md` 문서를 단일 기준으로 사용하여 Sprint 2-3 및 2-4 DDL 변경 사항에 대한 통합 코드 리뷰 및 승인을 진행해 주십시오.
-  2. 리뷰 완료 후, 다음 마일스톤인 **[Sprint 2-5] Strategy/Creative Domain DDL 구현을 위한 세부 작업 지시서**를 작성해 주십시오.
+  1. 다음 마일스톤인 **[Sprint 2-5] Strategy/Creative Domain DDL 구현을 위한 세부 작업 지시서**를 작성해 주십시오.
 
 ---
 
@@ -92,5 +90,5 @@
 
 ## 11. Last Update
 * **업데이트 날짜**: 2026-06-26
-* **완료 Sprint**: Sprint 2-3 (Review Domain), Sprint 2-4 (Sourcing/Margin Domain)
+* **완료 Sprint**: Sprint 2-4 (Sourcing/Margin Domain)
 * **다음 Sprint**: Sprint 2-5 (Strategy/Creative Domain)

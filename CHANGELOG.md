@@ -6,6 +6,12 @@
 
 ## [Unreleased] - 2026-06-26
 ### Added (새로 설계 및 추가된 사항)
+* **GitHub Repository 운영 규칙 반영 및 Git 저장소 구성**:
+  * 소스코드와 프로젝트 문서의 일관성 유지를 위해 GitHub Repository를 Single Source of Truth(SSOT)로 지정.
+  * `.gitignore` 파일 작성 및 로컬 Git 저장소 초기화 (`git init`).
+  * 브랜치 정책(`main` / `develop`) 수립 및 `develop` 브랜치 상에 Sprint 2-1 및 2-2 DDL 분할 커밋 생성.
+  * ChatGPT PM 리뷰 승인 하에 `main`으로 Merge 및 다음 Sprint를 전개하는 PR(Pull Request) 규격 수립.
+  * `AI_START.md` 및 `CONTEXT.md` 내에 커밋 규칙 및 작업 완료 후 필수 절차 적용.
 * **Sprint 2-2: Market Domain Database DDL 구현 완료**:
   * `database/migrations/` 경로 내에 Supabase 호환 4대 DDL 마이그레이션 파일 작성 완료.
   * 2대 마켓 데이터 수집 테이블(`market_metrics`, `competitor_products`) 생성 및 주석(Comment) 기술 스크립트 작성 (`08_market_tables.sql`).

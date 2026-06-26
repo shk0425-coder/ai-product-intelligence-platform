@@ -9,22 +9,29 @@
   * Supabase/pgvector 및 대용량 처리를 고려한 Database Architecture v1.1 Final 설계 동결
   * POS v2.3 최종 운영 체제 구축 및 CONTEXT.md 인계 규격화
   * Sprint 2-1: Core Domain Database DDL 구현 완료
-  * **[신규 스프린트] Sprint 2-2: Market Domain Database DDL 구현 완료**
+  * Sprint 2-2: Market Domain Database DDL 구현 완료
+  * **[신규 지시] GitHub Repository 운영 규칙 반영 및 Git 저장소 구성 완료**
 
 ---
 
 ## 2. 현재 작업 진행도 (Current State)
-* **Market Domain DDL 구현 완료**:
-  - [x] `database/migrations/` 폴더 내에 순차 실행 가능한 4대 마이그레이션 SQL 스크립트 작성 완료.
-    - `08_market_tables.sql`: market_metrics, competitor_products 테이블 생성 및 상세 주석(Comment) 설정
-    - `09_market_constraints.sql`: pk_<table>, fk_<table>_<parent>, uq_<table>_<column> 제약 조건 바인딩 및 Cascade 규칙 설정
-    - `10_market_indexes.sql`: 외래키 B-tree 인덱스, 브랜드명 검색 인덱스, JSONB raw_trend_json 컬럼 GIN 인덱스 생성
-    - `11_market_triggers.sql`: 스키마 명세에 맞춘 트리거 옴프 기입 완료 (해당 테이블은 스냅샷/이력 데이터로 updated_at이 배제되어 공백 배치 완료)
-* **POS v2.3 문서 최신화 완료**:
-  - [x] `AI_START.md`, `PROJECT.md`, `CONTEXT.md`, `TODO.md`, `CHANGELOG.md` 갱신 완료 (Session Memory 비우기 규칙 및 Market Domain DDL 구현 요약 반영).
+* **GitHub Repository 운영 규칙 반영 및 Git 저장소 구성**:
+  - [x] `.gitignore` 작성 및 로컬 Git 저장소 초기화 (`git init`).
+  - [x] 브랜치 정책에 따른 `main` 및 `develop` 브랜치 설정 완료.
+  - [x] 커밋 규칙에 맞춰 스프린트별 분할 커밋 완료:
+    - `feat(core): Sprint 2-1 Core Domain DDL` (01~07 DDL 및 설계 사양서 포함)
+    - `feat(market): Sprint 2-2 Market Domain DDL` (08~11 DDL 포함)
+  - [x] `AI_START.md` 및 `CONTEXT.md` 파일에 "GitHub Repository 운영 규칙" (브랜치 정책, 커밋 메시지 형식, 작업 완료 후 필수 절차, PR 작성 규격) 반영 완료.
+* **Core & Market Domain DDL 구현 완료**:
+  - [x] Core Domain (`01_extensions.sql` ~ `07_triggers.sql`) 구현 완료.
+  - [x] Market Domain (`08_market_tables.sql` ~ `11_market_triggers.sql`) 구현 완료.
 
 ---
 
 ## 3. 다음 세션 이어받을 포인트 (Next Steps)
-* 현재 작업 상태는 **ChatGPT (PM) Review 대기** 중입니다.
-* ChatGPT PM이 `database/migrations/`에 위치한 08~11번 SQL 파일들의 구문과 JSONB GIN 인덱스, 외래키 관계 등을 검토하고 승인하면, 다음 단계인 **`Sprint 2-3` (Customer/JTBD 도메인 DDL 구현 - customer_reviews, review_embeddings, jtbd_profiles 등)**을 개시해야 합니다.
+* **GitHub 원격 저장소 Push 및 Pull Request 생성**: 
+  - 로컬 Git 저장소를 GitHub 원격 저장소와 연동(Git remote add)하고 `develop` 브랜치를 push합니다.
+  - GitHub에서 `develop` -> `main`으로 머지하기 위한 Pull Request(PR 본문 명세서 규칙 준수)를 생성합니다.
+* **ChatGPT PM 최종 코드 리뷰 및 승인**:
+  - 생성된 PR 및 DDL 스크립트(01~11번)에 대해 ChatGPT PM의 승인을 획득한 후 `main`에 머지합니다.
+  - 승인 후 다음 단계인 **`Sprint 2-3` (Customer/JTBD 도메인 DDL 구현 - customer_reviews, review_embeddings, jtbd_profiles 등)**으로 진입합니다.

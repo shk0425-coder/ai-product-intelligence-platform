@@ -18,11 +18,15 @@
 
 ### [Phase 2] Database Schema & Migration DDL (Next Milestone)
 - [x] Sprint 2-1: Core Domain Database DDL 구현 완료
-- [/] Sprint 2-2: Market Domain Database DDL 구현 완료 (ChatGPT Review 대기 중)
+- [x] Sprint 2-2: Market Domain Database DDL 구현 완료 (ChatGPT Review 대기 중)
   - [x] 08_market_tables.sql (테이블 및 코멘트) 작성
   - [x] 09_market_constraints.sql (기본키/외래키/유니크 제약조건) 작성
   - [x] 10_market_indexes.sql (B-tree 및 GIN 인덱싱) 작성
   - [x] 11_market_triggers.sql (트리거 생략 명시) 작성
+- [x] GitHub Repository 운영 규칙 반영 및 Git 저장소 구성 완료
+  - [x] .gitignore 작성 및 로컬 Git 저장소 초기화 (`git init`)
+  - [x] main/develop 브랜치 운용 및 스프린트별 분할 커밋 생성
+  - [x] AI_START.md 및 CONTEXT.md 에 깃 가이드라인 이식 완료
 - [ ] Sprint 2-3: Customer/JTBD Domain Database DDL 구현
 - [ ] Sprint 2-4: Sourcing/Margin Domain Database DDL 구현
 - [ ] Sprint 2-5: Strategy/Creative Domain Database DDL 구현

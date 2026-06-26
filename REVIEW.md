@@ -23,7 +23,7 @@
 
 ## 3. 변경 요약
 * **복합 기본키 및 파티셔닝 구조 대비**: `customer_reviews` 및 `review_embeddings` 테이블에 `(review_id, collected_at)` 복합 기본키를 설계하여 향후 월별 범위 파티셔닝 확장에 완벽 대비했습니다.
-* **참조 무결성 유지**: `review_embeddings`가 `customer_reviews`를 참조할 때 복합 외래키 `(review_id, collected_at)` 조합을 참조하도록 선언하여 PostgreSQL 참조 무결성 규칙을 정확히 만족시켰습니다.
+* **참조 무결성 및 1:1 관계 보장**: `review_embeddings`가 `customer_reviews`를 참조할 때 복합 외래키 `(review_id, collected_at)` 조합을 참조하도록 선언하고, 해당 복합 외래키 조합에 `UNIQUE` 제약조건(`uq_review_embeddings_review_composite`)을 선언하여 리뷰 1건당 임베딩은 오직 1건만 매핑되도록 데이터 무결성을 보장했습니다.
 * **JTBD 1:1 격리 관계 수립**: `jtbd_profiles.run_id`에 `UNIQUE` 제약조건을 설정하여, 한 번의 분석 실행(`analysis_runs`)당 하나의 JTBD 요약서만 연결되도록 비즈니스 룰을 물리 계층에 강제했습니다.
 * **인덱싱 전략 최적화**:
   * `jtbd_profiles` 테이블의 페르소나 및 시나리오 데이터 등 대용량 JSONB 속성 조회를 최적화하기 위해 GIN 인덱스(`idx_jtbd_profiles_persona`, `idx_jtbd_profiles_usage_scenario`)를 생성했습니다.
@@ -109,6 +109,6 @@ erDiagram
 | 항목 | 개수 |
 | --- | --- |
 | Tables | 3 |
-| Constraints | 7 |
+| Constraints | 8 |
 | Indexes | 5 |
 | Triggers | 0 (생략 명시) |

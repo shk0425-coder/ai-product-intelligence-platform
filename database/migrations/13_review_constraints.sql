@@ -17,6 +17,9 @@ ALTER TABLE public.review_embeddings
     ADD CONSTRAINT fk_review_embeddings_customer_reviews FOREIGN KEY (review_id, collected_at)
     REFERENCES public.customer_reviews(review_id, collected_at) ON DELETE CASCADE;
 
+ALTER TABLE public.review_embeddings
+    ADD CONSTRAINT uq_review_embeddings_review_composite UNIQUE (review_id, collected_at);
+
 -- 3. jtbd_profiles Constraints
 ALTER TABLE public.jtbd_profiles
     ADD CONSTRAINT pk_jtbd_profiles PRIMARY KEY (jtbd_id);

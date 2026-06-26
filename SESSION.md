@@ -18,7 +18,7 @@
 * **Sprint 2-3 Review Domain DDL 구현 완료**:
   - [x] `database/migrations/` 내에 순차 실행 가능한 4대 마이그레이션 DDL SQL 스크립트 작성 완료.
     - `12_review_tables.sql`: customer_reviews, review_embeddings, jtbd_profiles 테이블 생성 및 컬럼 주석 추가
-    - `13_review_constraints.sql`: 복합 기본키, 복합 외래키(review_id, collected_at), 1:1 유니크 제약조건 매핑
+    - `13_review_constraints.sql`: 복합 기본키, 복합 외래키 및 임베딩 1:1 무결성 보장을 위한 UNIQUE 제약조건 매핑
     - `14_review_indexes.sql`: B-tree 조인 인덱스 및 JSONB GIN 인덱스 생성
     - `15_review_triggers.sql`: updated_at 배제 요건에 따른 트리거 생략 예외 처리 명시
 * **Sprint Review 자동화 프로세스 도입**:

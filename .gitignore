@@ -1,0 +1,17 @@
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+
+# Local environment variables
+.env
+
+# OS metadata
+.DS_Store
+
+# Temporary outputs
+results.json
+
+# IDE / Agent assets
+.gemini/
+mcp/

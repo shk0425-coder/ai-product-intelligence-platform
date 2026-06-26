@@ -118,15 +118,39 @@ Commit Message는 반드시 아래 접두어 및 형식을 따릅니다.
 
 ---
 
-## 7. AI 작업 종료 절차
-작업이 정상 완료되었거나 세션을 종료(Handover)할 시, 반드시 아래 절차 및 문서를 업데이트한 후 세션을 마쳐야 합니다.
+## 7. Sprint 종료 및 AI 작업 종료 절차 (v2.4 개편)
+스프린트가 완료되었거나 작업을 마쳐 세션을 종료(Handover)할 시, 다음의 필수 절차를 엄격히 준수합니다.
 
-* **1단계: 소스코드 정리 및 Git Commit & Push**
-  * `AI_START.md` 5-3 커밋 규칙에 맞춰 Git Commit을 실행합니다.
-  * 원격 저장소(`develop` 브랜치)로 Git Push 및 Pull Request 가이드라인을 작성합니다.
-* **2단계: 프로젝트 문서 업데이트**
-  * **[CONTEXT.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/CONTEXT.md)** (가장 최신 상태로 동기화 및 Session Memory 정리, 승인 대기 목록 갱신)
-  * **[PROJECT.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/PROJECT.md)** (누적 현황 업데이트)
-  * **[SESSION.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/SESSION.md)** (오늘 한 일 및 이어할 다음 포인트 명시)
-  * **[TODO.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/TODO.md)** (완료 항목 `[x]` 처리 및 진행 중 `[/]` 마킹)
-  * **[CHANGELOG.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/CHANGELOG.md)** (기술적 변경점 기록)
+### 7-1. Sprint 종료 필수 8단계 프로세스
+1. **개발 완료**: 스프린트 범위 내의 기능/소스코드/DDL 구현 완수.
+2. **Self Review**: `REVIEW.md`에 명시된 자체 점검 요건 검토.
+3. **Git Commit**: `AI_START.md` 5-3 커밋 규칙을 준수하여 커밋 메시지 작성 및 커밋. (예: `feat(core): Sprint 2-1 Core Domain DDL`)
+4. **Git Push**: 원격 GitHub Repository(`develop` 브랜치)로 Push (에이전트 자율 수행 의무).
+5. **프로젝트 문서 업데이트**: `CONTEXT.md`, `SESSION.md`, `TODO.md`, `CHANGELOG.md`, `PROJECT.md` 최신화.
+6. **REVIEW.md 생성**: 리뷰 산출물 표준 포맷에 맞추어 `REVIEW.md` 파일 생성 (이전 리뷰 덮어쓰기 또는 갱신).
+7. **ChatGPT (Project Manager) Review 요청**: 생성한 `REVIEW.md`와 `CONTEXT.md`를 제출하여 코드 리뷰 요청.
+8. **승인 후 다음 Sprint 진행**: ChatGPT PM의 승인 획득 후 다음 Sprint 개시. (승인 전 절대 다음 스프린트 이행 금지)
+
+### 7-2. REVIEW.md 생성 규칙
+모든 Sprint 종료 시, ChatGPT PM이 빠른 변경사항 파악과 일관된 품질 관리를 수행할 수 있도록 루트 경로에 **[REVIEW.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/REVIEW.md)**를 반드시 생성해야 합니다.
+
+#### [REVIEW.md 필수 구성 요소]
+1. **Sprint 정보**: Sprint 번호, 대상 Domain, Commit Message 명시.
+2. **변경된 파일**: 이번 Sprint에서 생성/수정된 구체적 파일 경로 목록.
+3. **변경 요약**: 주요 추가/수정 사항 기술.
+4. **Migration 정보**: 생성된 Migration 파일 목록 및 실행 순서, 기존 Migration 수정 여부 (단, 기존 Migration은 수정하지 않음을 원칙으로 명시).
+5. **Self Review (자체 점검 결과)**:
+   * PostgreSQL 16 호환 여부
+   * Supabase 호환 여부
+   * FK 순환참조 유무
+   * Trigger 정상 동작 확인
+   * Migration 순서 검증
+   * Architecture 명세와 차이 없음 여부
+6. **Known Issues**: 인지하고 있는 버그나 미해결 사항 (없을 시 `None` 기입).
+7. **Review Request**: ChatGPT PM이 특별히 집중해서 검토해야 할 항목 (SQL 품질, FK 정책, 인덱스 전략, 아키텍처 일치 여부 등).
+
+### 7-3. ChatGPT 리뷰 제출 및 피드백 규칙
+Sprint가 종료되면 PM에게 아래 자료를 함께 제출해야 합니다.
+* **필수 제출**: `REVIEW.md`, `CONTEXT.md`
+* **필요 시 제출**: 이번 Sprint에서 생성된 SQL DDL 파일 내용, ERD 다이어그램 등
+* **운영 원칙**: ChatGPT PM은 제출된 `REVIEW.md`를 단일 기준으로 활용하여 검토하고 승인 여부를 결정합니다.

@@ -88,6 +88,9 @@ GitHub Repository는 프로젝트의 공식 기준(Single Source of Truth, SSOT)
 5. **Pull Request 생성**: 아래 명세에 맞춰 PR을 생성하고, ChatGPT PM에게 코드 리뷰 요청.
 6. **ChatGPT PM 승인 획득**: 승인이 완료되기 전에는 `main`으로 Merge 및 다음 Sprint를 시작하지 않습니다.
 
+> [!IMPORTANT]
+> **에이전트 자율 수행 의무**: 개발 에이전트(Antigravity)는 각 Sprint 또는 개별 작업 완료 시, 사용자로부터 별도 지시를 받지 않더라도 **스스로 커밋 규칙에 맞춰 로컬 Git Commit을 수행하고 원격 GitHub Repository(`develop` 브랜치)에 Push까지 원스톱으로 즉시 실행**해야 합니다. 이는 프로세스 누락 방지를 위한 필수 조건입니다.
+
 ### 5-3. Commit 메시지 규칙
 Commit Message는 반드시 아래 접두어 및 형식을 따릅니다.
 * `feat(core): Sprint 2-1 Core Domain DDL`

@@ -41,7 +41,7 @@
 ---
 
 ## 5. Recent Decisions (최근 핵심 의사결정 - 최대 5개)
-1. **GitHub Repository 운영 원칙 수립** (2026-06-26): 소스코드와 프로젝트 문서의 일관성 보장을 위해 GitHub를 프로젝트의 Single Source of Truth(SSOT)로 선언하고 브랜치 정책(main/develop) 및 커밋 메시지 규격을 제정함.
+1. **GitHub Repository 운영 원칙 및 자율 Commit/Push 지침 수립** (2026-06-26): 프로젝트 소스코드 일관성을 위해 GitHub를 Single Source of Truth(SSOT)로 지정하고, 개발 에이전트(Antigravity)는 각 Sprint 완료 시 별도 사용자 지시 없이 자율적으로 적절한 커밋 메시지 작성 후 로컬 커밋 및 원격(develop 브랜치) Push를 즉시 수행하도록 규칙을 수립함.
 2. **Market Domain DDL 구현 완료** (2026-06-26): 외부 데이터 수집 저장소 성격인 Market Domain(2개 테이블)의 DDL 구현을 완료하여 원시 분석 데이터 적재 인프라를 수립함.
 3. **Core Domain DDL 우선 구현** (2026-06-26): 데이터베이스 셋업 단계에서 Core Domain(7개 테이블)만 1차 DDL로 구현하여 의존성 순환 오류를 차단하고, 기타 세부 도메인은 2차 구현으로 격리함.
 4. **Database Architecture v1.1 Final 동결** (2026-06-26): SaaS 다중 테넌시 구조 및 Product 중심의 코어 도메인 계층 구조를 수립하고 데이터베이스 아키텍처를 최종 확정(Freeze)함.

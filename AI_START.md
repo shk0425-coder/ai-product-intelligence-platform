@@ -29,45 +29,44 @@
 
 ---
 
-## 4. CONTEXT.md 운영 및 관리 규칙 (v2.3 최종 안착 규격)
-`CONTEXT.md`는 개발용 설명서나 프로젝트 종료 보고서가 아닙니다. **새로운 대화 세션에서 ChatGPT PM이 프로젝트 상태를 즉각 동기화하고 개발의 연속성을 유지하기 위한 전용 인계 문서(Project Handover Document)**입니다.
-
-* **POS 문서는 빈번하게 변경하지 않는다.**
-* **운영 규칙은 실제 프로젝트 진행 중 반복적으로 필요한 경우에만 수정한다.**
+## 4. CONTEXT.md 운영 및 관리 규칙 (v2.5 강화 규격)
+`CONTEXT.md`는 새로운 대화 세션에서 ChatGPT PM이 프로젝트 상태를 즉시 이어받기 위한 **프로젝트 단일 최신 상태 문서(Single Source of Truth, SSOT)**입니다. Sprint 완료 시마다 과거의 흔적을 남기지 않고 항상 **"현재 시점"의 실제 개발 상태만**을 기록해야 합니다.
 
 ### 4-1. 업데이트 타이밍
 다음 작업이 완료될 때마다 즉시 `CONTEXT.md`를 업데이트하여 반영합니다.
-* Sprint 완료 시
+* Sprint 완료 시 (승인 대기 및 승인 직후 포함)
 * 주요 의사결정(Decision) 발생 시
 * Architecture Review 완료 시
 * 작업지시 변경 시
 * 프로젝트 단계(Phase) 변경 시
 
-### 4-2. 필드별 유지 및 관리 규칙
-항상 다음 11대 항목을 최신 상태로 유지하며, 규칙에 따라 작성합니다.
+### 4-2. 필드별 유지 및 관리 규칙 (현재 시점 동기화)
+항상 다음 11대 항목을 최신 상태로 유지하며, 과거 Sprint 기준 정보가 잔존하는 것을 방지합니다.
 
 1. **Project Summary**: 플랫폼명, 목적, 현재 버전, 단계, Sprint 상태 명시.
-2. **Current Goal**: 항상 **실제 프로젝트의 시스템 개발 작업**만 기록합니다.
-   * **기록 배제 대상**: 문서 수정, 운영체계 개선, 일회성 관리 태스크 등
-   * **필수 포함 요소**: Current Sprint, Current Task, Progress (선택), Definition of Done (DoD)
-3. **Current Progress**: 완료된 핵심 마일스톤 위주로 간결하게 보존.
-4. **Session Memory**: 현재 세션 진행 중 발생한 아이디어/관찰을 기록하는 임시 공간입니다.
-   * 세션 종료 시 반드시 분석 검토하여, 중요도가 높은 내용만 `Recent Decisions`로 승격 이동합니다.
-   * 승격되지 않은 나머지 내용은 모두 삭제하며, **세션 종료 시 비어있는 상태(Empty)를 유지하는 것을 원칙**으로 합니다.
-5. **Recent Decisions**: 프로젝트 최근 핵심 결정 기록입니다. (최신순 정렬, **최대 5개만 유지**, 현재 개발에 직접적 영향을 주는 사항만 보존하며 초과분은 삭제).
-6. **Pending Review**: 파일 링크가 아닌 **검토 목적**을 구체적으로 기록합니다. (예: `pgvector 전략 검토`, `Agent Workflow 검토`). 검토 완료 시 즉시 목록에서 제외합니다.
-7. **Next Action**: 다음에 ChatGPT가 수행해야 할 관리/리뷰 작업을 명시합니다.
-8. **Current Blockers**: 해결되지 않은 장애물 기술 (없으면 "없음"으로 강제 표기).
-9. **Important Notes**: ChatGPT PM 전용 문서로서의 운영 규칙 고수.
-10. **Conversation Resume (대화 재개 절차)**: 다음 순서를 엄격히 준수하여 문서화합니다.
-    0. `Project Summary` 확인
-    1. `Current Goal` 확인
-    2. `Recent Decisions` 확인
-    3. `Pending Review` 수행
-    4. `Next Action` 작성
-    5. Antigravity 작업지시 생성
-    6. `CONTEXT.md` 업데이트
-11. **Last Update**: 날짜, 완료 Sprint, 다음 Sprint 메타 적재.
+2. **Current Goal (작성 원칙)**:
+   * **현재 진행 또는 대기 중인 실제 작업**만 작성합니다. (완료된 Sprint는 제외)
+   * 승인이 완료되어 대기 상태가 끝난 경우, 즉시 "Review 대기" 문구를 제거하고 다음 스프린트 준비 상태(예: `Sprint 2-5 구현 준비`) 등으로 즉시 변경합니다.
+3. **Current Progress**: 실제 완료된 Sprint 내역을 모두 동기화하여 현재 상태와 항상 100% 일치시킵니다.
+4. **Session Memory**: 항상 비워진 상태(`Empty`)를 원칙으로 고수하며, 장기 정보를 저장하지 않고 중요 이력은 즉시 `Recent Decisions`로 이동합니다.
+5. **Recent Decisions**: 이번 Sprint에서 실제 결정된 핵심 비즈니스/기술적 결정 사항만 추가하고, **최신 5개만 내림차순 정렬 유지**하며 초과분은 자동 삭제합니다.
+6. **Pending Review**:
+   * 스프린트 검토 요청 시 검토 대상을 상세히 기입합니다.
+   * **리뷰 및 승인이 완료된 직후에는 반드시 `None`으로 변경**하여 과거의 대기 항목을 남겨두지 않습니다.
+7. **Next Action**: 항상 다음에 진행해야 할 다음 Sprint의 공식 명칭과 상세 목표를 기입합니다.
+8. **Current Blockers**: 해결되지 않은 장애물 기술 (없으면 `None` 또는 "없음"으로 강제 표기).
+9. **Important Notes**: ChatGPT PM 전용 문서로서의 운영 규칙 및 단일 문서 맥락 복제 성격 명시.
+10. **Conversation Resume (대화 재개 절차)**: 다음 순서에 따라 PM이 프로젝트를 이해하도록 작성합니다.
+    * 0. `Project Summary` 확인 ➡️ 1. `Current Goal` 확인 ➡️ 2. `Recent Decisions` 확인 ➡️ 3. `Pending Review` 수행 ➡️ 4. `Next Action` 작성
+11. **Last Update**: 업데이트 날짜, 완료 Sprint, 다음 Sprint 메타가 실제 프로젝트의 현재 단계 및 상태와 빈틈없이 일치하도록 기록합니다.
+
+### 4-3. 제출 전 필수 자동 검증 (Self Check)
+에이전트(Antigravity)는 `CONTEXT.md`를 저장 및 제출하기 직전, 반드시 아래 **5대 필수 항목**이 최신 기준인지 검사해야 하며, 과거의 잔재가 남아있는 경우 수정을 보완한 뒤 저장해야 합니다.
+* [ ] **Current Goal 최신화**: 완료된 스프린트 정보 배제 및 현재 대기/진행 태스크 명시 여부
+* [ ] **Progress 최신화**: 완료된 스프린트 체크박스(`[x]`)의 전체 동기화 여부
+* [ ] **Pending Review 최신화**: 승인 직후 `None` 전환 여부 또는 이번 스프린트 검토 내용 한정 여부
+* [ ] **Next Action 최신화**: 다음 진행할 마일스톤 명시 여부
+* [ ] **Last Update 최신화**: 날짜, 완료/다음 스프린트 메타 정보의 일치 여부
 
 ---
 

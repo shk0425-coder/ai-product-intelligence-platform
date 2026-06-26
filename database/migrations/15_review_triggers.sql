@@ -1,0 +1,9 @@
+-- 15_review_triggers.sql
+-- Triggers for Review Domain
+-- 
+-- [요건 분석]
+-- - customer_reviews, review_embeddings: 수집/이력 성격의 스냅샷 테이블로 updated_at이 배제됨.
+-- - jtbd_profiles: LLM 분석 결과가 일대일(1:1) 매핑되는 고정 프로필 레코드로 updated_at이 없음.
+-- 
+-- 이에 따라 본 Sprint 대상 테이블에는 fn_update_updated_at() 트리거 결합을 생략하며,
+-- 파일은 마이그레이션 실행 순서 보장을 위해 빈 멱등성 스크립트로 유지합니다.

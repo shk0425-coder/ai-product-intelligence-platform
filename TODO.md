@@ -27,7 +27,11 @@
   - [x] .gitignore 작성 및 로컬 Git 저장소 초기화 (`git init`)
   - [x] main/develop 브랜치 운용 및 스프린트별 분할 커밋 생성
   - [x] AI_START.md 및 CONTEXT.md 에 깃 가이드라인 이식 완료
-- [ ] Sprint 2-3: Customer/JTBD Domain Database DDL 구현
+- [x] Sprint 2-3: Customer/JTBD Domain Database DDL 구현 (ChatGPT Review 대기 중)
+  - [x] 12_review_tables.sql (테이블 및 코멘트) 작성
+  - [x] 13_review_constraints.sql (기본키/외래키/유니크 제약조건) 작성
+  - [x] 14_review_indexes.sql (B-tree 및 GIN 인덱싱) 작성
+  - [x] 15_review_triggers.sql (트리거 생략 명시) 작성
 - [ ] Sprint 2-4: Sourcing/Margin Domain Database DDL 구현
 - [ ] Sprint 2-5: Strategy/Creative Domain Database DDL 구현
 - [ ] Sprint 2-6: Audit/Learning Domain Database DDL 구현

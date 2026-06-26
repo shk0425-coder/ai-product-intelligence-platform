@@ -6,6 +6,12 @@
 
 ## [Unreleased] - 2026-06-26
 ### Added (새로 설계 및 추가된 사항)
+* **Sprint 2-3: Review Domain Database DDL 구현 완료**:
+  * `database/migrations/` 경로 내에 Supabase 호환 4대 DDL 마이그레이션 파일 작성 완료 (`12_review_tables.sql` ~ `15_review_triggers.sql`).
+  * 3대 테이블(`customer_reviews`, `review_embeddings`, `jtbd_profiles`) 생성 및 컬럼 Comments 작성.
+  * 복합 기본키 및 복합 외래키 설정, 1:1 유니크 제약조건(`jtbd_profiles.run_id`) 설정.
+  * 조인 가속을 위한 B-tree 인덱스 및 JSONB 속성 가속을 위한 GIN 인덱스 생성.
+  * `updated_at` 컬럼 미존재에 따른 트리거 생략 예외 처리 스크립트 작성.
 * **GitHub Repository 운영 규칙 반영 및 Git 저장소 구성**:
   * 소스코드와 프로젝트 문서의 일관성 유지를 위해 GitHub Repository를 Single Source of Truth(SSOT)로 지정.
   * `.gitignore` 파일 작성 및 로컬 Git 저장소 초기화 (`git init`).

@@ -6,6 +6,13 @@
 
 ## [Unreleased] - 2026-06-26
 ### Added (새로 설계 및 추가된 사항)
+* **Sprint 2-4: Sourcing / Margin Domain Database DDL 구현 완료**:
+  * `database/migrations/` 경로 내에 Supabase 호환 4대 DDL 마이그레이션 파일 작성 완료 (`16_sourcing_tables.sql` ~ `19_sourcing_triggers.sql`).
+  * 2대 테이블(`sourcing_intelligences`, `margin_optimizations`) 생성 및 컬럼 Comments 작성.
+  * 금액 및 원가 비용 관련 컬럼에 `NUMERIC` 자료형을 강제 부여하여 부동소수점 오차 방지.
+  * DB 트리거 및 Generated Column을 배제하는 마진 계산 원칙을 수립하고 준수함.
+  * 1:1 관계 비즈니스 룰 준수를 위해 `run_id` UNIQUE 제약조건 설정.
+  * 외래키 조회 성능 최적화를 위한 B-tree 인덱스 생성.
 * **Sprint 2-3: Review Domain Database DDL 구현 완료**:
   * `database/migrations/` 경로 내에 Supabase 호환 4대 DDL 마이그레이션 파일 작성 완료 (`12_review_tables.sql` ~ `15_review_triggers.sql`).
   * 3대 테이블(`customer_reviews`, `review_embeddings`, `jtbd_profiles`) 생성 및 컬럼 Comments 작성.

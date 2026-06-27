@@ -42,10 +42,11 @@
 - [ ] pgvector 확장 활성화 및 HNSW 인덱싱 쿼리 작성 (2차 분할 구현)
 - [ ] 테이블 파티셔닝(Range Partitioning) 셋업 쿼리 작성 (2차 분할 구현)
 
-### [Phase 3] Scaffolding Backend & Scraper
-- [ ] FastAPI 프로젝트 기본 구조 생성 (`main.py`, `routers/`, `services/`, `models/` 분리)
+### [Phase 3] Scaffolding Backend & Scraper (Fastify & TS)
+- [x] Fastify 프로젝트 기본 구조 및 인프라 구축 (Sprint 3-1 완료, ChatGPT Review 대기 중)
+- [ ] Auth 모듈 (Authentication) 및 Workspace API 개발 (Sprint 3-2)
 - [ ] Playwright 기반 네이버 쇼핑 수집 엔진 구현 (스크롤 다운 처리 포함)
-- [ ] 수집된 로우 텍스트 및 JSON 검증을 위한 Pydantic Validation 스키마 코드 구축
+- [ ] 수집된 로우 텍스트 및 JSON 검증을 위한 Zod Validation 스키마 코드 구축
 - [ ] LLM Gateway 추상화 레이어(Extract, Summarize, Classify, Reason) 구현 및 라이브러리 연동
 - [ ] 비동기 병렬 에이전트 오케스트레이터 기본 모듈 구축
 

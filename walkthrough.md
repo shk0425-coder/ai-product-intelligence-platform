@@ -1,65 +1,85 @@
-# Sprint 2-5 & 2-6 Walkthrough
+# Sprint 3-1 Walkthrough
 
-This document outlines the accomplishments, verification results, and details of the database migration scripts created for the **Strategy / Creative Domain** (Sprint 2-5) and the **Audit / Learning Domain** (Sprint 2-6).
+This document outlines the accomplishments, directory structure, dependencies, and test results for **Sprint 3-1: Backend Scaffolding & Infrastructure**.
 
 ## Changes Implemented
 
-We created 8 new database migration scripts under `database/migrations/` corresponding to sequence numbers 20 to 27:
+We created the Fastify backend scaffolding inside the `backend/` directory:
 
-### Sprint 2-5: Strategy / Creative Domain
-1. **[20_strategy_tables.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/20_strategy_tables.sql)**:
-   - Declares the `product_strategies` table to store AI product strategy generation output.
-   - Declares the `creative_briefs` table to store landing/detailed page storyboard layouts and creative assets directions.
-   - Adds complete Korean comments (`COMMENT ON TABLE` and `COMMENT ON COLUMN`) for all tables and columns.
-2. **[21_strategy_constraints.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/21_strategy_constraints.sql)**:
-   - Configures Primary Keys (`pk_product_strategies` and `pk_creative_briefs`).
-   - Configures Unique constraints on `run_id` for both tables (`uq_product_strategies_run_id` and `uq_creative_briefs_run_id`) to enforce a strict physical 1:1 relationship with `analysis_runs`.
-   - Configures Foreign Keys referencing `analysis_runs(run_id)` with `ON DELETE CASCADE` to enable automatic cleanup during tenant destruction or run deletion.
-3. **[22_strategy_indexes.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/22_strategy_indexes.sql)**:
-   - Creates B-tree indexes on foreign keys (`idx_product_strategies_run_id` and `idx_creative_briefs_run_id`) to optimize join queries.
-   - Creates a GIN index on `creative_briefs(storyboard)` (`idx_creative_briefs_storyboard`) to accelerate searching/filtering within the large JSONB storyboard array. Other JSONB fields are not search targets and are omitted from indexing.
-4. **[23_strategy_triggers.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/23_strategy_triggers.sql)**:
-   - Includes trigger omission comments for maintenance consistency, since neither table contains an `updated_at` column.
+### 1. Project Configuration & Build Tools
+- **[package.json](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/package.json)**: Sets type to `module`, specifies scripts (`dev`, `build`, `start`, `lint`, `format`, `test`), and adds Fastify, Supabase client, Pino, Zod, and Vitest dependencies.
+- **[tsconfig.json](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tsconfig.json)**: Configures Strict Mode compile checks, ES2022/NodeNext resolutions, and absolute path mappings (`@/*` ➡️ `src/*`).
+- **[eslint.config.js](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/eslint.config.js)** / **[.prettierrc](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.prettierrc)**: Configures ESLint 9 (Flat Config) with TypeScript parsing, strict `no-explicit-any` validation, and rules for formatting.
+- **[vitest.config.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/vitest.config.ts)**: Configures path resolving for `@/` inside Vitest test suite.
+- **[.env.example](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.env.example)** / **[.env](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.env)**: Environmental variables and default configurations.
 
-### Sprint 2-6: Audit / Learning Domain
-5. **[24_audit_tables.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/24_audit_tables.sql)**:
-   - Declares the `decision_audits` table to store decision weight computation logs and rationales.
-   - Declares the `knowledge_assets` table to store verified few-shot knowledge assets.
-   - Declares the `learning_feedback_logs` table to store actual sales data and recommended weight adjustments.
-   - Restricts `knowledge_assets.category` to use the pre-defined `knowledge_category` custom Enum type.
-   - Adds complete Korean comments (`COMMENT ON TABLE` and `COMMENT ON COLUMN`) for all tables and columns.
-6. **[25_audit_constraints.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/25_audit_constraints.sql)**:
-   - Configures Primary Keys (`pk_decision_audits`, `pk_knowledge_assets`, `pk_learning_feedback_logs`).
-   - Configures a Unique constraint on `decision_audits(run_id)` for 1:1 relation integrity.
-   - Configures Foreign Keys referencing parent tables:
-     - `decision_audits.run_id` ➡️ `analysis_runs(run_id)` ON DELETE CASCADE
-     - `knowledge_assets.workspace_id` ➡️ `workspaces(workspace_id)` ON DELETE CASCADE
-     - `knowledge_assets.source_run_id` ➡️ `analysis_runs(run_id)` **ON DELETE SET NULL** (preserving assets even if source run is removed)
-     - `learning_feedback_logs.run_id` ➡️ `analysis_runs(run_id)` ON DELETE CASCADE
-7. **[26_audit_indexes.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/26_audit_indexes.sql)**:
-   - Creates B-tree indexes for all foreign key columns to optimize query joins and filters:
-     - `idx_decision_audits_run_id`
-     - `idx_knowledge_assets_workspace_id`
-     - `idx_knowledge_assets_source_run_id`
-     - `idx_learning_feedback_logs_run_id`
-   - Omit GIN indexing on logs' JSONB columns since they are not search/filter targets.
-8. **[27_audit_triggers.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/27_audit_triggers.sql)**:
-   - Includes trigger omission comments for maintenance consistency, since none of the tables contain an `updated_at` column.
+### 2. Config & Core
+- **[src/server.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/server.ts)**: Server entry point to load the application and run on port 3000.
+- **[src/app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts)**: Application builder registering cors, logger, and supabase plugins, setting up the global error handler, and prefixing routes with `/api/v1`.
+- **[src/config/env.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/config/env.ts)**: Validates environmental variables using Zod schema on process start.
+- **[src/config/logger.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/config/logger.ts)**: Pino logger configurations.
+- **[src/config/supabase.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/config/supabase.ts)**: Singleton provider for Supabase Client.
+
+### 3. Middleware & Plugins
+- **[src/plugins/cors.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/plugins/cors.ts)**: Fastify plugin wrapping `@fastify/cors`.
+- **[src/plugins/supabase.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/plugins/supabase.ts)**: Decorates the Fastify instance with the Supabase client (`fastify.supabase`).
+- **[src/plugins/logger.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/plugins/logger.ts)**: Sets hooks for request-time, request-id, and logging.
+- **[src/middleware/error-handler.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/middleware/error-handler.ts)**: Translates error types (validation, custom AppErrors, databases) into standard JSON format.
+
+### 4. Common & Repositories
+- **[src/common/responses/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/common/responses/index.ts)**: Exposes `successResponse` and `errorResponse` standard formatting helpers.
+- **[src/common/errors/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/common/errors/index.ts)**: Extends standard errors to type-safe validation, auth, database, and internal server errors.
+- **[src/repositories/interfaces/base.repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/repositories/interfaces/base.repository.ts)** / **[src/repositories/implementations/base.repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/repositories/implementations/base.repository.ts)**: Interfaces and abstract classes for data repository layers.
+
+### 5. Health API & Tests
+- **[src/routes/v1/health.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/routes/v1/health.ts)**: `GET /api/v1/health` status responder.
+- **[tests/health.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/health.test.ts)**: Vitest unit test confirming that the health route returns the correct status code and response payload.
+
+### 6. Placeholders for Modules
+- Created 54 placeholder files across 9 module directories (`auth`, `workspace`, `market`, `review`, `sourcing`, `strategy`, `creative`, `audit`, `learning`) containing empty class and interface templates for routing, types, repository, services, controllers, and schemas.
+
+### 7. Docker Infrastructure
+- **[docker/Dockerfile](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/docker/Dockerfile)** / **[docker/docker-compose.yml](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/docker/docker-compose.yml)** / **[docker/.dockerignore](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/docker/.dockerignore)**: Sets up container settings without local PostgreSQL container, relying on remote Supabase instance.
 
 ---
 
 ## Verification Results
 
-### 1. DDL Self Review
-- Verified that all SQL commands conform to PostgreSQL 16 standard.
-- Verified that all queries utilize `IF NOT EXISTS` for idempotency.
-- Verified that no tables contain circular reference paths.
+### 1. TypeScript Strict Compile Check
+Ran `npm run build` to confirm compiler compiles successfully without warnings.
+```bash
+> tsc
+```
+Status: **PASSED**
 
-### 2. Architecture Integrity Check
-- Checked column types against `database_architecture.md v1.1 Final`.
-- Verified that column names and data types (such as `JSONB`, `UUID`, and `TEXT`) match 100% with the specification.
-- Confirmed that no extra/unauthorized tables or columns were added.
+### 2. ESLint Code Lint Check
+Ran `npm run lint` and confirmed there are 0 style or parsing errors (2 warnings only for startup console logging).
+```bash
+> eslint src
+```
+Status: **PASSED**
 
-### 3. Migration Dependency Check
-- Validated that the files execute sequentially (20 ➡️ 27).
-- Confirmed that the scripts reference `public.workspaces` and `public.analysis_runs` which are defined in earlier migrations, ensuring no unresolved foreign key dependency errors.
+### 3. Server Startup & Health Check Endpoint
+Ran `npm run dev`, then queried the API:
+```bash
+$ curl http://localhost:3000/api/v1/health
+```
+Response:
+```json
+{"success":true,"data":{"status":"ok"},"message":""}
+```
+Status: **PASSED**
+
+### 4. Unit Test Suite Execution
+Ran Vitest test execution suite:
+```bash
+$ npx vitest run
+```
+Output:
+```text
+ ✓ tests/health.test.ts  (1 test) 58ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+```
+Status: **PASSED**

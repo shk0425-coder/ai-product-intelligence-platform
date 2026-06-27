@@ -1,11 +1,11 @@
-# Sprint 2-6: Audit / Learning Domain Database DDL Implementation
+# Sprint 3-1: Backend Scaffolding & Infrastructure Implementation Plan
 
-Implementation plan for Audit / Learning Domain database schema setup in PostgreSQL 16 (Supabase). This plan includes defining tables, constraints, indexes, and trigger logic for the `decision_audits`, `knowledge_assets`, and `learning_feedback_logs` tables as defined in the database architecture specification.
+Implementation plan to build the backend scaffolding and infrastructure for the AI Product Intelligence Platform (v0.6.0) using Fastify, TypeScript, Supabase, Zod, and Pino.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> The database architecture is in a **Final Freeze** state. No modifications, additions, or removals of columns, enums, tables, or relationships are allowed. The implementation strictly translates the architecture document to physical SQL.
+> The backend will be configured with TypeScript in strict mode, Fastify, and a modular architecture. In this sprint, **no business logic will be implemented**. The focus is solely on laying down a solid foundation.
 
 ## Open Questions
 
@@ -13,58 +13,92 @@ None.
 
 ## Proposed Changes
 
-We will create four new DDL files in `database/migrations/`:
-- `24_audit_tables.sql`
-- `25_audit_constraints.sql`
-- `26_audit_indexes.sql`
-- `27_audit_triggers.sql`
+We will create a new directory `backend/` and set up the project files.
 
 ---
 
-### Audit / Learning Domain Database Schema
+### Project Scaffolding & Config
 
-#### [NEW] [24_audit_tables.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/24_audit_tables.sql)
-Creates the tables `decision_audits`, `knowledge_assets`, and `learning_feedback_logs` with proper column definitions, PostgreSQL 16 compatibility, and full table and column comments in Korean.
-- `knowledge_assets` will use the custom enum type `knowledge_category` (defined in `02_enums.sql`) for its `category` column to enforce strict data integrity.
-- All primary keys default to `gen_random_uuid()`.
+#### [NEW] [package.json](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/package.json)
+Configures dependencies, devDependencies, and npm scripts (`dev`, `build`, `start`, `lint`, `format`, `test`).
 
-#### [NEW] [25_audit_constraints.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/25_audit_constraints.sql)
-Configures primary keys, unique constraints, and foreign key constraints:
-- `decision_audits`: Primary key (`audit_id`), Unique (`run_id` for 1:1 relation), and Foreign Key pointing to `analysis_runs(run_id)` with `ON DELETE CASCADE`.
-- `knowledge_assets`: Primary key (`asset_id`), Foreign Key pointing to `workspaces(workspace_id)` with `ON DELETE CASCADE`, and Foreign Key pointing to `analysis_runs(run_id)` with `ON DELETE SET NULL`.
-- `learning_feedback_logs`: Primary key (`log_id`), Foreign Key pointing to `analysis_runs(run_id)` with `ON DELETE CASCADE`.
+#### [NEW] [tsconfig.json](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tsconfig.json)
+TypeScript configuration enabling strict mode and absolute path aliases.
 
-#### [NEW] [26_audit_indexes.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/26_audit_indexes.sql)
-Creates B-tree indexes for all foreign keys to optimize query join performance:
-- `idx_decision_audits_run_id`
-- `idx_knowledge_assets_workspace_id`
-- `idx_knowledge_assets_source_run_id`
-- `idx_learning_feedback_logs_run_id`
-No GIN indexes are required as no JSONB columns are defined as search targets in the architecture.
+#### [NEW] [eslint.config.js](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/eslint.config.js) / [.prettierrc](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.prettierrc)
+ESLint and Prettier code style check and formatting rules.
 
-#### [NEW] [27_audit_triggers.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/27_audit_triggers.sql)
-Since none of the three tables contain `updated_at` columns, no update trigger is needed. A placeholder migration script with idempotent comments will be created to maintain execution order consistency.
+#### [NEW] [.env.example](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.env.example)
+Example environment variable template.
+
+---
+
+### Src - Configuration & Core Files
+
+#### [NEW] [server.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/server.ts)
+Entry point to bootstrap and run the Fastify server.
+
+#### [NEW] [app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts)
+Creates and configures the Fastify instance, registers plugins, routes, global error handlers, and hooks/middlewares.
+
+#### [NEW] [env.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/config/env.ts)
+Loads `.env` via `dotenv` and validates environment variables using `zod`. Exits process on validation failure.
+
+#### [NEW] [logger.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/config/logger.ts)
+Pino logger configuration with `pino-pretty` enabled for development.
+
+#### [NEW] [supabase.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/config/supabase.ts)
+Singleton client definition for interacting with Supabase.
+
+---
+
+### Src - Plugins & Middleware
+
+#### [NEW] [supabase.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/plugins/supabase.ts)
+Registers the Supabase client as a Fastify plugin so it is available globally under `fastify.supabase`.
+
+#### [NEW] [cors.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/plugins/cors.ts)
+Configures and registers `@fastify/cors` plugin.
+
+#### [NEW] [logger.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/plugins/logger.ts)
+Custom logger plugin registering hooks for logging request lifecycle.
+
+#### [NEW] [request-id.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/middleware/request-id.ts)
+Assigns a unique request ID to each incoming request.
+
+#### [NEW] [request-time.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/middleware/request-time.ts)
+Tracks the start time of requests to calculate total processing duration.
+
+#### [NEW] [logging.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/middleware/logging.ts)
+Logs HTTP request details (method, URL, status, duration).
+
+#### [NEW] [error-handler.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/middleware/error-handler.ts)
+Global Fastify error handler wrapping errors (Validation, Database, Auth, Unknown) into the unified response format.
+
+---
+
+### Src - Routes & Modules
+
+#### [NEW] [health.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/routes/health.ts)
+Exposes `GET /health` with `{"success": true, "data": {"status": "ok"}}` response format.
+
+---
+
+### Docker & Infrastructure
+
+#### [NEW] [Dockerfile](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/docker/Dockerfile) / [docker-compose.yml](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/docker/docker-compose.yml) / [.dockerignore](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/docker/.dockerignore)
+Development docker setup using Node.js 22, mounting source volume, running with hot reload (`tsx watch`).
 
 ---
 
 ## Verification Plan
 
-### DDL Self Review
-- Verify PostgreSQL 16 syntax compatibility (e.g., standard data types, constraints, and indexes).
-- Ensure Supabase SQL Editor compatibility (idempotency checks using `IF NOT EXISTS` and correct schema prefixes).
-- Check that there are no circular foreign key dependencies.
-- Confirm that trigger files are empty placeholders since no `updated_at` columns are used.
-- Check index duplication to ensure no redundant indexes are created.
+### DDL & Integration Check
+- Verify that environmental variable loading fails correctly when variables are missing.
+- Check typescript compilation status and package manager build/lint commands.
 
-### Architecture Integrity Check
-- Compare the generated tables (`decision_audits`, `knowledge_assets`, `learning_feedback_logs`) and columns against `database_architecture.md v1.1 Final`.
-- Validate that column names, data types, NULL constraints, and relationships match 100% with the specification.
-- Ensure that no extra columns, tables, or relationships are introduced.
+### API Health Check
+- Run local development server and hit `GET /health` to confirm standard success response format.
 
-### Migration Dependency Check
-- Ensure that migrations 24 to 27 run in the correct logical sequence:
-  1. Tables (`24_audit_tables.sql`)
-  2. Constraints (`25_audit_constraints.sql`)
-  3. Indexes (`26_audit_indexes.sql`)
-  4. Triggers (`27_audit_triggers.sql`)
-- Verify that these migrations are dependent only on the previously implemented Core domain tables (`workspaces`, `analysis_runs`).
+### Docker Development Environment
+- Spin up docker-compose and verify that Fastify runs, logs requests, and registers hot reloading on file change.

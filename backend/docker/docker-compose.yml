@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: ai_product_intelligence_backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ..:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    env_file:
+      - ../.env

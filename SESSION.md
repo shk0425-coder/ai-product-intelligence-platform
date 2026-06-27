@@ -4,27 +4,29 @@
 * **작업 일자**: 2026년 6월 27일
 * **활성 담당자**: Antigravity IDE (Lead Software Engineer)
 * **오늘의 주요 목표**:
-  * Sprint 2-5: Strategy / Creative Domain Database DDL 구현 완료 (product_strategies, creative_briefs)
-  * Sprint 2-6: Audit / Learning Domain Database DDL 구현 완료 (decision_audits, knowledge_assets, learning_feedback_logs)
-  * GIN 인덱스 선택적 배치 및 Custom Enum 데이터 타입 연동 완료
-  * 프로젝트 루트 경로 내 `implementation_plan.md` 및 `task.md` 에이전트 산출물 로컬 동기화
+  * Sprint 2-5: Strategy / Creative Domain Database DDL 구현 완료 & 승인
+  * Sprint 2-6: Audit / Learning Domain Database DDL 구현 완료 & 승인
+  * Sprint 3-1: Fastify 백엔드 인프라 구조 및 골격 구축 완료 (Node.js 22 LTS, TypeScript Strict Mode, Fastify)
 
 ---
 
 ## 2. 현재 작업 진행도 (Current State)
-* **Sprint 2-5 Strategy / Creative Domain DDL 구현 완료 & 승인**:
-  - [x] `20_strategy_tables.sql` ~ `23_strategy_triggers.sql` 작성 완료 및 승인 획득.
-  - [x] `product_strategies` 및 `creative_briefs` 1:1 관계 무결성 보장 (run_id UNIQUE) 및 `storyboard` GIN 인덱스 적용.
-* **Sprint 2-6 Audit / Learning Domain DDL 구현 완료 (검토 대기)**:
-  - [x] `24_audit_tables.sql` ~ `27_audit_triggers.sql` 작성 완료.
-  - [x] `decision_audits` (1:1 관계, run_id UNIQUE), `knowledge_assets` (source_run_id 삭제 시 SET NULL), `learning_feedback_logs` (1:N 관계) DDL 설계 및 Comments 추가.
-  - [x] `knowledge_assets.category`에 `knowledge_category` 커스텀 ENUM 타입 매핑 완료.
-  - [x] 모든 외래키 조인 경로에 B-tree 인덱스 생성 완료.
+* **Sprint 2-5 & 2-6 DDL 구현 완료 (승인 완료 및 배포)**:
+  - [x] `20_strategy_tables.sql` ~ `27_audit_triggers.sql` 작성 완료 및 develop 브랜치 푸시 완료.
+* **Sprint 3-1 Fastify 백엔드 초동 구축 완료 (검토 대기)**:
+  - [x] TypeScript Strict Mode 및 절대경로 별칭 설정 (`tsconfig.json`).
+  - [x] Zod 환경변수 유효성 검증 (`env.ts`) 및 Pino 로거 설정 (`logger.ts`).
+  - [x] Fastify 플러그인 (CORS, Supabase 클라이언트 싱글톤 데코레이터, Logger) 개발 및 등록.
+  - [x] 미들웨어 (request-id, request-time, logging, 글로벌 error-handler) 및 표준 Response 포맷 정의.
+  - [x] `GET /api/v1/health` API 구현 및 Mock HTTP Injection을 활용한 Vitest 유닛 테스트 작성/성공.
+  - [x] 9개 도메인 모듈(auth, workspace, market, review, sourcing, strategy, creative, audit, learning) 54개 플레이스홀더 파일 자동 생성.
+  - [x] Dockerfile 및 docker-compose 개발환경 설정 완료.
+  - [x] 로컬 린터(ESLint Flat Config) 검사 및 타입스크립트 빌드 테스트 무오류 완료.
 * **로컬 Git 저장소 구성 및 원격 동기화 완료**:
-  - [x] Sprint 2-5 및 2-6 완료에 따른 로컬 커밋 및 원격 `develop` 브랜치 Push 완료.
+  - [x] Sprint 3-1 완료에 따른 로컬 커밋 및 원격 `develop` 브랜치 Push 완료.
 
 ---
 
 ## 3. 다음 세션 이어받을 포인트 (Next Steps)
-* **Sprint 2-6 최종 승인 획득 및 Phase 3 진입**:
-  - ChatGPT PM의 Sprint 2-6 DDL 최종 승인 획득 후, Phase 3인 FastAPI 백엔드 개발 및 Playwright 크롤러 구현 마일스톤에 진입합니다.
+* **Sprint 3-1 최종 승인 획득 및 Sprint 3-2 진입**:
+  - ChatGPT PM의 Sprint 3-1 최종 승인 획득 후, **`Sprint 3-2` (Authentication Module 및 Workspace API 개발)**에 착수합니다.

@@ -11,6 +11,6 @@
 - [x] Create Vitest integration tests in `backend/tests/market-mutation.test.ts`
 - [x] Verify TypeScript compile check (`npm run build`) and ESLint style checks (`npm run lint`)
 - [x] Verify Vitest test execution (`npx vitest run`)
-- `[ ]` Generate `backend_review.zip` containing only Sprint 3-5 changed files
-- `[ ]` Update `pm_review/REVIEW.md`, `pm_review/CONTEXT.md`, and `pm_review/DECISIONS.md`
-- `[ ]` Commit and push changes to develop branch
+- [x] Generate `backend_review.zip` containing only Sprint 3-5 changed files
+- [x] Update `pm_review/REVIEW.md`, `pm_review/CONTEXT.md`, and `pm_review/DECISIONS.md`
+- [x] Commit and push changes to develop branch

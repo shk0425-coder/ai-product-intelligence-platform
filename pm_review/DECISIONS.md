@@ -1,5 +1,14 @@
 # Project Decisions
 
+## Sprint 3-8
+
+- **AI 분석 결과 영속성 및 캐시 정책 도입**: 동일한 조건의 AI 분석 요청에 대해 AI API를 다시 호출하지 않고 데이터베이스의 영속성 결과를 캐싱하여 즉시 반환하고, `"cached": true | false` 응답 메타데이터를 통합 제공함.
+- **Identity Generator 컴포넌트 신설 및 SHA-256 해싱**: 캐시 판단의 기준이 되는 Identity 생성(Canonical String 조립 및 SHA-256 해싱) 역할을 전담하는 `IdentityGenerator` 를 신설하여 비즈니스 서비스 계층과의 결합도를 제거함.
+- **Repository 및 Service 레이어 엄격 분리**: `AIAnalysisRepository`는 순수 Supabase 데이터 CRUD만을 담당하고 AI 호출이나 유효성 검사, 비즈니스 판단 등은 일절 배제하여 모듈 독립성 및 Repository 원칙을 준수함.
+- **API 쿼리 및 Params 유효성 검증 통합**: 쿼리 API 2종(`GET /analysis`, `GET /analysis/:id`)을 추가하고 Zod 스키마 검증(UUID 포맷, keyword 등)을 preValidation 훅에 장착함.
+
+---
+
 ## Sprint 3-7
 
 - **AI 분석 영속 저장 배제 정책**: 이번 스프린트에서는 데이터 저장을 완전히 금지하고 분석 수행 후 API Response까지만 결과를 구성해 반환하도록 아키텍처를 단순화함.

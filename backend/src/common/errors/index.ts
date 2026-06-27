@@ -100,4 +100,10 @@ export class AIResponseValidationError extends AppError {
   }
 }
 
+export class NotFoundError extends AppError {
+  constructor(message: string = 'Resource not found') {
+    super(404, 'NOT_FOUND', message);
+  }
+}
+
 

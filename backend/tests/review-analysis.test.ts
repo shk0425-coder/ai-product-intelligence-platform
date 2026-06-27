@@ -28,9 +28,33 @@ const mockValidResponse = {
   },
 };
 
-function createMockQueryBuilder(data: any[], error: any = null) {
+const mockStoredRow = {
+  id: '550e8400-e29b-41d4-a716-446655440000',
+  analysis_identity: 'mocked-identity-hash',
+  provider: 'gemini',
+  model: 'gemini-1.5-flash',
+  prompt_version: 'v1',
+  temperature: 0.2,
+  max_output_tokens: 4096,
+  keyword: '개모차',
+  review_count: 3,
+  summary: '가볍고 안정적이나 바퀴 소음이 아쉽다는 평가입니다.',
+  strengths: ['가벼운 무게', '우수한 주행감'],
+  weaknesses: ['바퀴 유격 소음'],
+  complaints: ['접이 폴딩 어려움'],
+  jtbd: ['강아지와 편안한 야외 산책'],
+  keywords: ['개모차', '바퀴'],
+  sentiment: { positive: 70, neutral: 10, negative: 20 },
+  prompt_tokens: 150,
+  completion_tokens: 80,
+  total_tokens: 230,
+  processing_time_ms: 500,
+  created_at: '2026-06-27T12:00:00Z',
+};
+
+function createMockQueryBuilder(data: any, error: any = null) {
   const qb: any = {};
-  const methods = ['select', 'order', 'ilike', 'limit'];
+  const methods = ['select', 'order', 'ilike', 'limit', 'insert', 'eq', 'maybeSingle', 'single'];
   for (const m of methods) {
     qb[m] = vi.fn().mockImplementation(() => qb);
   }
@@ -211,9 +235,17 @@ describe('AI Review Analysis Suite', () => {
           candidates: [{ content: { parts: [{ text: JSON.stringify(mockValidResponse) }] } }],
         }),
       });
-      global.fetch = mockFetch;
+      vi.stubGlobal('fetch', mockFetch);
 
-      vi.spyOn(app.supabase, 'from').mockImplementation(() => createMockQueryBuilder(mockReviews));
+      vi.spyOn(app.supabase, 'from').mockImplementation((table: string) => {
+        if (table === 'customer_reviews') {
+          return createMockQueryBuilder(mockReviews);
+        }
+        if (table === 'review_analysis_results') {
+          return createMockQueryBuilder(mockStoredRow);
+        }
+        return createMockQueryBuilder(null);
+      });
 
       const response = await app.inject({
         method: 'POST',

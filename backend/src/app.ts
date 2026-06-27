@@ -42,8 +42,8 @@ export const createApp = async (): Promise<FastifyInstance> => {
   await app.register(workspaceRoutes, { prefix: `${API_PREFIX}/workspaces` });
   await app.register(marketRoutes, { prefix: `${API_PREFIX}/markets` });
   await app.register(reviewRoutes, { prefix: `${API_PREFIX}/reviews` });
+  // Register AI Review Analysis Routes (analyze, query results)
   await app.register(aiRoutes, { prefix: `${API_PREFIX}/reviews` });
-
   // Test Protected Route for Verification
   app.get(`${API_PREFIX}/protected`, { preHandler: authMiddleware }, async (request, _reply) => {
     return successResponse({ user: request.user });

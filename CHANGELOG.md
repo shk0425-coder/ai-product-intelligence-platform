@@ -4,6 +4,16 @@
 
 ---
 
+## [Unreleased] - 2026-06-27
+### Added (새로 설계 및 추가된 사항)
+* **Sprint 2-5: Strategy / Creative Domain Database DDL 구현 완료**:
+  * `database/migrations/` 경로 내에 Supabase 호환 4대 DDL 마이그레이션 파일 작성 완료 (`20_strategy_tables.sql` ~ `23_strategy_triggers.sql`).
+  * 2대 테이블(`product_strategies`, `creative_briefs`) 생성 및 한글 컬럼 Comments 작성.
+  * 1:1 관계 비즈니스 룰 준수를 위해 `run_id` UNIQUE 제약조건 및 외래키 `ON DELETE CASCADE` 설정.
+  * 외래키 조회 성능 최적화를 위한 B-tree 인덱스 생성.
+  * 검색 대상으로 지정된 `creative_briefs(storyboard)` 대용량 JSONB 컬럼에만 선택적으로 GIN 인덱스를 적용하여 인덱스 효율성 극대화.
+  * `updated_at` 컬럼 미존재에 따른 트리거 생략 예외 처리 멱등성 플레이스홀더 스크립트 작성.
+
 ## [Unreleased] - 2026-06-26
 ### Added (새로 설계 및 추가된 사항)
 * **Sprint 2-4: Sourcing / Margin Domain Database DDL 구현 완료**:

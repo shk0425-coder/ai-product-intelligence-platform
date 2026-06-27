@@ -1,5 +1,15 @@
 # Project Decisions
 
+## Sprint 4-4
+
+- **Image Generation Provider 인터페이스 추상화 및 다중 포맷 파싱**: Stable Diffusion, Gemini Image 등과의 자유로운 플러그인 교체를 위해 ImageGenerationProvider 인터페이스를 수립하고, FluxImageProvider에 Replicate output 및 BFL sample response 구조를 동시 수용하게 설계함.
+- **스토리보드 Scene 8개 정합성 2차 유효성 검증(Custom Validation)**: Zod 의 기본 타입 파싱에 더해 step 1~8 순차 배치, 중복, 타입 및 이름 일치를 validator.ts에 구현해 LLM의 이탈 가능성을 완전 차단함.
+- **zod-to-json-schema 동기화 아키텍처**: Zod Schema를 `zod-to-json-schema` 로 동적 변환하여 프롬프트에 주입하고 Validator도 이를 공유해 스키마 변경 시 두 요소가 100% 자동 동기화되도록 설계함.
+- **Markdown 및 코드 블록 우회 정제**: LLM의 마크다운 포맷팅 위반에 대응하여, parser단에서 trim 및 brace tracking 을 탑재해 순수 JSON만 안전하게 통과시키도록 구현함.
+- **Stateless Pure Layer 설계 및 AIProvider DI 의존성 주입**: DB, Repository, Rule Engine, Retry, Fallback 등 외부 요소를 격리하고 AI 호출부를 DI 방식으로 구성해 결합도를 원천 차단함.
+
+---
+
 ## Sprint 4-3
 
 - **8단계 스토리보드 정합성 2차 유효성 검증(Custom Validation)**: Zod 의 기본 타입 파싱에 더해 step 1~8 순차 배치, 중복, 타입 및 이름 일치를 validator.ts에 구현해 LLM의 이탈 가능성을 완전 차단함.

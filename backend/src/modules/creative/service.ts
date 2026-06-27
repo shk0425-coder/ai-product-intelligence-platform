@@ -1,1 +1,41 @@
-export class CreativeService {}
+import { AIProvider, AIRequestOptions } from '../ai/types.js';
+import { ImageGenerationProvider } from './provider.js';
+import { CreativeInput, CreativeResult } from './types.js';
+import { buildPrompt } from './prompt.js';
+import { parseResponse } from './parser.js';
+import { validateResult } from './validator.js';
+import { MAX_TOKENS, TEMPERATURE, PROMPT_VERSION } from './constants.js';
+
+export class CreativeService {
+  constructor(
+    private readonly aiProvider: AIProvider,
+    private readonly imageProvider: ImageGenerationProvider
+  ) {}
+
+  async generateCreative(input: CreativeInput, options?: Partial<AIRequestOptions>): Promise<CreativeResult> {
+    // 1. Prompt 생성
+    const prompt = buildPrompt(input);
+
+    // 2. AI 호출 옵션 구성
+    const requestOptions: AIRequestOptions = {
+      model: options?.model || 'gemini-1.5-pro',
+      temperature: options?.temperature ?? TEMPERATURE,
+      maxOutputTokens: options?.maxOutputTokens ?? MAX_TOKENS,
+      timeout: options?.timeout ?? 60000,
+      promptVersion: options?.promptVersion || PROMPT_VERSION,
+    };
+
+    // 3. AI Provider 호출
+    const rawResponse = await this.aiProvider.analyze(prompt, requestOptions);
+
+    // 4. Parser 호출
+    const parsedData = parseResponse(rawResponse);
+
+    // 5. Validator 호출 및 DTO 반환
+    return validateResult(parsedData);
+  }
+
+  getImageProvider(): ImageGenerationProvider {
+    return this.imageProvider;
+  }
+}

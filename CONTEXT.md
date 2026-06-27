@@ -94,23 +94,17 @@ DECISIONS.md
 ## 1. Project Summary
 * **프로젝트명**: AI Product Intelligence Platform
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
-* **현재 버전**: v0.9.5
-* **현재 단계**: Phase 4 - Evaluator & Generator Core Integration
-* **현재 Sprint**: Sprint 4-5 - Dashboard Backend API Integration & Streamlit Refactoring 완료 (PM 검토 대기)
+* **현재 버전**: v1.0.0
+* **현재 단계**: Phase 5 - Closed-loop Learning & Production Setup
+* **현재 Sprint**: Sprint 4-5 - Dashboard Backend API Integration & Streamlit Refactoring 완료 [APPROVED]
 
 ---
 
 ## 2. Current Goal
-* **현재 Sprint**: Sprint 4-5 (Dashboard API Integration & Refactoring)
-* **현재 작업 (Task)**: Sprint 4-5 완료 검토 대기
+* **현재 Sprint**: Phase 5 준비 단계 (Closed-loop Learning & Production Setup)
+* **현재 작업 (Task)**: ChatGPT PM의 Phase 5 (피드백 루프 연계 및 Supabase 배포) 작업 지시 대기
 * **완료 조건 (Definition of Done)**:
-  1. API Client (Timeout, tenacity retry, HTTP 예외 매핑) 구현 완료.
-  2. Workspace/Product UUID 드롭다운 연동 및 endpoints 중앙 집중화 완료.
-  3. SessionStateManager 세션 상태 캡슐화 완료.
-  4. Memory cache 및 CACHE_TTL 제어 완료.
-  5. UI widgets 컴포넌트 캡슐화 및 순수 서브페이지(pages) 라우팅 분할 완료.
-  6. Pytest 테스트 스위트 구동 및 커버리지 100% 만족 완료.
-  7. Ruff 린터 0건, MyPy 타입체커 0건 통과 완료.
+  * 차기 스프린트 계획 수립 완료.
 
 ---
 
@@ -134,7 +128,7 @@ DECISIONS.md
 * [x] **Sprint 4-2: JTBD 정보 모델 추출 프롬프트 엔진 구현 완료** [APPROVED]
 * [x] **Sprint 4-3: Product Strategy Generator 구현 완료** [APPROVED]
 * [x] **Sprint 4-4: Creative Pipeline 구현 완료** [APPROVED]
-* [x] **Sprint 4-5: Dashboard API Integration & Refactoring 구현 완료** (API Client, Endpoints, Cache, State, Services, Components, Pages 구현 및 100% 커버리지 Pytest 통과 완료)
+* [x] **Sprint 4-5: Dashboard API Integration & Refactoring 구현 완료** [APPROVED]
 
 ---
 
@@ -153,15 +147,13 @@ DECISIONS.md
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **Sprint 4-5 Dashboard Refactoring 구현체 검토 및 승인 요청**:
-  - 대상 폴더/파일: `dashboard/` (api, services, state, cache, components, pages, types, constants, utils), `tests/dashboard/test_dashboard_unit.py`, `dashboard.py` (ROOT)
-  - 검토 요점: requests client 캡슐화의 견고성, tenacity retry 매핑, st.session_state 은닉 및 프로퍼티 관리, widgets를 통한 UI 코드 중복 제거의 완결성, Pytest 100% 커버리지 확인.
+* **없음** (Phase 4 전체 완료 및 승인 획득)
 
 ---
 
 ## 7. Next Action
 * **ChatGPT (PM)**:
-  1. 다음 마일스톤인 **[Phase 5] Closed-loop Learning & Production Setup** 에 해당하는 작업 지시서를 작성해 주십시오.
+  1. **Phase 5 (Closed-loop Learning & Production Setup)** 첫 번째 스프린트인 **Sprint 5-1** 작업 지시서(출시 상품 실적 수집 모듈 및 피드백 루프 연계)를 작성해 주십시오.
 
 ---
 
@@ -190,5 +182,5 @@ DECISIONS.md
 
 ## 11. Last Update
 * **업데이트 날짜**: 2026-06-27
-* **완료 Sprint**: Sprint 4-5 (Dashboard API Integration & Streamlit Refactoring)
-* **다음 Sprint**: Phase 5 (Closed-loop Learning & Production Setup)
+* **완료 Sprint**: Sprint 4-5 (Dashboard API Integration & Streamlit Refactoring) [APPROVED]
+* **다음 Sprint**: Sprint 5-1 (Closed-loop Learning & Feedback Loop Setup)

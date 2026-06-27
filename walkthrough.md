@@ -1,33 +1,29 @@
-# Sprint 3-2 Walkthrough
+# Sprint 3-3 Walkthrough
 
-This document outlines the accomplishments, directory structure, dependencies, and test results for **Sprint 3-2: Authentication Module 구축**.
+This document outlines the accomplishments, directory structure, dependencies, and test results for **Sprint 3-3: Workspace API & Supabase Database 연동**.
 
 ## Changes Implemented
 
-We created the User Authentication module inside the `backend/` directory:
+We created the Workspace Domain module inside the `backend/` directory and added the soft delete migration:
 
-### 1. Project Configuration & Dependencies
-- **[package.json](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/package.json)**: Added `jsonwebtoken`, `bcrypt` dependencies and `@types/jsonwebtoken`, `@types/bcrypt` devDependencies.
-- **[.env.example](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.env.example)** / **[.env](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.env)**: Set secrets and token expiry definitions (`JWT_SECRET`, `JWT_REFRESH_SECRET`, `ACCESS_TOKEN_EXPIRES`, `REFRESH_TOKEN_EXPIRES`).
-- **[env.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/config/env.ts)**: Configured Zod variables validation to throw descriptive errors if parameters are invalid/short.
-- **[errors/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/common/errors/index.ts)**: Declared `AUTH_INVALID_TOKEN`, `AUTH_EXPIRED_TOKEN`, `AUTH_INVALID_CREDENTIALS`, and `AUTH_UNAUTHORIZED` errors.
-- **[.gitignore](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.gitignore)**: New backend gitignore to exclude `node_modules/`, local secrets, and compiled `dist/` artifacts.
+### 1. Database Migration
+- **[database/migrations/28_add_workspace_deleted_at.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/28_add_workspace_deleted_at.sql)**: Adds the `deleted_at` nullable column to `workspaces` table for soft delete capability.
 
-### 2. Authentication Utilities
-- **[src/utils/jwt.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/utils/jwt.ts)**: Defines the `TokenProvider` interface to decouple token signatures from core libraries, and implements `JwtTokenProvider` using `jsonwebtoken` with strict type definitions.
-- **[src/utils/password.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/utils/password.ts)**: Defines typed hashing and comparison functions via `bcrypt`.
+### 2. Base Repository Pattern
+- **[interfaces/base.repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/repositories/interfaces/base.repository.ts)**: Declares the reusable generic interface `IBaseRepository<T>`, `PaginationOptions`, and `PaginatedResult<T>`.
+- **[implementations/base.repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/repositories/implementations/base.repository.ts)**: Supabase PostgREST concrete implementation of the generic CRUD and pagination methods.
 
-### 3. Middleware & Routes
-- **[src/middleware/auth.middleware.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/middleware/auth.middleware.ts)**: Authorization header parser and token verification hook. Exposes a preHandler hook.
-- **[src/app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts)**: Registers subroutes under `/api/v1/auth` and registers `/api/v1/protected` mock endpoint to test middleware protection.
+### 3. Workspace Module
+- **[types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/types.ts)**: Defines `Workspace` entity model mapping and repository interface `IWorkspaceRepository`.
+- **[dto.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/dto.ts)**: Defines `CreateWorkspaceDto`, `UpdateWorkspaceDto`, and `WorkspaceResponseDto` mapping functions.
+- **[schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/schema.ts)**: Declares Zod validation schemas for payload body, params UUID, and pagination query fields.
+- **[repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/repository.ts)**: Implements concrete workspace queries (`findByName`, `findAllByOwner`) mapping `org_id` as the owner field.
+- **[service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/service.ts)**: Integrates business checks for name uniqueness, ownership, stubs for Audits and Transactions, and soft delete mappings.
+- **[controller.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/controller.ts)**: Coordinates validation extraction, maps database responses into DTOs.
+- **[route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/route.ts)**: Mounts endpoints `/` and `/:id` and binds `authMiddleware` hook.
 
-### 4. Auth Module Structure
-- **[types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/types.ts)**: Declares typed `JwtPayload`, `UserRole` enum (`ADMIN`, `MANAGER`, `USER`), and Fastify Request extensions.
-- **[schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/schema.ts)**: Login and token refresh Zod validation schemas.
-- **[repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/repository.ts)**: Declares the decoupled `IAuthRepository` interface and its mock implementation `MockAuthRepository` (with mock `admin@test.com` details).
-- **[service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/service.ts)**: Performs credential checking, JWT generation, and token refresh verification logic.
-- **[controller.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/controller.ts)**: Maps routes to services and returns standard JSON payloads.
-- **[route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/route.ts)**: Defines `/login`, `/logout`, `/refresh` routes.
+### 4. Application Integration
+- **[app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts)**: Mounts the workspace subroute under `/api/v1/workspaces`.
 
 ---
 
@@ -55,9 +51,10 @@ $ npx vitest run
 Output:
 ```text
  ✓ tests/health.test.ts  (1 test) 58ms
- ✓ tests/auth.test.ts  (12 tests) 1605ms
+ ✓ tests/auth.test.ts  (12 tests) 1586ms
+ ✓ tests/workspace.test.ts  (14 tests) 150ms
 
- Test Files  2 passed (2)
-      Tests  13 passed (13)
+ Test Files  3 passed (3)
+      Tests  27 passed (27)
 ```
 Status: **PASSED**

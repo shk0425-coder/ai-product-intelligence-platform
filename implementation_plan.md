@@ -1,29 +1,28 @@
-# Implementation Plan: Sprint 4-1 Deterministic Rule Engine
+# Implementation Plan: Sprint 4-2 JTBD Information Extraction Prompt Engine
 
-본 스프린트(4-1)에서는 AI 분석 결과를 기반으로 100% 결정론적인 상품 등급 평가를 수행하는 `rule-engine` 모듈을 구축합니다.
+본 스프린트(4-2)에서는 AI Review Analyzer가 수집한 리뷰 데이터를 기반으로 JTBD(Job To Be Done) 정보를 구조화하여 추출하는 `jtbd` 모듈을 구축합니다.
 
-본 모듈은 외부 의존성(DB, Repository, AI, Environment, Date, Random)이 완전히 배제된 Stateless Pure Function 라이브러리로 구현합니다.
+본 모듈은 Database, Repository, Rule Engine과 완전히 분리된 독립 모듈이며, Prompt 생성, AI 호출, 응답 Parsing, Schema Validation만 담당하는 Stateless 레이어로 구현합니다.
 
 ---
 
-## Proposed Changes
+# Proposed Changes
 
-새로운 모듈을 생성합니다.
+신규 모듈 생성
 
 ```text
-backend/src/modules/rule-engine/
+backend/src/modules/jtbd/
 ```
 
 구성
 
 ```text
-rule-engine/
-    calculator.ts
-    score.ts
-    grade.ts
-    reason.ts
+jtbd/
+    prompt.ts
+    schema.ts
+    parser.ts
     validator.ts
-    engine.ts
+    service.ts
     types.ts
     constants.ts
     index.ts
@@ -31,335 +30,278 @@ rule-engine/
 
 ---
 
-## 1. backend/src/modules/rule-engine/
+# backend/src/modules/jtbd/
 
-### [NEW] types.ts
+## [NEW] types.ts
 
-* RuleEngineInput 정의
-* RuleEngineOutput 정의
-* RuleEngineOptions 정의
-* DebugInfo 정의
-* Grade Enum(S/A/B/C/D) 정의
+정의
+
+* JTBDAnalysisInput
+* JTBDAnalysisResult
+* JTBD
+* PainPoint
+* DesiredOutcome
+* PurchaseMotivation
+* PurchaseBarrier
+* UsageContext
+* CustomerSegment
+* UnexpectedInsight
+
+Enum
+
+* Severity
+* Priority
 
 ---
 
-### [NEW] constants.ts
+## [NEW] constants.ts
 
-모든 상수는 이 파일에서만 관리합니다.
+관리 대상
 
-포함 항목
-
-* WEIGHTS
-* SCALING_RULES
-* GRADE_RULES
+* PROMPT_VERSION
+* PROMPT_TEMPLATE
+* MAX_REVIEWS
+* MAX_TOKENS
+* TEMPERATURE
 * VALIDATION_LIMITS
-* REASON_RULES
-* REASON_PRIORITY
-* SCORE_LIMITS
+* OUTPUT_RULES
 
-서비스 및 계산 함수 내부에서 숫자와 문자열을 직접 작성하지 않습니다.
+Prompt 내부 문자열 및 Validation 관련 상수는 모두 이 파일에서만 관리한다.
 
 ---
 
-### [NEW] validator.ts
+## [NEW] schema.ts
 
-입력 검증만 담당합니다.
+Zod Schema 단일 정의
 
-검증 대상
+```text
+jtbdAnalysisResultSchema
+```
 
-* undefined
-* null
-* NaN
-* Infinity
-* 음수
-* Score 범위 초과
-* reviewVolume 범위
-* marketGrowth 범위
+Schema는 반드시 `.strict()`를 사용한다.
 
-검증 실패 시 명확한 Error를 발생시키면 됩니다.
+Prompt용 JSON Schema와 Runtime Validator는 동일한 Zod Schema를 공유한다.
+
+JSON Schema는
+
+```text
+zod-to-json-schema
+```
+
+를 이용하여 생성한다.
+
+Schema를 중복 작성하지 않는다.
 
 ---
 
-### [NEW] score.ts
+## [NEW] parser.ts
 
 역할
 
-* reviewVolume 정규화
-* marketGrowth 정규화
-* Weighted Score 계산
+* Markdown 제거
+* Code Block 제거
+* JSON 추출
+* JSON Parse
 
-정규화는 constants.ts의 SCALING_RULES 기준으로 수행합니다.
+Validation 수행 금지
 
-최종 계산
+비즈니스 로직 금지
 
-```text
-Normalization
-
-↓
-
-Weighted Sum
-
-↓
-
-Math.round()
-
-↓
-
-0~100 Clamp
-
-↓
-
-Return Total Score
-```
-
-최종 점수는 반드시
-
-```text
-0 <= score <= 100
-```
-
-범위를 유지합니다.
+Prompt 수정 금지
 
 ---
 
-### [NEW] grade.ts
+## [NEW] validator.ts
 
-GRADE_RULES 테이블만 순회하여 Grade를 결정합니다.
+검증
 
-if-else 체인 구현을 금지합니다.
+* Required Field
+* Unknown Field
+* Enum
+* Number
+* String
+* Array
+* Object
+* null
+* undefined
+* 빈 문자열
+* 최대 길이
+* 최소 길이
 
-향후
-
-* AA
-* AAA
-* F
-
-등급 추가 시
-
-데이터만 수정하면 동작하도록 구현합니다.
-
----
-
-### [NEW] reason.ts
-
-Reason 생성 전용 모듈입니다.
-
-생성 규칙
-
-* 80 이상 → 긍정 Reason
-* 40 이하 → 부정 Reason
-* 40~79 → 생성 제외
-
-조건 만족 Reason이 3개 미만이면
-
-Threshold와의 거리가 가장 가까운 항목부터 순서대로 추가하여 최소 3개를 보장합니다.
-
-Reason 우선순위는 constants.ts에서 관리합니다.
-
-동일 입력은
-
-* 동일 Reason
-* 동일 순서
-
-를 항상 반환해야 합니다.
-
-최대 10개까지만 반환합니다.
+Validation 실패 시 명확한 Error를 발생시킨다.
 
 ---
 
-### [NEW] calculator.ts
+## [NEW] prompt.ts
 
-전체 계산 오케스트레이션
+Prompt 생성 전담
+
+입력
+
+* 상품명
+* 키워드
+* 리뷰 목록
+* AI Review Analysis 결과
+
+출력
+
+Prompt String
+
+Prompt에는 반드시 포함
+
+* Role
+* Objective
+* Input Data
+* Output Rules
+* JSON Schema
+* Constraints
+
+동일 입력는 항상 동일 Prompt를 생성해야 한다.
+
+---
+
+## [NEW] service.ts
 
 실행 순서
 
 ```text
-Validation
+Prompt 생성
 
 ↓
 
-Normalization
+AI 호출
 
 ↓
 
-Weighted Score
+Parser
 
 ↓
 
-Grade
+Validator
 
 ↓
 
-Reason
-
-↓
-
-Debug 생성(옵션)
-
-↓
-
-Output
+DTO 반환
 ```
+
+Retry
+
+Fallback
+
+Database
+
+Repository
+
+Rule Engine
+
+비즈니스 로직
+
+모두 금지
+
+AI Provider는 생성하지 않고 DI(Dependency Injection) 방식으로 주입받아 사용한다.
 
 ---
 
-### [NEW] engine.ts
+## [NEW] index.ts
 
-Rule Engine의 공개 진입점입니다.
+Export
 
-제공 API
-
-```text
-calculate(input)
-
-calculate(input, options)
-```
-
-입력 객체를 절대 수정하지 않습니다.
-
-Pure Function 형태로 calculator를 호출하여 결과만 반환합니다.
-
----
-
-### [NEW] index.ts
-
-외부 공개 인터페이스
-
-Export 대상
-
-* Engine
+* Service
 * Types
 * Constants
 
 ---
 
-## 테스트
+# AI 출력 규칙
 
-### backend/tests/rule-engine.test.ts
+AI는 반드시 JSON만 반환한다.
 
-검증 항목
+금지
 
-### Grade Boundary
-
-```text
-49
-50
-69
-70
-84
-85
-94
-95
-```
+* Markdown
+* Code Block
+* 설명
+* 자연어
+* 주석
+* Schema 외 Field
 
 ---
 
-### Weight
+# 테스트
 
-가중치 계산 검증
+## tests/jtbd.test.ts
 
----
-
-### Normalization
-
-reviewVolume
-
-marketGrowth
-
-선형 정규화 검증
-
----
-
-### Clamp
-
-0 미만
-
-100 초과
-
-Clamp 정상 동작 검증
-
----
-
-### Validation
-
-* undefined
-* null
-* NaN
-* Infinity
-* 음수
-* Score 101 이상
-* reviewVolume 범위 초과
-* marketGrowth 범위 초과
-
----
-
-### Deterministic
+### Prompt
 
 동일 입력
 
-100회 반복
+100회 실행
 
-항상 동일 결과
-
----
-
-### Object Immutability
-
-Object.freeze(input)
-
-calculate()
-
-입력 객체 변경 없음
+동일 Prompt 생성
 
 ---
 
-### Object Key Order
+### Schema
 
-입력 Key 순서가 달라도
+Prompt에 포함된 JSON Schema와
 
-동일 결과 반환
-
----
-
-### Reason
-
-최소 3개
-
-최대 10개
-
-동일 입력 시
-
-동일 순서 보장
+Validator가 사용하는 Zod Schema가 항상 동일함을 검증
 
 ---
 
-### Debug
+### Parser
 
-debug=false
+* 정상 JSON
+* Markdown JSON
+* Code Block JSON
+* Invalid JSON
+* 설명 포함 JSON
 
-debug=true
+---
 
-모두 검증
+### Validator
+
+* Required Field 누락
+* Unknown Field
+* Enum 오류
+* 잘못된 타입
+* null
+* undefined
+* 빈 문자열
+* 최대 길이 초과
+
+---
+
+### Service
+
+* Prompt → AI → Parser → Validator → DTO 전체 흐름 검증
+* AI Provider Mock 주입 검증
+* Provider 호출 횟수 검증(1회)
+* Validation 실패 시 예외 전파 검증
 
 ---
 
 ### Coverage
 
-Rule Engine 모듈
+jtbd 모듈
 
-100%
+Statements 100%
+
+Lines 100%
+
+Functions 100%
+
+Branches 100%
 
 ---
 
-## Verification Plan
-
-### Automated Tests
+# Verification Plan
 
 ```bash
-npx vitest run tests/rule-engine.test.ts
+npx vitest run tests/jtbd.test.ts
 npm run lint
 npm run build
-npx vitest run --coverage
+npx vitest run --coverage --coverage.include="src/modules/jtbd/**" tests/jtbd.test.ts
 ```
 
 성공 조건
@@ -367,58 +309,23 @@ npx vitest run --coverage
 * Vitest 전체 통과
 * ESLint 오류 0건
 * TypeScript Strict 오류 0건
-* Rule Engine Coverage 100%
+* jtbd 모듈 Coverage 100%
 
 ---
 
-## 구현 원칙
+# 구현 원칙
 
-Rule Engine 내부에서는 다음을 절대 사용하지 않습니다.
+다음 기능은 구현하지 않는다.
 
-* Repository
-* Database
-* AI 호출
-* 외부 API
-* Environment
+* Database 접근
+* Repository 사용
+* Rule Engine 호출
+* Retry
+* Fallback
 * Date
 * Date.now()
 * new Date()
 * Math.random()
+* Environment 접근
 
-입력 → 출력만 수행하는 Stateless Pure Function 구조를 유지합니다.
-
----
-
-## 완료 조건 (Definition of Done)
-
-* rule-engine 모듈 생성 완료
-* calculator / score / grade / reason / validator / engine 구현 완료
-* Grade Enum 구현 완료
-* Weight 상수 분리 완료
-* Grade Rule Table 구현 완료
-* Validation 상수 분리 완료
-* Reason 상수 분리 완료
-* Scaling Rule 구현 완료
-* Clamp 구현 완료
-* Debug 옵션 구현 완료
-* Pure Function 유지
-* Deterministic 보장
-* Validation 완료
-* Reason 생성 완료
-* Vitest 전체 통과
-* ESLint Flat Config 오류 0건
-* TypeScript Strict 오류 0건
-* REVIEW.md 업데이트
-* CONTEXT.md 업데이트
-* DECISIONS.md 업데이트
-* Git Commit 및 Push 완료
-
----
-
-## 중요
-
-이번 Sprint에서는 Rule Engine만 구현합니다.
-
-Controller, API, Repository, Database와 연결하지 않습니다.
-
-독립 라이브러리처럼 구현하여 다음 Sprint에서 AI Analysis Persistence와 연결할 수 있도록 유지합니다.
+입력 → 출력만 수행하는 Stateless 구조를 유지한다.

@@ -15,7 +15,7 @@
 
 ## 2. Current Goal
 * **현재 Sprint**: Sprint 2 (Supabase DDL 및 데이터베이스 구조체 셋업)
-* **현재 작업 (Task)**: Sprint 2-5 Strategy / Creative Domain Database DDL 구현 준비
+* **현재 작업 (Task)**: Sprint 2-5 Strategy / Creative Domain Database DDL 구현 검토 대기
 * **완료 조건 (Definition of Done)**:
   1. `database/migrations/` 폴더 내의 20~23번 마이그레이션 SQL 스크립트 작성 완료.
   2. `product_strategies` 및 `creative_briefs` 테이블 선언 및 세부 컬럼 한글 Comment 추가 완료.
@@ -33,35 +33,38 @@
 * [x] **Database Architecture v1.1 Final 설계 확정 및 동결(Freeze)** 완료
 * [x] **Core Domain Database DDL 구현 완료** (`01_extensions.sql` ~ `07_triggers.sql`)
 * [x] **Market Domain Database DDL 구현 완료** (`08_market_tables.sql` ~ `11_market_triggers.sql`)
-* [x] **GitHub Repository 운영 규칙 수립 및 로컬 Git 초기화 완료** (main/develop 브랜치 및 커밋 규칙 수립)
+* [x] **GitHub Repository 운영 규칙 반영 및 Git 저장소 구성 완료** (.gitignore 작성, develop 브랜치 운용)
 * [x] **Sprint 2-3: Review Domain Database DDL 구현 완료** (`12_review_tables.sql` ~ `15_review_triggers.sql`)
 * [x] **Sprint 2-4: Sourcing / Margin Domain Database DDL 구현 완료** (`16_sourcing_tables.sql` ~ `19_sourcing_triggers.sql`)
+* [x] **Sprint 2-5: Strategy / Creative Domain Database DDL 구현 완료** (`20_strategy_tables.sql` ~ `23_strategy_triggers.sql`)
 * [x] **CONTEXT.md 자동 갱신 규칙 및 v2.5 강화 운영 체계 수립 완료** (AI_START.md 반영)
 
 ---
 
 ## 4. Session Memory (임시 세션 메모리)
-*(현재 세션 종료 규칙에 따라 중요 의사결정은 Recent Decisions로 검토/이동되었으며, 메모 영역은 비워진 상태입니다.)*
+*Empty*
 
 ---
 
 ## 5. Recent Decisions (최근 핵심 의사결정 - 최대 5개)
-1. **CONTEXT.md 자동 갱신 및 자가 검증(Self Check) 규칙 제정** (2026-06-26): ChatGPT PM과의 세션 전환 시 정보 왜곡을 방지하고자 CONTEXT.md의 5대 필드에 대한 자가 검증 프로세스를 AI_START.md v2.5 규격에 도입함.
-2. **리뷰-임베딩 간 1:1 무결성 제약조건 추가** (2026-06-26): 리뷰 1건당 임베딩은 단 1건만 존재하도록 보장하기 위해 `review_embeddings`에 `UNIQUE (review_id, collected_at)` 복합 유니크 제약조건을 명시적으로 추가함.
-3. **Sprint Review 자동화 및 REVIEW.md 규격 수립** (2026-06-26): ChatGPT PM의 효율적인 코드 리뷰를 지원하기 위해 Sprint 종료 시 마다 에이전트가 자체 검증(Self Review)을 포함한 `REVIEW.md` 문서를 자동 생성하여 제출하도록 표준 절차를 정립함.
-4. **GitHub Repository 운영 원칙 및 자율 Commit/Push 지침 수립** (2026-06-26): 프로젝트 소스코드 일관성을 위해 GitHub를 Single Source of Truth(SSOT)로 지정하고, 개발 에이전트(Antigravity)는 각 Sprint 완료 시 별도 사용자 지시 없이 자율적으로 적절한 커밋 메시지 작성 후 로컬 커밋 및 원격(develop 브랜치) Push를 즉시 수행하도록 규칙을 수립함.
-5. **Market/Core/Review/Sourcing DDL 구현 완료** (2026-06-26): Supabase PostgreSQL 16 환경에 대응하여 데이터베이스 아키텍처 설계를 무손실 물리 DDL 스크립트로 구현 완료함.
+1. **Strategy/Creative Domain DDL 구현 및 storyboard GIN 인덱싱 적용** (2026-06-27): Supabase PostgreSQL 16 환경에 맞춰 product_strategies 및 creative_briefs 테이블을 DDL로 구현하였으며, 대용량 상세페이지 스토리보드 검색 최적화를 위해 GIN 인덱스를 storyboard 컬럼에 단독으로 배치함.
+2. **CONTEXT.md 자동 갱신 및 자가 검증(Self Check) 규칙 제정** (2026-06-26): ChatGPT PM과의 세션 전환 시 정보 왜곡을 방지하고자 CONTEXT.md의 5대 필드에 대한 자가 검증 프로세스를 AI_START.md v2.5 규격에 도입함.
+3. **리뷰-임베딩 간 1:1 무결성 제약조건 추가** (2026-06-26): 리뷰 1건당 임베딩은 단 1건만 존재하도록 보장하기 위해 `review_embeddings`에 `UNIQUE (review_id, collected_at)` 복합 유니크 제약조건을 명시적으로 추가함.
+4. **Sprint Review 자동화 및 REVIEW.md 규격 수립** (2026-06-26): ChatGPT PM의 효율적인 코드 리뷰를 지원하기 위해 Sprint 종료 시 마다 에이전트가 자체 검증(Self Review)을 포함한 `REVIEW.md` 문서를 자동 생성하여 제출하도록 표준 절차를 정립함.
+5. **GitHub Repository 운영 원칙 및 자율 Commit/Push 지침 수립** (2026-06-26): 프로젝트 소스코드 일관성을 위해 GitHub를 Single Source of Truth(SSOT)로 지정하고, 개발 에이전트(Antigravity)는 각 Sprint 완료 시 별도 사용자 지시 없이 자율적으로 적절한 커밋 메시지 작성 후 로컬 커밋 및 원격(develop 브랜치) Push를 즉시 수행하도록 규칙을 수립함.
 
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **None** (이전 스프린트 2-3 및 2-4 DDL 최종 승인 완료됨)
+* **Sprint 2-5 Strategy/Creative Domain DDL 검토 및 승인 요청**:
+  * 대상 파일: `20_strategy_tables.sql` ~ `23_strategy_triggers.sql`, [REVIEW.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/REVIEW.md), [CONTEXT.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/CONTEXT.md)
+  * 검토 요점: `run_id` 1:1 유니크 제약 조건, `storyboard` JSONB GIN 인덱싱, 한글 컬럼/테이블 코멘트.
 
 ---
 
 ## 7. Next Action
-* **ChatGPT (PM)**: 
-  1. 다음 마일스톤인 **[Sprint 2-5] Strategy/Creative Domain DDL 구현을 위한 세부 작업 지시서**를 작성해 주십시오.
+* **Antigravity**:
+  * ChatGPT PM의 승인 이후 **Sprint 2-6: Audit / Learning Domain Database DDL 구현**을 위해 마이그레이션 DDL 스크립트 작성에 착수할 예정.
 
 ---
 
@@ -89,6 +92,6 @@
 ---
 
 ## 11. Last Update
-* **업데이트 날짜**: 2026-06-26
-* **완료 Sprint**: Sprint 2-4 (Sourcing/Margin Domain)
-* **다음 Sprint**: Sprint 2-5 (Strategy/Creative Domain)
+* **업데이트 날짜**: 2026-06-27
+* **완료 Sprint**: Sprint 2-5 (Strategy/Creative Domain)
+* **다음 Sprint**: Sprint 2-6 (Audit/Learning Domain)

@@ -1,0 +1,9 @@
+-- 23_strategy_triggers.sql
+-- Triggers for Strategy & Creative Domain
+-- 
+-- [요건 분석]
+-- - product_strategies, creative_briefs: 분석 완료 후 LLM에 의해 생성 및 적재되는 정적 데이터셋으로 updated_at 컬럼이 없음.
+-- - updated_at 컬럼이 존재하는 Master Table만 Trigger를 연결하므로, 본 도메인의 테이블들에는 fn_update_updated_at() 트리거 연결을 생략합니다.
+-- 
+-- 이에 따라 본 Sprint 대상 테이블에는 트리거를 결합하지 않으며,
+-- 파일은 마이그레이션 실행 순서 보장을 위해 빈 멱등성 스크립트로 유지합니다.

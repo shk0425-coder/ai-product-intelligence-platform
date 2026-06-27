@@ -1,0 +1,9 @@
+-- 27_audit_triggers.sql
+-- Triggers for Audit & Learning Domain
+-- 
+-- [요건 분석]
+-- - decision_audits, knowledge_assets, learning_feedback_logs: 의사결정 기록, 승격 지식 자산, 학습 피드백 로그 등은 생성/조회용 스냅샷 및 이력 테이블로 updated_at 컬럼이 배제되어 설계되었습니다.
+-- - updated_at 컬럼이 있는 Master Table만 Trigger를 연결하므로, 본 도메인의 테이블들에는 fn_update_updated_at() 트리거 연결을 생략합니다.
+-- 
+-- 이에 따라 본 Sprint 대상 테이블에는 트리거를 결합하지 않으며,
+-- 파일은 마이그레이션 실행 순서 보장을 위해 빈 멱등성 스크립트로 유지합니다.

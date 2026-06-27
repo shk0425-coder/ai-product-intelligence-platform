@@ -37,8 +37,8 @@
   - [x] 17_sourcing_constraints.sql (기본키/외래키/유니크 제약조건) 작성
   - [x] 18_sourcing_indexes.sql (B-tree 및 GIN 인덱싱) 작성
   - [x] 19_sourcing_triggers.sql (트리거 생략 명시) 작성
-- [ ] Sprint 2-5: Strategy/Creative Domain Database DDL 구현
-- [ ] Sprint 2-6: Audit/Learning Domain Database DDL 구현
+- [x] Sprint 2-5: Strategy/Creative Domain Database DDL 구현
+- [x] Sprint 2-6: Audit/Learning Domain Database DDL 구현 (ChatGPT Review 대기 중)
 - [ ] pgvector 확장 활성화 및 HNSW 인덱싱 쿼리 작성 (2차 분할 구현)
 - [ ] 테이블 파티셔닝(Range Partitioning) 셋업 쿼리 작성 (2차 분할 구현)
 

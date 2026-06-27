@@ -16,6 +16,7 @@ import healthRoutes from '@/routes/v1/health.js';
 import authRoutes from '@/modules/auth/route.js';
 import workspaceRoutes from '@/modules/workspace/route.js';
 import marketRoutes from '@/modules/market/route.js';
+import reviewRoutes from '@/modules/review/route.js';
 
 export const createApp = async (): Promise<FastifyInstance> => {
   const app = Fastify({
@@ -39,6 +40,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
   await app.register(authRoutes, { prefix: `${API_PREFIX}/auth` });
   await app.register(workspaceRoutes, { prefix: `${API_PREFIX}/workspaces` });
   await app.register(marketRoutes, { prefix: `${API_PREFIX}/markets` });
+  await app.register(reviewRoutes, { prefix: `${API_PREFIX}/reviews` });
 
   // Test Protected Route for Verification
   app.get(`${API_PREFIX}/protected`, { preHandler: authMiddleware }, async (request, _reply) => {

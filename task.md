@@ -1,16 +1,16 @@
-- [x] Update `backend/src/common/errors/index.ts` to include `MarketMetricAlreadyExistsError`
-- [x] Create `backend/src/modules/scraper/types.ts` for scraper interfaces and data schemas
-- [x] Create `backend/src/modules/scraper/providers/base.provider.ts` and `naver.provider.ts`
-- [x] Create `backend/src/modules/scraper/service.ts` with deterministic stubs
-- [x] Update `backend/src/modules/market/dto.ts` with `CreateMarketMetricDto` and `UpdateMarketMetricDto`
-- [x] Update `backend/src/modules/market/schema.ts` with Zod validation schemas for create/update
-- [x] Update `backend/src/modules/market/repository.ts` with `create` and `update` overrides (fully inherited from BaseRepository)
-- [x] Update `backend/src/modules/market/service.ts` with mutations, duplicate check, and run owner checks
-- [x] Update `backend/src/modules/market/controller.ts` with create, update, delete handlers
-- [x] Update `backend/src/modules/market/route.ts` with POST, PATCH, DELETE endpoints
-- [x] Create Vitest integration tests in `backend/tests/market-mutation.test.ts`
+- [x] Create `backend/src/modules/review/types.ts` defining ReviewDto and Repository interface
+- [x] Create `backend/src/modules/review/dto.ts` defining request/response structures
+- [x] Create `backend/src/modules/review/mapper.ts` implementing DTO translation and default mapping
+- [x] Create `backend/src/modules/review/repository.ts` implementing bulk inserts with conflict handling
+- [x] Create `backend/src/modules/review/service.ts` implementing the crawling pipeline flow
+- [x] Create `backend/src/modules/review/controller.ts` processing crawl requests
+- [x] Create `backend/src/modules/review/schema.ts` for Zod validations
+- [x] Create `backend/src/modules/review/route.ts` registering crawl route
+- [x] Create `backend/src/modules/scraper/providers/naver-review.provider.ts` with timeout and backoff retry logic
+- [x] Register review routes in `backend/src/app.ts`
+- [x] Create integration tests in `backend/tests/review-pipeline.test.ts`
 - [x] Verify TypeScript compile check (`npm run build`) and ESLint style checks (`npm run lint`)
 - [x] Verify Vitest test execution (`npx vitest run`)
-- [x] Generate `backend_review.zip` containing only Sprint 3-5 changed files
-- [x] Update `pm_review/REVIEW.md`, `pm_review/CONTEXT.md`, and `pm_review/DECISIONS.md`
-- [x] Commit and push changes to develop branch
+- `[ ]` Generate `backend_review.zip` containing only Sprint 3-6 changed files
+- `[ ]` Update `pm_review/REVIEW.md`, `pm_review/CONTEXT.md`, and `pm_review/DECISIONS.md`
+- `[ ]` Commit and push changes to develop branch

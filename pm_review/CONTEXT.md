@@ -9,21 +9,21 @@
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
 * **현재 버전**: v0.6.0
 * **현재 단계**: Phase 3 - Scaffolding Backend & Scraper
-* **현재 Sprint**: Sprint 3-5 - Market Mutations & Scraper Infrastructure Setup 완료 (PM 검토 대기)
+* **현재 Sprint**: Sprint 3-6 - Review Intelligence Pipeline & First Provider Integration 완료 (PM 검토 대기)
 
 ---
 
 ## 2. Current Goal
-* **현재 Sprint**: Sprint 3-5 (Market Mutations & Scraper Infrastructure Setup)
-* **현재 작업 (Task)**: Sprint 3-5 완료 검토 대기
+* **현재 Sprint**: Sprint 3-6 (Review Intelligence Pipeline & First Provider Integration)
+* **현재 작업 (Task)**: Sprint 3-6 완료 검토 대기
 * **완료 조건 (Definition of Done)**:
-  1. `POST /api/v1/markets`, `PATCH /api/v1/markets/:id`, `DELETE /api/v1/markets/:id` API를 완성하고 테넌트 소유권 교차 검증 연동 완료.
-  2. 마켓 메트릭 생성 시 전달받은 `runId`가 현재 사용자의 소유인지 `verifyRunOwner(runId, userId)`를 리포지토리 수준에 신설하여 서비스 레이어에서 교차 대조 검증.
-  3. UNIQUE Constraint로 인한 `runId` 중복 메트릭 생성 요청 시 `MarketMetricAlreadyExistsError` (409 Conflict) 매핑 완료.
-  4. 다중 크롤링 채널(Naver, Coupang, 1688 등) 확장이 자연스러운 `IScraperProvider` 및 `BaseScraperProvider` 플러그인형 아키텍처 설계 및 stubs 모듈 완비.
-  5. 키워드 해시 변환 연산을 통해 100% 동일 재현 데이터를 반환하는 **Deterministic Mock Scraper Provider** 구현 완료.
-  6. DTO 명칭을 명확한 도메인 단위인 `CreateMarketMetricDto` 및 `UpdateMarketMetricDto`로 개정 적용.
-  7. 인증 부재, 만료 토큰, 타인 권한 침범, 잘못된 Run ID, 중복 생성 Conflict, 소프트 딜리트 재수정/재삭제 차단 및 스크래퍼 결정론성 검증을 포함한 12개 통합 테스트 성공 완수.
+  1. Keyword ➡️ Review Provider ➡️ Review Mapper ➡️ Review Repository ➡️ customer_reviews 흐름 완비.
+  2. 실제 Naver Shopping Smartstore API 연동 프로바이더 개발 및 AbortController 기반 10초 타임아웃, 3회 재시도, 1s/2s/4s Exponential Backoff 장애 처리 장착.
+  3. DTO 표준 구조 설계 및 Mapper를 통한 Null 필드 기본값 가공. 중복 삽입 감지를 위해 `provider`, `productId`, `reviewId` 조합의 deterministic UUID 생성기 장착.
+  4. Repository 내 `ON CONFLICT (review_id, collected_at) DO NOTHING` 기반 `upsert` 실행으로 중복은 `duplicateCount`로 분류하고 그 외 DB 오류는 `failedCount`로 정확히 분류 반환.
+  5. DB DDL 스키마 및 마이그레이션 변경 없이, NOT NULL 외래키 제약조건(`run_id`) 충족을 위해 DB 내 기존 `run_id` 동적 바인딩 및 fallback UUID 장치 구현.
+  6. API endpoint `POST /api/v1/reviews/crawl` 개발, JWT 인증 및 Zod 유효성 검증 적용.
+  7. Vitest를 활용하여 Provider, Mapper, Repository, API 모의/통합 테스트 총 57개 성공 완수.
   8. `REVIEW.md`, `CONTEXT.md`, `DECISIONS.md` 갱신 및 Git Commit & Push 완료.
 
 ---
@@ -39,8 +39,9 @@
 * [x] **Sprint 3-1: Backend Scaffold 및 Infrastructure 구축 완료** [APPROVED]
 * [x] **Sprint 3-2: Authentication Module 구축 완료** [APPROVED]
 * [x] **Sprint 3-3: Workspace API & Database 연동 개발 완료** [APPROVED]
-* [x] **Sprint 3-4: Sprint 3-3 개선사항 반영 및 Market Domain 기반 구축 완료** [APPROVED]
-* [x] **Sprint 3-5: Market Mutations & Scraper Infrastructure Setup 완료** (CRUD Mutations, Provider-based Scraper 아키텍처 설계, Deterministic stubs, 소유권 교차 검증 보강 완료)
+* [x] **Sprint 3-4: Sprint 3-3 개선사항 반영 및 Market Domain 구축 완료** [APPROVED]
+* [x] **Sprint 3-5: Market Mutations & Scraper Infrastructure Setup 완료** [APPROVED]
+* [x] **Sprint 3-6: Review Intelligence Pipeline & First Provider Integration 완료** (Smartstore 실연동, Mapper, Repo, Crawl API, Timeout/Retry 회복성 연동 및 DB Freeze 유지 완료)
 
 ---
 
@@ -50,24 +51,24 @@
 ---
 
 ## 5. Recent Decisions (최근 핵심 의사결정 - 최대 5개)
-1. **다중 외부 크롤러 확장을 고려한 Provider-based Scraper 아키텍처 도입** (2026-06-27): 백엔드 비즈니스 로직과 특정 크롤러 엔진 간의 결합도를 낮추기 위해 `IScraperProvider` 플러그인 구조를 정립함.
-2. **Deterministic Mock Scraper Stub 구현** (2026-06-27): 테스트 자동화 시 재현성을 보장하고 무작위 난수로 인한 테스트 Flaikness를 원천 방지하기 위해 키워드 문자열 해싱 기반의 결정론적 스텁을 구현함.
-3. **Run ID 소유주 위장 가입 검증 추가** (2026-06-27): 시장 지표 등록 시 사용되는 `runId`가 해당 로그인 유저 소유의 워크스페이스에 매핑된 상품의 분석 건인지 리포지토리 레이어 조인을 통해 검증함.
-4. **도메인 성격을 명확히 한 DTO 네이밍 개정** (2026-06-27): 범용적인 Market 의미보다 상세 데이터 성격을 띠는 `CreateMarketMetricDto`, `UpdateMarketMetricDto`로 개정 적용.
-5. **Soft Delete 및 중복 생성의 완벽한 예외 매핑** (2026-06-27): 소프트 딜리트 처리 완료 건에 대한 수정/재삭제 시도를 findByIdWithOwner(deleted_at IS NULL) 단에서 404 차단하고, 중복 runId 등록 시 409 Conflict 매핑 완료.
+1. **Database Freeze 원칙 준수** (2026-06-27): 스키마 변경, 신규 컬럼 추가 및 마이그레이션 생성을 완전히 지양하고, 기존 `customer_reviews` 테이블의 NOT NULL 외래키 제약조건(`run_id`) 충족을 위해 DB 내 기존 `run_id` 동적 바인딩 및 fallback UUID 장치를 통해 데이터 삽입을 처리함.
+2. **Exponential Backoff Retry 및 AbortController Timeout 적용** (2026-06-27): HTTP 429/403/Timeout 에러 발생 시 최대 3회 재시도를 지원하며 Exponential Backoff (1초 -> 2초 -> 4초) 및 요청당 최대 10초 타임아웃 제한을 Naver Shopping Provider에 적용하여 회복성을 강화함.
+3. **Deterministic UUID 생성기를 통한 Duplicate 감지** (2026-06-27): 중복 리뷰가 데이터베이스의 composite primary key `(review_id, collected_at)` 상에서 동일 UUID 충돌을 일으키도록 `provider`, `productId`, `reviewId` 조합의 SHA-256 해싱 deterministic UUID 생성기를 Mapper에 설계함.
+4. **의존성 추가 배제 목적의 Node.js 내장 fetch 및 AbortController 활용** (2026-06-27): `axios` 설치를 피해 패키지 종속성을 최소화하고자 Node.js v18+ 글로벌 내장 fetch 및 AbortController API를 도입함.
+5. **Crawl API 역할 한정** (2026-06-27): AI 분석 및 감성 분석을 제외하고 순수 수집/매핑/DB 적재 및 결과 카운트 반환 단계로만 역할을 한정하여 파이프라인의 결합도를 낮춤.
 
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **Sprint 3-5 Market Mutations & Scraper Infrastructure Setup 구현체 검토 및 승인 요청**:
-  * 대상 폴더/파일: `backend/src/modules/market/`, `backend/src/modules/scraper/`, `backend/tests/market-mutation.test.ts`
-  * 검토 요점: Multi-provider scraper 설계 규격, 해싱 기반 Deterministic stubs, API 권한/중복/만료 검사의 테스트 보강 신뢰성.
+* **Sprint 3-6 Review Pipeline & Naver Smartstore API 실연동 구현체 검토 및 승인 요청**:
+  * 대상 폴더/파일: `backend/src/modules/review/`, `backend/src/modules/scraper/providers/naver-review.provider.ts`, `backend/tests/review-pipeline.test.ts`
+  * 검토 요점: 내장 fetch 기반 Naver Smartstore JSON 수집 및 Retry/Timeout 동작성, Mapper Null 기본값 처리, Repo Bulk Insert 및 Skip 카운트 테스트 정합성.
 
 ---
 
 ## 7. Next Action
 * **ChatGPT (PM)**:
-  1. 다음 마일스톤인 **[Sprint 3-6] Naver Shopping Crawler 실연동 및 DB 저장 연동 작업 지시서**를 작성해 주십시오.
+  1. 다음 마일스톤인 **[Sprint 3-7] AI Review Analyzer & JTBD 분석 작업 지시서**를 작성해 주십시오.
 
 ---
 
@@ -98,5 +99,5 @@
 
 ## 11. Last Update
 * **업데이트 날짜**: 2026-06-27
-* **완료 Sprint**: Sprint 3-5 (Market Mutations & Scraper Infrastructure Setup)
-* **다음 Sprint**: Sprint 3-6 (Naver Shopping Crawler Integration)
+* **완료 Sprint**: Sprint 3-6 (Review Intelligence Pipeline & First Provider Integration)
+* **다음 Sprint**: Sprint 3-7 (AI Review Analyzer)

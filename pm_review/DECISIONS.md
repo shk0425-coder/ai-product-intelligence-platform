@@ -1,5 +1,15 @@
 # Project Decisions
 
+## Sprint 3-6
+
+- **Database Freeze 원칙 준수**: 스키마 변경, 신규 컬럼 추가 및 마이그레이션 생성을 완전히 지양하고, 기존 `customer_reviews` 테이블의 NOT NULL 외래키 제약조건(`run_id`) 충족을 위해 DB 내 기존 `run_id` 동적 바인딩 및 fallback UUID 장치를 통해 데이터 삽입을 처리함.
+- **Exponential Backoff Retry 및 AbortController Timeout 적용**: HTTP 429/403/Timeout 에러 발생 시 최대 3회 재시도를 지원하며 Exponential Backoff (1초 -> 2초 -> 4초) 및 요청당 최대 10초 타임아웃 제한을 Naver Shopping Provider에 적용하여 회복성을 강화함.
+- **Deterministic UUID 생성기를 통한 Duplicate 감지**: 중복 리뷰가 데이터베이스의 composite primary key `(review_id, collected_at)` 상에서 동일 UUID 충돌을 일으키도록 `provider`, `productId`, `reviewId` 조합의 SHA-256 해싱 deterministic UUID 생성기를 Mapper에 설계함.
+- **의존성 추가 배제 목적의 Node.js 내장 fetch 및 AbortController 활용**: `axios` 설치를 피해 패키지 종속성을 최소화하고자 Node.js v18+ 글로벌 내장 fetch 및 AbortController API를 도입함.
+- **Crawl API 역할 한정**: AI 분석 및 감성 분석을 제외하고 순수 수집/매핑/DB 적재 및 결과 카운트 반환 단계로만 역할을 한정하여 파이프라인의 결합도를 낮춤.
+
+---
+
 ## Sprint 3-5
 
 - **플러그인형 Scraper Provider 구조 도입**: Naver, Coupang, 1688 등 다중 쇼핑 플랫폼 수집 채널을 손쉽게 붙이고 확장할 수 있도록 `IScraperProvider` 및 `ScraperService` 레지스트리 기반의 모듈 아키텍처를 도입함.
@@ -15,7 +25,7 @@
 - **BaseRepository 내 소프트 딜리트 수정/삭제 차단 정책**: Soft Delete 처리가 끝난 로우의 추가 수정 및 재삭제 연산을 차단하고자 `BaseRepository.update` 및 `delete`에 `.is('deleted_at', null)` 필터를 기본 기입함.
 - **Zod 기반의 페이징 상한 규격화 및 정렬 화이트리스트 검사**: page 최대 100,000, limit 최대 100 조건 및 명칭 화이트리스트 외 정렬을 라우트 Zod 검증 레이어에서 즉시 오류 반환 처리함.
 - **최종 중복 검사의 DB Constraint 위반 감지 이관**: 최종 중복 식별은 DB Unique Constraint를 의존하여 Supabase 23505 에러 감지를 통해 `WorkspaceAlreadyExistsError`로 변환하도록 구조 개선함.
-- **마켓 메트릭 다단계 조인 소유주 필터링**: `market_metrics` 테이블과 `workspaces`의 `org_id`를 연결하는 조인 경로 필터링을 Repository 단에 적용함.
+- **마켓 메트릭 다단계 조인 소유주 필터링**: `market_metrics` 테이블 and `workspaces`의 `org_id`를 연결하는 조인 경로 필터링을 Repository 단에 적용함.
 - **마켓 테이블 soft delete용 DDL 추가**: DDL 직접 수정 금지령에 맞추어 `29_add_market_deleted_at.sql` 마이그레이션을 신설 적용함.
 
 ---

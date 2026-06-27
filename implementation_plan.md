@@ -1,192 +1,188 @@
-# Sprint 3-5: Market Mutations & Scraper Infrastructure Setup Implementation Plan
+# Sprint 3-6: Review Intelligence Pipeline & First Provider Integration Implementation Plan (Final Approved)
 
-Implementation plan to build Market mutation APIs (Create, Update, Delete) and establish the Scraper Infrastructure stubs for the AI Product Intelligence Platform (v0.6.0).
+Implementation plan to build the Review Intelligence Pipeline, define the standard Review DTO, construct the Review Mapper, implement the Review Repository, and build the Crawl API under a frozen database schema.
 
 ---
 
 ## 1. Sprint 목표
-* **Market CRUD 완성**: `market_metrics` 테이블에 대한 Create, Update, Delete API를 완비하고 테넌트 소유권 검증 연동.
-* **Scraper Infrastructure 설계**: 네이버 쇼핑 키워드 크롤링 및 경쟁사 데이터를 추합하기 위한 표준 스크래퍼 인터페이스(`IScraperService`) 및 스텁(Stub) 모듈 구축.
+* **Review Pipeline 구축**: Keyword -> Provider -> Mapper -> Repository -> Database로 이어지는 플랫폼 비종속적인 수집 파이프라인 구축.
+* **첫 번째 Provider 연동**: 실제 Naver Shopping 상품 리뷰 공개 API를 첫 번째 수집 Provider로 연동 (Timeout, Retry, Backoff 포함).
+* **Crawl API 개발**: `POST /api/v1/reviews/crawl` API 개발 및 Zod 유효성 검사 (runId 배제).
 
 ---
 
 ## 2. 구현 범위
 
-### 구현 대상
-* **Market Mutations**:
-  * `POST /api/v1/markets`
-  * `PATCH /api/v1/markets/:id`
-  * `DELETE /api/v1/markets/:id`
-* **Scraper Infrastructure**:
-  * `src/modules/scraper/` 신설 및 표준 크롤러 인터페이스(`IScraperService`) 설계.
-  * 크롤링 데이터 모델 규격 수립 (검색 수치, 트렌드, 경쟁사 상위 10개 정보).
-* **Owner 검증**:
-  * 수정/삭제 요청 시 JWT 소유주 매칭 검사.
-  * 생성 요청 시 지정된 `runId`가 현재 사용자 소유인지 검사 (중요 보완 사항).
-* **Zod Validation & DTO**:
-  * 생성/수정 페이로드 검증 스키마 추가.
-  * `CreateMarketDto`, `UpdateMarketDto` 작성.
-* **Unit & Integration Tests**:
-  * 생성 성공, 타인의 `runId`를 이용한 생성 시도 차단(403), 수정 성공/실패, 삭제 성공/실패, Zod 유효성 검사.
+### 구현 대상 (In-Scope)
+* **First Review Provider (Naver Shopping)**:
+  * 네이버 스마트스토어 상품 리뷰 공개 API (`smartstore.naver.com/i/v1/contents/reviews`) 연동.
+  * Timeout(10초), Retry(3회), Exponential Backoff(1초, 2초, 4초) 회복성 로직 장착.
+* **Review 표준 DTO 및 Mapper**:
+  * 플랫폼 간 비종속적인 표준 `ReviewDto` 정의.
+  * 타입 형변환, Null 가공, 기본값 지정을 수행하는 `ReviewMapper` 구현.
+* **Review Repository**:
+  * 데이터베이스 DDL 변경 없이 기존 `customer_reviews` 테이블 구조 (`review_id`, `run_id`, `raw_text`, `rating`, `collected_at`)를 그대로 재사용.
+  * 데이터베이스 constraints (NOT NULL `run_id`) 충족을 위해 DB 내 임의의 기존 `run_id` 자동 조회 후 임시 바인딩 (Default fallback UUID 지정).
+  * Bulk Insert 및 중복 방지(`ON CONFLICT (review_id, collected_at) DO NOTHING`) 연동.
+  * Bulk Insert 결과 반환 설계 (`insertedCount`, `duplicateCount`, `failedCount`).
+* **Crawl API**:
+  * `POST /api/v1/reviews/crawl` (body: `provider`, `keyword`).
+* **Vitest 통합 테스트**:
+  * Provider(JSON fetch, Timeout, Retry), Mapper(Null 처리, DTO 변환), Repository(Insert, Duplicate 처리, failedCount 처리), API(401, 400, 200) 통합 테스트 수립.
 
-### 제외 대상
-* 실제 네이버 쇼핑 HTTP 크롤러 엔진(Axios/Puppeteer) 연동 동작 (Sprint 3-6 구현 예정).
-* AI 분석(JTBD) Orchestration 엔진 연동.
+### 제외 대상 (Out-Scope)
+* AI 감성 분석 및 JTBD 분류.
+* Database Schema 변경, Migration 생성, 기존 DDL 수정.
 
 ---
 
 ## 3. 수정 대상 파일
-* [app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts): 신규 scraper 모듈 의존성 주입 또는 stubs 등록
-* [modules/market/dto.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/market/dto.ts): `CreateMarketDto`, `UpdateMarketDto` 기입
-* [modules/market/schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/market/schema.ts): Zod create/update 바디 스키마 선언
-* [modules/market/service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/market/service.ts): 생성, 수정, 삭제 비즈니스 로직 작성
-* [modules/market/controller.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/market/controller.ts): 요청 핸들러 바인딩
-* [modules/market/route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/market/route.ts): POST, PATCH, DELETE 라우팅 등록
+* [app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts): 신규 review 라우트 프리픽스 연동 등록
 
 ---
 
 ## 4. 신규 생성 파일
-* [modules/scraper/types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/scraper/types.ts): 스크래퍼 인터페이스, 데이터 전송 규격 수립
-* [modules/scraper/service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/scraper/service.ts): 모의 스크래핑 스텁 서비스
-* [tests/market-mutation.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/market-mutation.test.ts): Mutation 검증용 유닛/통합 테스트
+* **Review Module**:
+  * [modules/review/types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/types.ts): 표준 `Review` 엔티티 정의, `ReviewDto` 및 리포지토리 인터페이스 정의
+  * [modules/review/dto.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/dto.ts): DTO 규격 선언
+  * [modules/review/mapper.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/mapper.ts): Provider raw json 데이터 ➡️ 표준 DTO 매퍼
+  * [modules/review/repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/repository.ts): `customer_reviews` 테이블 Bulk Insert 구현
+  * [modules/review/service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/service.ts): 파이프라인 흐름 제어
+  * [modules/review/controller.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/controller.ts): Crawl 요청 중계 및 결과 건수 반환
+  * [modules/review/schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/schema.ts): Zod를 이용한 API 요청 유효성 스키마 선언
+  * [modules/review/route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/route.ts): 라우트 등록
+* **Scraper Module/Interface 확장**:
+  * [modules/scraper/providers/naver-review.provider.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/scraper/providers/naver-review.provider.ts): Naver Smartstore 리뷰 실 연동 프로바이더 (Timeout, Retry 포함)
+* **테스트**:
+  * [tests/review-pipeline.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/review-pipeline.test.ts): 통합 검증 테스트
 
 ---
 
-## 5. Database 변경 여부
-* **변경 없음**: Sprint 3-4에서 `market_metrics` 테이블에 `deleted_at` 소프트 딜리트 컬럼 추가 마이그레이션(`29_add_market_deleted_at.sql`)을 이미 실행했으므로 물리 DDL 변경은 불필요합니다.
+## 5. Database 정책 및 데이터 매핑 전략
+
+### 5-1. Database Schema 동결 (Freeze)
+* DDL 수정, 컬럼 추가 및 신규 Migration 파일 생성을 일체 진행하지 않고 기존 스키마를 재사용합니다.
+
+### 5-2. 데이터 매핑 전략
+* `ReviewDto`의 플랫폼 독립 필드 중 데이터베이스 컬럼에 상응하는 정보만 선별 매핑하여 `customer_reviews`에 삽입합니다:
+  * `review_id` ⬅️ `ReviewDto.reviewId` (UUID)
+  * `raw_text` ⬅️ `ReviewDto.reviewContent` (원본 텍스트)
+  * `rating` ⬅️ `ReviewDto.rating` (별점)
+  * `collected_at` ⬅️ `ReviewDto.collectedAt` (수집 일시)
+* `run_id`는 외래키 제약조건 및 NOT NULL 제약을 충족하기 위해 데이터베이스 내 임의의 기존 `run_id`를 자동 조회 후 임시 바인딩 (Default fallback UUID 지정).
 
 ---
 
 ## 6. API 설계
 
-### 6-1. POST `/api/v1/markets` (시장 지표 생성)
+### POST `/api/v1/reviews/crawl` (리뷰 수집 실행)
 * **Headers**: `Authorization: Bearer <JWT>`
 * **Request Body**:
   ```json
   {
-    "runId": "uuid-here",
-    "totalMonthlySearch": 15000,
-    "trendSlope": 0.85,
-    "seasonalityClassification": "MEDIUM",
-    "rawTrendJson": [
-      { "date": "2026-05-01", "value": 1200 },
-      { "date": "2026-06-01", "value": 1500 }
-    ]
+    "provider": "naver",
+    "keyword": "강아지 유모차"
   }
   ```
-* **Response (201 Created)**:
-  ```json
-  {
-    "success": true,
-    "data": {
-      "metricId": "generated-metric-uuid",
-      "runId": "uuid-here",
-      "totalMonthlySearch": 15000,
-      "trendSlope": 0.85,
-      "seasonalityClassification": "MEDIUM",
-      "rawTrendJson": [...]
-    },
-    "message": "Market metric created successfully"
-  }
-  ```
-
-### 6-2. PATCH `/api/v1/markets/:id` (시장 지표 수정)
-* **Headers**: `Authorization: Bearer <JWT>`
-* **Request Body**:
-  ```json
-  {
-    "totalMonthlySearch": 20000
-  }
-  ```
+* **Validation 규칙**:
+  * `provider`: `'naver'` 필수.
+  * `keyword`: 필수 입력, 앞뒤 공백 제거(Trim), 빈 문자열(Empty) 차단, 최대 50자 제한.
 * **Response (200 OK)**:
   ```json
   {
     "success": true,
     "data": {
-      "metricId": "metric-uuid",
-      "totalMonthlySearch": 20000,
-      ...
+      "provider": "naver",
+      "keyword": "강아지 유모차",
+      "insertedCount": 20,
+      "duplicateCount": 0,
+      "failedCount": 0
     },
-    "message": "Market metric updated successfully"
-  }
-  ```
-
-### 6-3. DELETE `/api/v1/markets/:id` (시장 지표 삭제)
-* **Headers**: `Authorization: Bearer <JWT>`
-* **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "message": "Market metric deleted successfully"
+    "message": "Successfully crawled reviews"
   }
   ```
 
 ---
 
-## 7. Scraper Infrastructure 설계
-* **의존성 격리**: 백엔드 컨트롤러나 비즈니스 도메인이 크롤러 엔진(Axios, Puppeteer 등)에 직접 의존하지 않도록 `IScraperService` 추상 인터페이스를 선언합니다.
-* **표준 타입**:
+## 7. Retry 및 Timeout 상세 사양
+* **Timeout**: 각 HTTP 요청당 최대 10초 대기 제한.
+* **Retry 정책**: HTTP 429 (Too Many Requests), HTTP 403 (Forbidden), Timeout 에러 발생 시 최대 3회 재시도.
+* **Exponential Backoff**:
+  * 1차 재시도 대기 시간: 1초
+  * 2차 재시도 대기 시간: 2초
+  * 3차 재시도 대기 시간: 4초
+
+---
+
+## 8. 확장 가능한 Provider Interface 설계
+```typescript
+export interface CrawlRequest {
+  keyword: string;
+  maxReviews?: number;
+  sort?: 'latest' | 'best';
+}
+
+export interface RawReviewData {
+  id: string;
+  productName: string;
+  rating: number;
+  title: string;
+  content: string;
+  date: string;
+  reviewer: string;
+  helpfulCount: number;
+  brand?: string;
+  optionName?: string;
+  raw: Record<string, unknown>;
+}
+
+export interface IReviewProvider {
+  getName(): string;
+  crawl(request: CrawlRequest): Promise<RawReviewData[]>;
+}
+```
+
+---
+
+## 9. Review Mapper 및 DTO 설계
+* 표준 `ReviewDto` 구조:
   ```typescript
-  export interface ScrapedCompetitor {
-    rank: number;
-    brandName: string;
-    mallType: string;
-    price: number;
-    reviewCount: number;
-    rawMallName?: string;
-  }
-
-  export interface ScrapedMarketData {
-    totalMonthlySearch: number;
-    trendSlope: number;
-    seasonalityClassification: 'HIGH' | 'MEDIUM' | 'LOW';
-    rawTrendJson: Record<string, unknown> | unknown[];
-    competitors: ScrapedCompetitor[];
-  }
-
-  export interface IScraperService {
-    scrapeKeyword(keyword: string): Promise<ScrapedMarketData>;
+  export interface ReviewDto {
+    provider: string;
+    keyword: string;
+    reviewId: string;
+    providerProductId: string;
+    providerReviewId: string;
+    productName: string;
+    rating: number;
+    reviewTitle: string;
+    reviewContent: string;
+    reviewer: string;
+    reviewDate: string;
+    helpfulCount: number;
+    brand: string;
+    optionName: string;
+    collectedAt: string;
+    metadata: Record<string, unknown>;
   }
   ```
-* **Stub 서비스**: `MockScraperService`를 작성하여, 호출 시 가상의 검색 볼륨 및 경쟁사 10개 목록 데이터를 결정론적으로 반환하게 구현해 Sprint 3-6에서 persist/save 연결만 하도록 스텁화합니다.
 
 ---
 
-## 8. Market Create / Update / Delete 구현 방식
-* **생성 시 Run 소유주 대조 검증**:
-  * 마켓 메트릭 생성 시 전달받은 `runId`가 실제 로그인한 유저의 소유인지 검사하기 위해, `analysis_runs` 테이블을 조회하여 연계된 `products` ➡️ `workspaces` ➡️ `org_id`가 유저 ID와 일치하는지 Service 레이어에서 선제 점검합니다.
-* **수정/삭제 시 메트릭 소유주 검증**:
-  * `findByIdWithOwner`를 사용하여 호출 유저의 소유가 확인된 경우에만 `update()` 및 `delete()` 명령을 실행합니다.
-* **Soft Delete 준수**:
-  * 이미 삭제된 건은 BaseRepository 수준에서 수정 및 재삭제가 원천 방어되므로, 예외 상황 발생 시 404/403 예외가 정밀 반환됩니다.
+## 10. Review Repository & Bulk Insert 결과 구조
+* **Bulk Insert 결과 규격**:
+  ```typescript
+  export interface BulkInsertResult {
+    insertedCount: number;
+    duplicateCount: number;
+    failedCount: number;
+  }
+  ```
 
 ---
 
-## 9. 테스트 계획
-
-### Vitest 검증 시나리오
-* **POST /api/v1/markets**
-  * 로그인 유저 소유의 `runId`인 경우 정상 생성 확인.
-  * 타인 소유의 `runId`로 위장 생성 요청 시 403 Forbidden 차단 확인.
-  * 잘못된 페이로드 전달 시 Zod가 캐치하여 400 Validation Error 처리.
-* **PATCH /api/v1/markets/:id**
-  * 메트릭 소유주인 경우 정상 수정 완료 확인.
-  * 타인 메트릭 수정 요청 시 404/403 예외 처리.
-  * 이미 Soft-Deleted 된 건에 대한 수정 요청 시 404 차단 확인.
-* **DELETE /api/v1/markets/:id**
-  * 소유주인 경우 soft-delete (`deleted_at` 갱신) 성공 확인.
-  * 타인 메트릭 삭제 요청 시 차단 확인.
-  * 이미 삭제된 대상을 재삭제 시도할 때 차단 확인.
-
----
-
-## 10. 예상 리스크
-* **외래키 관계 조인 성능**: `run_id` ➡️ `products` ➡️ `workspaces` 다층 관계 조인이 PostgREST 쿼리에서 잦은 Latency를 유발할 위험이 존재합니다.
-  * *대응책*: Supabase 인덱싱에 적합한 외래키 설정이 구현되어 있으므로, 쿼리 플래너가 정상 동작하는지 모니터링하고 필요시 `analysis_runs` 단에 소유주 ID를 역정규화로 캐싱할 수 있습니다.
-
----
-
-## 11. REVIEW.md / CONTEXT.md / DECISIONS.md 업데이트 계획
-* **REVIEW.md**: 구현 기능, 변경/신규 파일, 테스트 34+개 합격 결과 및 Self Review 등재.
-* **CONTEXT.md**: Sprint 3-5 완료 상태 및 Sprint 3-6 Scraper 실연동 인계 가이드 작성.
-* **DECISIONS.md**: Scraper 추상 아키텍처 및 Run ID 생성 검증 정책 누적 등재.
+## 11. 테스트 계획
+* **Provider**: JSON Fetch 성공 케이스, Timeout 강제 에러 처리, 3회 Retry 동작 검증.
+* **Mapper**: Null 처리 기본값 변환, DTO 맵핑 완료, metadata 보존 여부 검사.
+* **Repository**: 대량 삽입 성공, 중복 레코드 DO NOTHING 무시, 제약조건 위반 실패 카운트 처리.
+* **API**: 401 Unauthorized, 400 Validation, 200 OK 동작 확인.

@@ -41,7 +41,7 @@
 - [x] Sprint 4-1: 결정론적 룰 엔진(Deterministic Rule Engine) 등급 컷오프(S~D) 계산기 구현 완료
 - [x] Sprint 4-2: JTBD 정보 모델 추출 프롬프트 엔진 구현 완료
 - [x] Sprint 4-3: Product Strategy Generator 구현 (상세페이지 8단계 스토리보드 빌드) 완료
-- [ ] Creative Pipeline (FLUX API 연동 및 이미지 프롬프트 빌더) 연동 (Sprint 4-4)
+- [x] Creative Pipeline (FLUX API 연동 및 이미지 프롬프트 빌더) 연동 (Sprint 4-4) 완료
 - [ ] Streamlit 대시보드 리팩토링 및 API 서버 연계 (Sprint 4-5)
 
 ### [Phase 5] Closed-loop Learning & Production Setup

@@ -7,25 +7,19 @@
 ## 1. Project Summary
 * **프로젝트명**: AI Product Intelligence Platform
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
-* **현재 버전**: v0.8.0
-* **현재 단계**: Phase 3 - Scaffolding Backend & Scraper
-* **현재 Sprint**: Sprint 3-8 - AI Review Analysis Persistence Pipeline & Storage (Final) 완료 (PM 검토 대기)
+* **현재 버전**: v0.9.0
+* **현재 단계**: Phase 4 - Evaluator & Generator Core Integration
+* **현재 Sprint**: Sprint 4-1 - 결정론적 룰 엔진 등급 계산기 구현 (준비 중)
 
 ---
 
 ## 2. Current Goal
-* **현재 Sprint**: Sprint 3-8 (AI Review Analysis Persistence Pipeline & Storage)
-* **현재 작업 (Task)**: Sprint 3-8 완료 검토 대기
+* **현재 Sprint**: Sprint 4-1 (결정론적 룰 엔진 등급 계산기 구현)
+* **현재 작업 (Task)**: Sprint 4-1 설계 수립 및 PM 작업 지시 대기
 * **완료 조건 (Definition of Done)**:
-  1. `31_create_review_analysis_results.sql` 신규 마이그레이션 적용 및 UNIQUE, 인덱스 생성 완료.
-  2. `AIAnalysisRepository` (Save, FindByIdentity, FindLatest, FindById, Exists) 구현 완료.
-  3. `ReviewAnalysisPersistenceService` (SHA-256 Identity 생성, Cache Hit/Miss 오케스트레이션) 구현 완료.
-  4. `ReviewAnalysisQueryService` (Latest 조회, ID 조회) 구현 완료.
-  5. API `POST /api/v1/reviews/analyze` 에 캐시 정책 연동 및 `cached: true | false` 응답 완료.
-  6. API `GET /api/v1/reviews/analysis` 및 `GET /api/v1/reviews/analysis/:id` 신설 완료.
-  7. Vitest 테스트 92개 시나리오 전체 100% 통과 완료.
-  8. ESLint Flat Config 린터 및 TypeScript Strict 컴파일 오류 0건 유지.
-  9. `REVIEW.md`, `CONTEXT.md`, `DECISIONS.md` 등 POS 산출물 최신 갱신 및 Git Push 자율 완수.
+  1. 결정론적 룰 엔진(Deterministic Rule Engine) 등급 컷오프(S~D) 계산기 구현.
+  2. Vitest 유닛 테스트 작성 및 통과.
+  3. POS 문서 최신화 및 Git Push 자율 완수.
 
 ---
 
@@ -63,15 +57,13 @@
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **Sprint 3-8 AI Review Analysis Persistence & Storage 구현체 검토 및 승인 요청**:
-  - 대상 폴더/파일: `backend/src/modules/ai/` (repository, persistence-service, query-service, identity-generator), `database/migrations/31_create_review_analysis_results.sql`, `backend/tests/analysis-persistence.test.ts`
-  - 검토 요점: Identity Generator 해시 중복 제어 및 캐싱(Cache Hit/Miss) 분기 처리, DDL 마이그레이션 인덱스 최적화, 쿼리 API 응답 정합성.
+* **None**
 
 ---
 
 ## 7. Next Action
 * **ChatGPT (PM)**:
-  1. 다음 마일스톤인 **[Sprint 4-1] 결정론적 룰 엔진(Deterministic Rule Engine) 등급 컷오프(S~D) 계산기 구현 작업 지시서**를 작성해 주십시오.
+  1. **[Sprint 4-1] 결정론적 룰 엔진 등급 계산기 구현 작업 지시서**를 작성해 주십시오.
 
 ---
 

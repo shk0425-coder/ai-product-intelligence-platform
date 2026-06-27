@@ -7,46 +7,38 @@
 ## 1. Project Summary
 * **프로젝트명**: AI Product Intelligence Platform
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
-* **현재 버전**: v0.7.0
-* **현재 단계**: Phase 3 - Scaffolding Backend & Scraper
-* **현재 Sprint**: Sprint 3-8 - AI Review Analysis Persistence Pipeline & Storage (Final)
+* **현재 버전**: v0.9.0
+* **현재 단계**: Phase 4 - Evaluator & Generator Core Integration
+* **현재 Sprint**: Sprint 4-1 - 결정론적 룰 엔진 등급 계산기 구현 (준비 중)
 
 ---
 
 ## 2. Current Goal
-* **현재 Sprint**: Sprint 3-8 (AI Review Analysis Persistence Pipeline & Storage)
-* **현재 작업 (Task)**: Sprint 3-8 구현 계획 승인 대기 및 구현 준비
+* **현재 Sprint**: Sprint 4-1 (결정론적 룰 엔진 등급 계산기 구현)
+* **현재 작업 (Task)**: Sprint 4-1 설계 수립 및 PM 작업 지시 대기
 * **완료 조건 (Definition of Done)**:
-  1. `31_create_review_analysis_results.sql` 신규 마이그레이션 생성 완료.
-  2. `AIAnalysisRepository` (Save, FindByIdentity, FindLatest, FindById, Exists) 구현 완료.
-  3. `ReviewAnalysisPersistenceService` (SHA-256 Identity 생성, Cache Hit/Miss 분기 및 DB 저장/조회 연동) 구현 완료.
-  4. `ReviewAnalysisQueryService` (Latest 조회 및 ID 기반 단일 조회) 구현 완료.
-  5. `POST /api/v1/reviews/analyze` 영속성 결합 및 cached 필드(true/false) 추가 완료.
-  6. `GET /api/v1/reviews/analysis` (Latest) 및 `GET /api/v1/reviews/analysis/:id` (ID 조회) API 신설 완료.
-  7. Vitest 테스트(`analysis-persistence.test.ts`) 작성 및 전체 테스트 패스.
-  8. ESLint 및 TypeScript Strict Mode 컴파일 경고/오류 0건.
-  9. Sprint 종료에 따른 POS 문서(`REVIEW.md`, `CONTEXT.md`, `DECISIONS.md`, `TODO.md`, `SESSION.md`, `CHANGELOG.md`) 업데이트 자율 완수.
-  10. 원격 저장소(`develop` 브랜치) Push 완료 및 PM 리뷰 요청.
+  1. 결정론적 룰 엔진(Deterministic Rule Engine) 등급 컷오프(S~D) 계산기 구현.
+  2. Vitest 유닛 테스트 작성 및 통과.
+  3. POS 문서 최신화 및 Git Push 자율 완수.
 
 ---
 
 ## 3. Current Progress
-* [x] **Product Intelligence Framework v3.0 최종 사양 확정** (JTBD 상황 모델 모델링, S~D 등급제)
+* [x] **Product Intelligence Framework v3.0 최종 사양 확정** (JTBD 상황 모델링, S~D 등급제)
 * [x] **AI Agent Architecture v1.1 설계 수립** (Task Planner 및 비동기 Orchestrator)
 * [x] **Database Architecture v1.1 Final 설계 확정 및 동결** 완료
 * [x] **Core Domain Database DDL 구현 완료** (`01_extensions.sql` ~ `07_triggers.sql`)
 * [x] **Market Domain Database DDL 구현 완료** (`08_market_tables.sql` ~ `11_market_triggers.sql`)
-* [x] **Sprint 2-3: Review Domain Database DDL 구현 완료** (`12_review_tables.sql` ~ `15_review_triggers.sql`)
-* [x] **Sprint 2-4: Sourcing / Margin Domain Database DDL 구현 완료** (`16_sourcing_tables.sql` ~ `19_sourcing_triggers.sql`)
-* [x] **Sprint 2-5: Strategy / Creative Domain Database DDL 구현 완료** (`20_strategy_tables.sql` ~ `23_strategy_triggers.sql`)
-* [x] **Sprint 2-6: Audit / Learning Domain Database DDL 구현 완료** (`24_audit_tables.sql` ~ `27_audit_triggers.sql`)
-* [x] **Sprint 3-1: Backend Scaffold 및 Infrastructure 구축 완료** (Fastify, TS Strict, Zod, Pino)
-* [x] **Sprint 3-2: Auth 및 Workspace API 개발 완료** (JWT 인증 및 워크스페이스 제어)
-* [x] **Sprint 3-3: Market Metric 수집 및 크롤러 연동 완료**
-* [x] **Sprint 3-4: Customer Review 수집 파이프라인 완료**
-* [x] **Sprint 3-5: Sourcing & Margin API 최적화 완료**
-* [x] **Sprint 3-6: Strategy & Creative Brief 모듈 구축 완료**
-* [x] **Sprint 3-7: AI Review Analyzer & JTBD Intelligence 엔진 구축 완료** (Gemini 연동, Token 관리, Zod Validation)
+* [x] **GitHub Repository 운영 규칙 반영 및 Git 저장소 구성 완료** (.gitignore 작성, develop 브랜치 운용)
+* [x] **Sprint 2-3 ~ 2-6: 데이터베이스 마이그레이션 DDL 구축 완료** [APPROVED]
+* [x] **Sprint 3-1: Backend Scaffold 및 Infrastructure 구축 완료** [APPROVED]
+* [x] **Sprint 3-2: Authentication Module 구축 완료** [APPROVED]
+* [x] **Sprint 3-3: Workspace API & Database 연동 개발 완료** [APPROVED]
+* [x] **Sprint 3-4: Sprint 3-3 개선사항 반영 및 Market Domain 구축 완료** [APPROVED]
+* [x] **Sprint 3-5: Market Mutations & Scraper Infrastructure Setup 완료** [APPROVED]
+* [x] **Sprint 3-6: Review Intelligence Pipeline & First Provider Integration 완료** [APPROVED]
+* [x] **Sprint 3-7: AI Review Analyzer & JTBD Intelligence 완료** [APPROVED]
+* [x] **Sprint 3-8: AI Review Analysis Persistence Pipeline & Storage 완료** (영속성 레이어 분리, Identity Generator, AIAnalysisRepository, Persistence & Query Service 구축, POST analyze 캐싱 및 GET 쿼리 API 연동 완료)
 
 ---
 
@@ -56,26 +48,22 @@
 ---
 
 ## 5. Recent Decisions (최근 핵심 의사결정 - 최대 5개)
-1. **Gemini API 연동 시 60초 Timeout 및 2회 Exponential Backoff 적용** (2026-06-27): 대량 리뷰 분석 시 LLM 호출 지연에 대처하고 일시적인 오류(429/500) 상황을 자율적으로 복구하도록 재시도 메커니즘을 통합함.
-2. **리뷰 Token Truncation 엔진 수립** (2026-06-27): 모델 Context Limit을 초과하는 리뷰 입력에 대비해 최신 리뷰를 보존하며 토큰 한계(4096 tokens)까지 안전하게 축소하도록 TokenManager 설계.
-3. **Response Schema 강제 및 비즈니스 검증 탑재** (2026-06-27): Zod 검증을 통해 구조 신뢰성을 보장하고, 긍정/부정 감성 수치 합산 100% 검증 등 비즈니스 벨리데이션을 추가 구현함.
-4. **Backend Framework로 Fastify 채택** (2026-06-27): Express 대비 높은 성능과 플러그인 생태계를 갖춘 Fastify를 백엔드 웹 프레임워크로 채택함.
-5. **선택적 GIN 인덱싱 및 Audit/Learning DDL 완료** (2026-06-27): `storyboard` JSONB에만 GIN 인덱스를 적용하고, `decision_audits`, `knowledge_assets`, `learning_feedback_logs`를 포함한 DDL 작업을 최종 마무리함.
+1. **AI 분석 결과 영속 및 캐싱 정책 적용** (2026-06-27): 동일한 분석 요청에 대해 AI API 재호출 비용과 지연을 방지하기 위해 SHA-256 Identity 해시 기반 캐시 조회 메커니즘을 통합 구축함.
+2. **Identity Generator 컴포넌트 신설** (2026-06-27): `provider`, `keyword`, `reviewCount`, `latestCollectedAt`, `promptVersion`, `model`, `temperature`, `maxOutputTokens`를 줄바꿈(`\n`)으로 결합해 SHA-256 해시를 구하는 로직을 Service 밖으로 꺼내 자율 관리함.
+3. **Repository 접근 전담 및 비즈니스 격리** (2026-06-27): `AIAnalysisRepository`는 순수 Supabase CRUD 연산만 대행하며, AI 호출이나 비즈니스 검증, 프롬프트 생성 등은 일절 배제하여 아키텍처 규칙을 고수함.
+4. **API Query 파라미터 및 URL Params Zod 검증 통합** (2026-06-27): `GET /analysis` 및 `GET /analysis/:id` API를 설계하고, 각각 Zod 스키마 검증(UUID 및 Keyword 형식 규격)을 preValidation 훅에 매핑함.
+5. **글로벌 Fetch Stubbing을 통한 Vitest 격리 강화** (2026-06-27): 동시성 병렬 테스트 간 글로벌 fetch mocking 오염을 방지하기 위해 `vi.stubGlobal` 기법을 적용하여 완벽하게 테스트 케이스를 격리 검증함.
 
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **Sprint 3-8 AI Review Analysis Persistence Pipeline & Storage 구현 계획**:
-  - 대상 문서: [implementation_plan.md](file:///Users/kimsanghyeon/.gemini/antigravity-ide/brain/4f384c2a-76ae-4a88-9bf1-2374fec85ea4/implementation_plan.md)
-  - 검토 요점: Identity 해시 생성 규칙, 캐싱(Cache Hit/Miss) 파이프라인 구조, 신규 `review_analysis_results` 테이블 마이그레이션 및 쿼리 API 설계 정합성.
+* **None**
 
 ---
 
 ## 7. Next Action
-* **Antigravity (Lead Developer)**:
-  1. ChatGPT PM의 구현 계획 승인 후 `31_create_review_analysis_results.sql` 신규 마이그레이션 반영.
-  2. `repository.ts`, `persistence-service.ts`, `query-service.ts` 구현 및 기존 API 라우트/컨트롤러 리팩토링.
-  3. `analysis-persistence.test.ts` Vitest 테스트 스위트 통과 완료.
+* **ChatGPT (PM)**:
+  1. **[Sprint 4-1] 결정론적 룰 엔진 등급 계산기 구현 작업 지시서**를 작성해 주십시오.
 
 ---
 
@@ -105,5 +93,5 @@
 
 ## 11. Last Update
 * **업데이트 날짜**: 2026-06-27
-* **완료 Sprint**: Sprint 3-7 (AI Review Analyzer)
-* **다음 Sprint**: Sprint 3-8 (AI Review Analysis Persistence Pipeline & Storage)
+* **완료 Sprint**: Sprint 3-8 (AI Review Analysis Persistence Pipeline & Storage)
+* **다음 Sprint**: Sprint 4-1 (Deterministic Rule Engine 등급 계산기)

@@ -3,6 +3,8 @@ import sensible from '@fastify/sensible';
 import { loggerConfig } from '@/config/logger.js';
 import { errorHandler } from '@/middleware/error-handler.js';
 import { API_PREFIX } from '@/common/constants/index.js';
+import { authMiddleware } from '@/middleware/auth.middleware.js';
+import { successResponse } from '@/common/responses/index.js';
 
 // Import Plugins
 import corsPlugin from '@/plugins/cors.js';
@@ -11,6 +13,7 @@ import supabasePlugin from '@/plugins/supabase.js';
 
 // Import Routes
 import healthRoutes from '@/routes/v1/health.js';
+import authRoutes from '@/modules/auth/route.js';
 
 export const createApp = async (): Promise<FastifyInstance> => {
   const app = Fastify({
@@ -31,6 +34,12 @@ export const createApp = async (): Promise<FastifyInstance> => {
 
   // Register API Routes
   await app.register(healthRoutes, { prefix: API_PREFIX });
+  await app.register(authRoutes, { prefix: `${API_PREFIX}/auth` });
+
+  // Test Protected Route for Verification
+  app.get(`${API_PREFIX}/protected`, { preHandler: authMiddleware }, async (request, _reply) => {
+    return successResponse({ user: request.user });
+  });
 
   return app;
 };

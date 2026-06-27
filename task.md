@@ -1,23 +1,21 @@
-# Sprint 3-1 Checklist
-
-- [x] Create backend directory structure
-- [x] Write backend/package.json
-- [x] Write backend/tsconfig.json
-- [x] Write backend/eslint.config.js and backend/.prettierrc
-- [x] Write backend/.env.example and backend/.env
-- [x] Write backend/src/config/env.ts
-- [x] Write backend/src/config/logger.ts
-- [x] Write backend/src/config/supabase.ts
-- [x] Write backend/src/common/ responses, errors, constants, validators
-- [x] Write backend/src/middleware/ request-id, request-time, logging, error-handler
-- [x] Write backend/src/plugins/ supabase, logger, cors
-- [x] Write backend/src/routes/v1/health.ts
-- [x] Write backend/src/app.ts and backend/src/server.ts
-- [x] Create placeholder files for modules (auth, workspace, market, review, sourcing, strategy, creative, audit, learning)
-- [x] Create repository structures (interfaces, implementations)
-- [x] Write Docker configurations (Dockerfile, docker-compose.yml, .dockerignore)
-- [x] Perform DDL/scaffold self review
-- [x] Update REVIEW.md
-- [x] Update CONTEXT.md
-- [x] Write walkthrough.md
-- [x] Commit and Push changes to develop branch
+- [x] Install jsonwebtoken, bcrypt, and their types
+- [x] Update `.env.example` and `.env` with JWT config variables
+- [x] Update `backend/src/config/env.ts` with Zod schema validation
+- [x] Update `backend/src/common/errors/index.ts` with custom Auth errors
+- [x] Create `backend/src/modules/auth/types.ts` defining UserRole enum, JwtPayload, and request interfaces
+- [x] Create `backend/src/utils/password.ts` with hashPassword and comparePassword
+- [x] Create token provider abstraction interface TokenProvider and class JwtTokenProvider in `backend/src/utils/jwt.ts`
+- [x] Create auth repository interface IAuthRepository and MockAuthRepository in `backend/src/modules/auth/repository.ts`
+- [x] Create schemas loginSchema and refreshSchema in `backend/src/modules/auth/schema.ts`
+- [x] Create `backend/src/modules/auth/service.ts` injecting IAuthRepository and TokenProvider
+- [x] Create `backend/src/modules/auth/controller.ts`
+- [x] Create `backend/src/modules/auth/route.ts`
+- [x] Create global `auth.middleware.ts` preHandler hook
+- [x] Register `/api/v1/auth` routes and test protected route `/api/v1/protected` in `app.ts`
+- [x] Create Vitest integration test suite `backend/tests/auth.test.ts`
+- [x] Run TypeScript build compile checks (`npm run build`)
+- [x] Run style linter checks (`npm run lint`)
+- [x] Verify unit tests (`npx vitest run`)
+- [x] Generate `backend_review.zip` in `pm_review/`
+- [x] Update `pm_review/REVIEW.md`, `pm_review/CONTEXT.md`, and `pm_review/DECISIONS.md`
+- `[ ]` Commit and push changes to develop branch

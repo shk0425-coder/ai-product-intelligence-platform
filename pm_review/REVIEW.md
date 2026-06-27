@@ -1,149 +1,72 @@
-# REVIEW.md (Sprint 3-1 Backend Scaffolding & Infrastructure Review)
+# REVIEW.md (Sprint 3-2 Authentication Module Review)
 
-본 문서는 **Sprint 3-1 (Backend Scaffolding & Infrastructure)** 완료 후, **ChatGPT (Project Manager)**의 효율적인 코드 리뷰와 승인을 지원하기 위해 자동으로 생성된 스프린트 리뷰 표준 요약서입니다.
+본 문서는 **Sprint 3-2 (Authentication Module 구축)** 완료 후, **ChatGPT (Project Manager)**의 코드 리뷰와 승인을 지원하기 위해 자동으로 생성된 스프린트 리뷰 요약서입니다.
 
 ---
 
 ## 1. Sprint 정보
-* **Sprint 번호**: Sprint 3-1
-* **대상 작업**: Backend Scaffolding & Infrastructure 구축
-* **Commit Message**: `feat(backend): scaffold backend project`
+* **Sprint 번호**: Sprint 3-2
+* **대상 작업**: Authentication Module 구축 (로그인, 로그아웃, 토큰 재발급, JWT 미들웨어, 유닛 테스트)
+* **Commit Message**: `feat(auth): implement authentication module`
 
 ---
 
-## 2. 생성된 파일 목록
-이번 스프린트에서 신규 작성된 백엔드 구조체 파일 목록입니다.
-
-* **Configuration & Core**:
-  * [package.json](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/package.json): 종속성 및 devDependencies, npm scripts 정의
-  * [tsconfig.json](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tsconfig.json): TypeScript Strict Mode 및 절대경로 별칭 설정
-  * [eslint.config.js](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/eslint.config.js) / [.prettierrc](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.prettierrc): ESLint 9 플랫 설정 및 포맷팅 규칙
-  * [.env.example](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.env.example) / [.env](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.env): 환경변수 템플릿 및 기본값 정의
-  * [server.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/server.ts): Fastify 부트스트랩 및 실행 엔트리포인트
-  * [app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts): Fastify 인스턴스 생성, 플러그인/미들웨어/라우트 설정 등록
-  * [env.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/config/env.ts): Zod 스키마 기반 환경변수 로드 및 검증
-  * [logger.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/config/logger.ts): Pino 로거 및 개발용 pino-pretty 수송 설정
-  * [supabase.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/config/supabase.ts): Supabase Client 싱글톤 설정
-
-* **Common & Middleware**:
-  * [responses/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/common/responses/index.ts): 성공/실패 표준 응답 규격 포맷터
-  * [errors/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/common/errors/index.ts): Custom App Error 클래스 (Validation, Auth, Database 등)
-  * [constants/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/common/constants/index.ts): API 접두어 등 글로벌 상수 정의
-  * [validators/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/common/validators/index.ts): Zod 공통 벨리데이터
-  * [request-id.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/middleware/request-id.ts) / [request-time.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/middleware/request-time.ts) / [logging.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/middleware/logging.ts): 요청 추적, 타이밍 및 로깅 훅
-  * [error-handler.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/middleware/error-handler.ts): Fastify 글로벌 에러 핸들러
-
-* **Plugins & Routes**:
-  * [supabase.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/plugins/supabase.ts): Supabase 데코레이터 등록 플러그인
-  * [cors.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/plugins/cors.ts): CORS 교차 출처 리소스 공유 설정 플러그인
-  * [logger.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/plugins/logger.ts): 요청 라이프사이클 로그 부착 플러그인
-  * [health.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/routes/v1/health.ts): `GET /api/v1/health` 헬스체크 라우트
-
-* **Modules (Placeholders - 9 Modules)**:
-  * 각 모듈(`auth`, `workspace`, `market`, `review`, `sourcing`, `strategy`, `creative`, `audit`, `learning`) 아래 `controller.ts`, `service.ts`, `repository.ts`, `schema.ts`, `route.ts`, `types.ts` 구조 생성 완료 (총 54개 파일)
-
-* **Repositories**:
-  * [interfaces/base.repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/repositories/interfaces/base.repository.ts) / [implementations/base.repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/repositories/implementations/base.repository.ts): 레포지토리 인터페이스 및 추상 클래스 구조 수립
-
-* **Docker**:
-  * [Dockerfile](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/docker/Dockerfile) / [docker-compose.yml](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/docker/docker-compose.yml) / [.dockerignore](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/docker/.dockerignore): Node.js 22 기반 개발 컨테이너 설정
+## 2. 구현 내용
+* **JWT Token Provider 추상화**: `jsonwebtoken` 라이브러리에 직접 결합되지 않도록 `TokenProvider` 인터페이스를 수립하고, `JwtTokenProvider` 구현체가 이를 따르도록 설계했습니다. 향후 Clerk, Auth0 등으로 교체 시 서비스 레이어 수정 없이 주입만 교체 가능합니다.
+* **사용자 패스워드 암호화**: `bcrypt` (12 Salt Rounds) 유틸리티를 적용하여 암호 비밀번호를 안전하게 해싱 및 비교합니다.
+* **계정 데이터 모델 & 역할군(Role) 반영**: `UserRole` Enum (`ADMIN`, `MANAGER`, `USER`)을 추가하고 `JwtPayload` 구조에 바인딩하여 향후 역할 기반 접근 제어(RBAC) 확장의 기틀을 마련했습니다.
+* **Mock User Repository**: DB 없이 구동 가능한 독립형 `MockAuthRepository`를 설계하여, Sprint 3-3 실제 DB 연동 저장소 교체 시 충돌이 나지 않도록 인터페이스(`IAuthRepository`)로 분격 격리하였습니다.
+* **Zod 검증 정책**: 로그인 및 토큰 리프레시 요청 시 Zod 스키마 검증 훅을 Fastify 라우터와 연동하여 400 Validation Error가 규격 응답 포맷으로 발생하도록 제어하였습니다.
+* **토큰 재발급 제한**: Refresh Token은 오직 Access Token 재발급 용도로만 활용할 수 있도록 하고, 일반 Access Token을 전달한 오용 호출 시 즉시 401 Unauthorized 코드를 반환하게 강제했습니다.
+* **경로 권한 보호**: `auth.middleware.ts`를 구현하여 Authorization Bearer 토큰의 유무 및 서명/만료를 체크하고 `request.user`를 채워 넣는 공통 검증기(preHandler hook)를 제공합니다.
 
 ---
 
-## 3. 프로젝트 구조 (Directory Layout)
-```
-backend/
-src/
-├── app.ts
-├── server.ts
-├── config/
-│   ├── env.ts
-│   ├── logger.ts
-│   └── supabase.ts
-├── common/
-│   ├── constants/
-│   ├── errors/
-│   ├── responses/
-│   └── validators/
-├── middleware/
-│   ├── error-handler.ts
-│   ├── logging.ts
-│   ├── request-id.ts
-│   └── request-time.ts
-├── plugins/
-│   ├── cors.ts
-│   ├── logger.ts
-│   └── supabase.ts
-├── repositories/
-│   ├── interfaces/
-│   └── implementations/
-├── routes/
-│   └── v1/
-│       └── health.ts
-├── modules/
-│   ├── auth/
-│   ├── workspace/
-│   ├── market/
-│   ├── review/
-│   ├── sourcing/
-│   ├── strategy/
-│   ├── creative/
-│   ├── audit/
-│   └── learning/
-└── utils/
+## 3. 변경 파일
+* **설정 및 환경**:
+  * [package.json](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/package.json): `jsonwebtoken`, `bcrypt` 및 관련 타입 종속성 추가
+  * [.env.example](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.env.example) / [.env](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.env): JWT access/refresh secret 및 만료 시간 환경변수 적재
+  * [.gitignore](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.gitignore): `node_modules/`, `dist/`, `.env` 등을 Git 추적에서 제외
+  * [env.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/config/env.ts): 새로운 JWT 환경변수들의 Zod 타입 검증 조건 추가
+  * [errors/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/common/errors/index.ts): `AUTH_INVALID_TOKEN`, `AUTH_EXPIRED_TOKEN`, `AUTH_INVALID_CREDENTIALS`, `AUTH_UNAUTHORIZED`에 매칭되는 예외 클래스 추가
+* **유틸리티 및 미들웨어**:
+  * [jwt.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/utils/jwt.ts): `TokenProvider` 인터페이스 및 `JwtTokenProvider` 구현체 작성
+  * [password.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/utils/password.ts): bcrypt 비밀번호 해싱 및 매칭 함수 정의
+  * [auth.middleware.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/middleware/auth.middleware.ts): 공통 HTTP Bearer 토큰 검사 미들웨어 훅 구축
+* **Auth 모듈**:
+  * [types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/types.ts): `UserRole` Enum, `JwtPayload`, `User` 인터페이스 및 FastifyRequest user 데코레이션 정의
+  * [schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/schema.ts): 로그인 및 토큰 리프레시 Zod 검증 스키마
+  * [repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/repository.ts): `IAuthRepository` 및 Mock 구현체 작성 (admin@test.com 계정 내장)
+  * [service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/service.ts): 비즈니스 로그인, 갱신 및 로그아웃 메서드 정의
+  * [controller.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/controller.ts): 요청 수용 및 성공 포맷 응답
+  * [route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/route.ts): `/api/v1/auth` 세부 라우팅 및 검증 바인딩
+* **애플리케이션 연동 및 테스트**:
+  * [app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts): authRoutes 모듈 등록 및 `/api/v1/protected` 테스트 전용 보호 경로 생성
+  * [auth.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/auth.test.ts): 로그인 성공/실패, 토큰 리프레시 재발급/오용 차단, JWT 유틸 서명/만료, 미들웨어 인증 무결성 테스트 추가
+
+---
+
+## 4. 테스트 결과
+Vitest를 활용하여 13개 통합 테스트 케이스가 무결하게 통과함을 성공적으로 확인했습니다.
+```text
+ ✓ tests/health.test.ts  (1 test) 58ms
+ ✓ tests/auth.test.ts  (12 tests) 1605ms
+
+ Test Files  2 passed (2)
+      Tests  13 passed (13)
 ```
 
 ---
 
-## 4. 설치 라이브러리 (Dependencies)
-* **Production**: `fastify`, `@fastify/cors`, `@fastify/sensible`, `@supabase/supabase-js`, `dotenv`, `zod`, `pino`, `pino-pretty`
-* **Development**: `typescript`, `tsx`, `eslint`, `prettier`, `husky`, `lint-staged`, `vitest`, `vitest/config`, `@typescript-eslint/parser`, `@typescript-eslint/eslint-plugin`
+## 5. Self Review
+* [x] **비밀번호 평문 저장 금지**: bcrypt를 이용해 `admin@test.com`의 패스워드를 `$2b$12$...` 해시로 가공 적재했습니다.
+* [x] **JWT Secret 하드코딩 금지**: 모든 토큰 서명 키와 만료시간 설정은 Zod가 파싱/검증하는 환경 변수 파일(`.env`)로부터 로드됩니다.
+* [x] **모듈식 캡슐화**: 인증에 연관된 모든 제어기, 서비스, 스키마, 라우팅 정보가 `src/modules/auth/` 내부에 온전히 집적되어 있습니다.
+* [x] **ESLint / TypeScript 오류 없음**: TS Strict 모드 하에서 정상적으로 빌드 완료 및 린트 검사 0개 오류 상태를 통과하였습니다.
 
 ---
 
-## 5. 환경변수 (Environment Variables)
-* `SUPABASE_URL`: Supabase 프로젝트 URL
-* `SUPABASE_ANON_KEY`: Supabase 익명 클라이언트 키 (클라이언트 전용)
-* `SUPABASE_SERVICE_ROLE_KEY`: Supabase 서비스 롤 키 (보안 우회 서버 작업용)
-* `NODE_ENV`: 런타임 환경 (`development` | `production` | `test`)
-* `PORT`: 서버 포트 (기본값 `3000`)
-* `LOG_LEVEL`: Pino 로그 레벨 (기본값 `info`)
-
----
-
-## 6. API 목록
-* `GET /api/v1/health`
-  * 응답 규격:
-    ```json
-    {
-      "success": true,
-      "data": {
-        "status": "ok"
-      },
-      "message": ""
-    }
-    ```
-
----
-
-## 7. Docker 구성
-* Node.js 22 LTS Alpine 환경 기반 빌드.
-* `docker-compose`는 Backend 컨테이너 단독 구동하도록 설정 (`supabase` 데이터베이스를 외부에서 가져다 사용하므로 DB 컨테이너 배제).
-* 로컬의 소스코드를 실시간으로 컨테이너에 연동하기 위한 **Volume Mount** 및 **Hot Reload (`npm run dev`)** 지원.
-
----
-
-## 8. Self Review (자체 검증 결과)
-* [x] **Backend 프로젝트 생성 완료**: `package.json`, `tsconfig.json` 수립 완료.
-* [x] **Fastify 실행 성공**: 로컬 실행 시 DB 클라이언트 빌드 및 서버 구동 완료 확인.
-* [x] **/api/v1/health API 정상 응답**: `curl`을 통해 `/api/v1/health` 라우트가 공통 response 규격에 부합하게 응답함을 검증함.
-* [x] **환경변수 Validation 성공**: `.env`에 정의된 Zod 타입 제약이 완벽하게 필터링됨.
-* [x] **ESLint / TypeScript 오류 없음**: `npm run lint` 및 `npm run build` 시 엄격 모드(Strict Mode) 컴파일에 0개의 에러 상태임을 검증함.
-* [x] **유닛 테스트(Vitest) 통과**: `npx vitest run` 시 Fastify의 Mock HTTP Injection 기능을 통해 무결하게 성공함을 확인.
-
----
-
-## 9. Known Issues
+## 6. Known Issues
 ```text
 None
 ```

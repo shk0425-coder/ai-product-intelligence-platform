@@ -33,3 +33,28 @@ export class InternalServerError extends AppError {
     super(500, 'INTERNAL_SERVER_ERROR', message);
   }
 }
+
+export class InvalidTokenError extends AppError {
+  constructor(message: string = 'Invalid token') {
+    super(401, 'AUTH_INVALID_TOKEN', message);
+  }
+}
+
+export class ExpiredTokenError extends AppError {
+  constructor(message: string = 'Token has expired') {
+    super(401, 'AUTH_EXPIRED_TOKEN', message);
+  }
+}
+
+export class InvalidCredentialsError extends AppError {
+  constructor(message: string = 'Invalid email or password') {
+    super(401, 'AUTH_INVALID_CREDENTIALS', message);
+  }
+}
+
+export class UnauthorizedError extends AppError {
+  constructor(message: string = 'Unauthorized access') {
+    super(401, 'AUTH_UNAUTHORIZED', message);
+  }
+}
+

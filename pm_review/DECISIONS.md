@@ -1,5 +1,12 @@
 # Project Decisions
 
+## Sprint 3-2
+
+- **TokenProvider 추상 인터페이스화 및 JwtTokenProvider 구현**: jsonwebtoken 라이브러리와 서비스 레이어의 직접적인 결합을 제거하여, 향후 Clerk/Auth0/Supabase Auth 등으로 서비스 코드 변경 없이 변경이 가능하도록 아키텍처적 유연성을 확보함.
+- **UserRole Enum 및 JwtPayload 설계**: `ADMIN`, `MANAGER`, `USER` 구조의 Enum을 적용하여 향후 역할 기반 접근 제어(RBAC) 구현 시 JWT 스키마 변경을 최소화함.
+
+---
+
 ## Sprint 3-1
 
 - **Fastify 채택**: Express 대비 높은 처리 성능과 플러그인 기반 아키텍처를 제공하는 Fastify를 백엔드 웹 프레임워크로 선정함.

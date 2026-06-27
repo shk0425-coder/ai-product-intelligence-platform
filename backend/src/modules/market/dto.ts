@@ -19,3 +19,18 @@ export const toResponseDto = (entity: MarketMetric): MarketResponseDto => {
     rawTrendJson: entity.raw_trend_json,
   };
 };
+
+export interface CreateMarketMetricDto {
+  runId: string;
+  totalMonthlySearch: number;
+  trendSlope: number;
+  seasonalityClassification: 'HIGH' | 'MEDIUM' | 'LOW';
+  rawTrendJson: Record<string, unknown> | unknown[];
+}
+
+export interface UpdateMarketMetricDto {
+  totalMonthlySearch?: number;
+  trendSlope?: number;
+  seasonalityClassification?: 'HIGH' | 'MEDIUM' | 'LOW';
+  rawTrendJson?: Record<string, unknown> | unknown[];
+}

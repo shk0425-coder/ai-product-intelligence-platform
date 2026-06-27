@@ -13,3 +13,21 @@ export const marketQuerySchema = z.object({
 
 export type MarketQueryInput = z.infer<typeof marketQuerySchema>;
 export type MarketIdParamInput = z.infer<typeof marketIdParamSchema>;
+
+export const createMarketMetricSchema = z.object({
+  runId: z.string().uuid('Invalid run ID format'),
+  totalMonthlySearch: z.number().int().nonnegative('Search count must be non-negative'),
+  trendSlope: z.number({ invalid_type_error: 'Trend slope must be a number' }),
+  seasonalityClassification: z.enum(['HIGH', 'MEDIUM', 'LOW']),
+  rawTrendJson: z.union([z.record(z.unknown()), z.array(z.unknown())]),
+});
+
+export const updateMarketMetricSchema = z.object({
+  totalMonthlySearch: z.number().int().nonnegative('Search count must be non-negative').optional(),
+  trendSlope: z.number({ invalid_type_error: 'Trend slope must be a number' }).optional(),
+  seasonalityClassification: z.enum(['HIGH', 'MEDIUM', 'LOW']).optional(),
+  rawTrendJson: z.union([z.record(z.unknown()), z.array(z.unknown())]).optional(),
+});
+
+export type CreateMarketMetricInput = z.infer<typeof createMarketMetricSchema>;
+export type UpdateMarketMetricInput = z.infer<typeof updateMarketMetricSchema>;

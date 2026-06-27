@@ -9,23 +9,22 @@
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
 * **현재 버전**: v0.6.0
 * **현재 단계**: Phase 3 - Scaffolding Backend & Scraper
-* **현재 Sprint**: Sprint 3-4 - Sprint 3-3 개선사항 반영 및 Market Domain 기반 구축 완료 (PM 검토 대기)
+* **현재 Sprint**: Sprint 3-5 - Market Mutations & Scraper Infrastructure Setup 완료 (PM 검토 대기)
 
 ---
 
 ## 2. Current Goal
-* **현재 Sprint**: Sprint 3-4 (Sprint 3-3 개선사항 반영 및 Market Domain 기반 구축)
-* **현재 작업 (Task)**: Sprint 3-4 완료 검토 대기
+* **현재 Sprint**: Sprint 3-5 (Market Mutations & Scraper Infrastructure Setup)
+* **현재 작업 (Task)**: Sprint 3-5 완료 검토 대기
 * **완료 조건 (Definition of Done)**:
-  1. `BaseRepository` 내 `update()` 및 `delete()` 연산 시 `.is('deleted_at', null)`을 바인딩하여 소프트 딜리트 정책 완수.
-  2. Zod validation을 활용하여 페이지네이션 상한선(page: 100,000 / limit: 100) 및 정렬 가능 컬럼의 화이트리스트 검사 적용.
-  3. Workspace 생성 실패 예외 처리 시 사전 UX 체크와 더불어 DB Unique Constraint (`23505`) 캐치 후 `WorkspaceAlreadyExistsError` 예외 변환 보완 완료.
-  4. Market Domain 모듈(`src/modules/market/`) 구조를 Workspace 모듈과 일관되게 신설.
-  5. `GET /api/v1/markets` 및 `GET /api/v1/markets/:id` Read 전용 API 구현 완료.
-  6. Market metric 레포지토리에 nested inner join (metrics ➡️ runs ➡️ products ➡️ workspaces ➡️ org_id)을 적용하여 소유주 타겟 페이징 및 단건 조회 구현 완료.
-  7. DTO 맵핑 처리 및 Zod UUID/Query parameter 타입 검사 연동.
-  8. Vitest 8개 신규 테스트를 포함한 총 34개 테스트 전체 성공 확인.
-  9. `REVIEW.md`, `CONTEXT.md`, `DECISIONS.md` 갱신 및 Git Commit & Push 완료.
+  1. `POST /api/v1/markets`, `PATCH /api/v1/markets/:id`, `DELETE /api/v1/markets/:id` API를 완성하고 테넌트 소유권 교차 검증 연동 완료.
+  2. 마켓 메트릭 생성 시 전달받은 `runId`가 현재 사용자의 소유인지 `verifyRunOwner(runId, userId)`를 리포지토리 수준에 신설하여 서비스 레이어에서 교차 대조 검증.
+  3. UNIQUE Constraint로 인한 `runId` 중복 메트릭 생성 요청 시 `MarketMetricAlreadyExistsError` (409 Conflict) 매핑 완료.
+  4. 다중 크롤링 채널(Naver, Coupang, 1688 등) 확장이 자연스러운 `IScraperProvider` 및 `BaseScraperProvider` 플러그인형 아키텍처 설계 및 stubs 모듈 완비.
+  5. 키워드 해시 변환 연산을 통해 100% 동일 재현 데이터를 반환하는 **Deterministic Mock Scraper Provider** 구현 완료.
+  6. DTO 명칭을 명확한 도메인 단위인 `CreateMarketMetricDto` 및 `UpdateMarketMetricDto`로 개정 적용.
+  7. 인증 부재, 만료 토큰, 타인 권한 침범, 잘못된 Run ID, 중복 생성 Conflict, 소프트 딜리트 재수정/재삭제 차단 및 스크래퍼 결정론성 검증을 포함한 12개 통합 테스트 성공 완수.
+  8. `REVIEW.md`, `CONTEXT.md`, `DECISIONS.md` 갱신 및 Git Commit & Push 완료.
 
 ---
 
@@ -36,14 +35,12 @@
 * [x] **Core Domain Database DDL 구현 완료** (`01_extensions.sql` ~ `07_triggers.sql`)
 * [x] **Market Domain Database DDL 구현 완료** (`08_market_tables.sql` ~ `11_market_triggers.sql`)
 * [x] **GitHub Repository 운영 규칙 반영 및 Git 저장소 구성 완료** (.gitignore 작성, develop 브랜치 운용)
-* [x] **Sprint 2-3: Review Domain Database DDL 구현 완료** (`12_review_tables.sql` ~ `15_review_triggers.sql`)
-* [x] **Sprint 2-4: Sourcing / Margin Domain Database DDL 구현 완료** (`16_sourcing_tables.sql` ~ `19_sourcing_triggers.sql`)
-* [x] **Sprint 2-5: Strategy / Creative Domain Database DDL 구현 완료** (`20_strategy_tables.sql` ~ `23_strategy_triggers.sql`)
-* [x] **Sprint 2-6: Audit / Learning Domain Database DDL 구현 완료** (`24_audit_tables.sql` ~ `27_audit_triggers.sql`)
+* [x] **Sprint 2-3 ~ 2-6: 데이터베이스 마이그레이션 DDL 구축 완료** [APPROVED]
 * [x] **Sprint 3-1: Backend Scaffold 및 Infrastructure 구축 완료** [APPROVED]
 * [x] **Sprint 3-2: Authentication Module 구축 완료** [APPROVED]
 * [x] **Sprint 3-3: Workspace API & Database 연동 개발 완료** [APPROVED]
-* [x] **Sprint 3-4: Sprint 3-3 개선사항 반영 및 Market Domain 기반 구축 완료** (BaseRepository soft delete 차단 강화, Zod whitelist 정렬 한계 제한 적용, DB Unique constraint 매핑, Market Read API 구축 완료)
+* [x] **Sprint 3-4: Sprint 3-3 개선사항 반영 및 Market Domain 기반 구축 완료** [APPROVED]
+* [x] **Sprint 3-5: Market Mutations & Scraper Infrastructure Setup 완료** (CRUD Mutations, Provider-based Scraper 아키텍처 설계, Deterministic stubs, 소유권 교차 검증 보강 완료)
 
 ---
 
@@ -53,24 +50,24 @@
 ---
 
 ## 5. Recent Decisions (최근 핵심 의사결정 - 최대 5개)
-1. **BaseRepository.update/delete 소프트 딜리트 필터링 강화** (2026-06-27): 삭제 대상이 업데이트되거나 재삭제되지 않도록 `.is('deleted_at', null)`을 SQL 조건절에 기본 부착함.
-2. **Zod를 활용한 API 보호** (2026-06-27): 비정상적인 페이징 호출을 Zod 스키마 검증단에서 차단하며, 정렬 컬럼 화이트리스트(`z.enum`)를 선언하여 SQL Injection 우려를 사전에 밀봉함.
-3. **DB Exception Mapping 신뢰** (2026-06-27): 워크스페이스 명칭의 중복 최종 감지는 DB Unique Constraint 에러 코드(`23505`) 파싱에 의존하도록 구조 수정.
-4. **마켓 메트릭 다단계 릴레이션 소유주 필터링** (2026-06-27): metrics ➡️ runs ➡️ products ➡️ workspaces ➡️ org_id로 이어지는 조인 맵핑을 구현하여 타인의 데이터에 임의 접근하는 현상을 차단함.
-5. **마켓 테이블 soft delete용 DDL 추가** (2026-06-27): DDL 직접 수정 금지령에 맞추어 `29_add_market_deleted_at.sql`을 추가 적용함.
+1. **다중 외부 크롤러 확장을 고려한 Provider-based Scraper 아키텍처 도입** (2026-06-27): 백엔드 비즈니스 로직과 특정 크롤러 엔진 간의 결합도를 낮추기 위해 `IScraperProvider` 플러그인 구조를 정립함.
+2. **Deterministic Mock Scraper Stub 구현** (2026-06-27): 테스트 자동화 시 재현성을 보장하고 무작위 난수로 인한 테스트 Flaikness를 원천 방지하기 위해 키워드 문자열 해싱 기반의 결정론적 스텁을 구현함.
+3. **Run ID 소유주 위장 가입 검증 추가** (2026-06-27): 시장 지표 등록 시 사용되는 `runId`가 해당 로그인 유저 소유의 워크스페이스에 매핑된 상품의 분석 건인지 리포지토리 레이어 조인을 통해 검증함.
+4. **도메인 성격을 명확히 한 DTO 네이밍 개정** (2026-06-27): 범용적인 Market 의미보다 상세 데이터 성격을 띠는 `CreateMarketMetricDto`, `UpdateMarketMetricDto`로 개정 적용.
+5. **Soft Delete 및 중복 생성의 완벽한 예외 매핑** (2026-06-27): 소프트 딜리트 처리 완료 건에 대한 수정/재삭제 시도를 findByIdWithOwner(deleted_at IS NULL) 단에서 404 차단하고, 중복 runId 등록 시 409 Conflict 매핑 완료.
 
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **Sprint 3-4 리뷰 보완사항 및 Market Domain 기반 구축 검토 및 승인 요청**:
-  * 대상 폴더/파일: `backend/src/repositories/`, `backend/src/modules/market/`, `backend/src/modules/workspace/`, `backend/tests/market.test.ts`
-  * 검토 요점: BaseRepository의 Soft Delete 조건절 강제, Zod 정렬/페이징 검사 한계, DB 23505 에러 파싱, Market 도메인 inner join 조회 소유권 검증의 구현 신뢰성.
+* **Sprint 3-5 Market Mutations & Scraper Infrastructure Setup 구현체 검토 및 승인 요청**:
+  * 대상 폴더/파일: `backend/src/modules/market/`, `backend/src/modules/scraper/`, `backend/tests/market-mutation.test.ts`
+  * 검토 요점: Multi-provider scraper 설계 규격, 해싱 기반 Deterministic stubs, API 권한/중복/만료 검사의 테스트 보강 신뢰성.
 
 ---
 
 ## 7. Next Action
 * **ChatGPT (PM)**:
-  1. 다음 마일스톤인 **[Sprint 3-5] Market Create/Update/Delete 및 Scraper 연동 인프라 구축 세부 작업 지시서**를 작성해 주십시오.
+  1. 다음 마일스톤인 **[Sprint 3-6] Naver Shopping Crawler 실연동 및 DB 저장 연동 작업 지시서**를 작성해 주십시오.
 
 ---
 
@@ -101,5 +98,5 @@
 
 ## 11. Last Update
 * **업데이트 날짜**: 2026-06-27
-* **완료 Sprint**: Sprint 3-4 (Reviews Refinement & Market Domain Foundation)
-* **다음 Sprint**: Sprint 3-5 (Market Mutation & Scraper Setup)
+* **완료 Sprint**: Sprint 3-5 (Market Mutations & Scraper Infrastructure Setup)
+* **다음 Sprint**: Sprint 3-6 (Naver Shopping Crawler Integration)

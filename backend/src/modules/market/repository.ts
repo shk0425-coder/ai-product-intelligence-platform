@@ -70,4 +70,31 @@ export class MarketRepository extends BaseRepository<MarketMetric> implements IM
       limit,
     };
   }
+
+  async verifyRunOwner(runId: string, userId: string): Promise<boolean | null> {
+    const { data, error } = await this.supabase
+      .from('analysis_runs')
+      .select(`
+        run_id,
+        products!inner(
+          workspace_id,
+          workspaces!inner(
+            org_id
+          )
+        )
+      `)
+      .eq('run_id', runId)
+      .maybeSingle();
+
+    if (error) {
+      throw new DatabaseError(error.message);
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    const orgId = (data as unknown as { products?: { workspaces?: { org_id: string } } }).products?.workspaces?.org_id;
+    return orgId === userId;
+  }
 }

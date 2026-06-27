@@ -13,4 +13,5 @@ export interface MarketMetric {
 export interface IMarketRepository extends IBaseRepository<MarketMetric> {
   findByIdWithOwner(id: string, ownerId: string): Promise<MarketMetric | null>;
   findAllByOwner(ownerId: string, options: PaginationOptions): Promise<PaginatedResult<MarketMetric>>;
+  verifyRunOwner(runId: string, userId: string): Promise<boolean | null>;
 }

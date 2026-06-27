@@ -1,5 +1,15 @@
 # Project Decisions
 
+## Sprint 3-5
+
+- **플러그인형 Scraper Provider 구조 도입**: Naver, Coupang, 1688 등 다중 쇼핑 플랫폼 수집 채널을 손쉽게 붙이고 확장할 수 있도록 `IScraperProvider` 및 `ScraperService` 레지스트리 기반의 모듈 아키텍처를 도입함.
+- **결정론적 Mock Scraper Stub 설계**: 테스트의 Flaikness 방지 및 재현성을 보장하고자 난수(Random) 사용을 지양하고 입력 키워드 해시 해상도 비례 결정론적 응답 stubs를 도입함.
+- **Run ID 소유주 위장 등록 예방 조인 대조 정책**: 마켓 메트릭 생성 시 전달받은 `runId`가 현재 API를 호출한 유저 소유의 워크스페이스에 매핑된 상품의 분석 건인지 레포지토리 레이어 조인을 통해 검증함.
+- **도메인 명확화를 위한 DTO 명칭 개정**: `CreateMarketMetricDto`, `UpdateMarketMetricDto` 등으로 개정하여 엔티티 모델링 규격과 명칭 싱크를 맞춤.
+- **중복 메트릭 Conflict 매핑 정책**: `run_id` 1:1 유니크 제약 조건 충돌에 따른 DB Unique Constraint 위반(`23505`)을 감지하여 `MarketMetricAlreadyExistsError` (409 Conflict)로 매핑 반환함.
+
+---
+
 ## Sprint 3-4
 
 - **BaseRepository 내 소프트 딜리트 수정/삭제 차단 정책**: Soft Delete 처리가 끝난 로우의 추가 수정 및 재삭제 연산을 차단하고자 `BaseRepository.update` 및 `delete`에 `.is('deleted_at', null)` 필터를 기본 기입함.

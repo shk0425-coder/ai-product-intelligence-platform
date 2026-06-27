@@ -88,4 +88,10 @@ export class MarketForbiddenError extends AppError {
   }
 }
 
+export class MarketMetricAlreadyExistsError extends AppError {
+  constructor(message: string = 'Market metric already exists for this run') {
+    super(409, 'MARKET_METRIC_ALREADY_EXISTS', message);
+  }
+}
+
 

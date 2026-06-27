@@ -1,19 +1,16 @@
-- [x] Update `backend/src/repositories/implementations/base.repository.ts` with refined Soft Delete checks
-- [x] Update `backend/src/common/errors/index.ts` with custom Market errors
-- [x] Update `backend/src/modules/workspace/schema.ts` with pagination boundaries and sort whitelist
-- [x] Update `backend/src/modules/workspace/service.ts` with database unique constraint catch mapping
-- [x] Create `database/migrations/29_add_market_deleted_at.sql`
-- [x] Create market module types in `backend/src/modules/market/types.ts`
-- [x] Create market module DTOs in `backend/src/modules/market/dto.ts`
-- [x] Create market module Zod validation schemas in `backend/src/modules/market/schema.ts`
-- [x] Create market repository in `backend/src/modules/market/repository.ts`
-- [x] Create market service in `backend/src/modules/market/service.ts` with nested relational owner checks
-- [x] Create market controller in `backend/src/modules/market/controller.ts`
-- [x] Create market routes in `backend/src/modules/market/route.ts`
-- [x] Register `/api/v1/markets` routes in `backend/src/app.ts`
-- [x] Create Vitest market integration tests in `backend/tests/market.test.ts`
+- [x] Update `backend/src/common/errors/index.ts` to include `MarketMetricAlreadyExistsError`
+- [x] Create `backend/src/modules/scraper/types.ts` for scraper interfaces and data schemas
+- [x] Create `backend/src/modules/scraper/providers/base.provider.ts` and `naver.provider.ts`
+- [x] Create `backend/src/modules/scraper/service.ts` with deterministic stubs
+- [x] Update `backend/src/modules/market/dto.ts` with `CreateMarketMetricDto` and `UpdateMarketMetricDto`
+- [x] Update `backend/src/modules/market/schema.ts` with Zod validation schemas for create/update
+- [x] Update `backend/src/modules/market/repository.ts` with `create` and `update` overrides (fully inherited from BaseRepository)
+- [x] Update `backend/src/modules/market/service.ts` with mutations, duplicate check, and run owner checks
+- [x] Update `backend/src/modules/market/controller.ts` with create, update, delete handlers
+- [x] Update `backend/src/modules/market/route.ts` with POST, PATCH, DELETE endpoints
+- [x] Create Vitest integration tests in `backend/tests/market-mutation.test.ts`
 - [x] Verify TypeScript compile check (`npm run build`) and ESLint style checks (`npm run lint`)
 - [x] Verify Vitest test execution (`npx vitest run`)
-- [x] Generate `backend_review.zip` in `pm_review/`
-- [x] Update `pm_review/REVIEW.md`, `pm_review/CONTEXT.md`, and `pm_review/DECISIONS.md`
+- `[ ]` Generate `backend_review.zip` containing only Sprint 3-5 changed files
+- `[ ]` Update `pm_review/REVIEW.md`, `pm_review/CONTEXT.md`, and `pm_review/DECISIONS.md`
 - `[ ]` Commit and push changes to develop branch

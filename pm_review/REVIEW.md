@@ -1,87 +1,98 @@
-# REVIEW.md (Sprint 4-4 Review)
+# REVIEW.md (Sprint 4-5 Review)
 
-본 문서는 **Sprint 4-4 (Creative Pipeline - FLUX API Integration & Image Prompt Builder)** 완료 후, **ChatGPT (Project Manager)**의 코드 리뷰와 승인을 지원하기 위해 작성된 스프린트 리뷰 보고서입니다.
+본 문서는 **Sprint 4-5 (Dashboard Backend API Integration & Streamlit Refactoring)** 완료 후, **ChatGPT (Project Manager)**의 코드 리뷰와 승인을 지원하기 위해 작성된 스프린트 리뷰 보고서입니다.
 
 ---
 
 ## 1. Sprint 정보
-* **Sprint 번호**: Sprint 4-4
-* **대상 작업**: Product Strategy 8단계 스토리보드를 이미지 생성용 프롬프트 명세로 가공하고, FLUX 이미지 생성 요청 스펙을 완성하는 `creative` 모듈 설계 및 검증
-* **Commit Message**: `feat(creative): Sprint 4-4 Creative Pipeline`
+* **Sprint 번호**: Sprint 4-5
+* **대상 작업**: 기존 Streamlit Dashboard를 Backend API 기반 구조로 리팩터링하고 API Client, Service, State Wrapper, Cache Layer, Page 및 Component 분할 완료
+* **Commit Message**: `feat(dashboard): Sprint 4-5 Dashboard Refactoring & API Integration`
 
 ---
 
 ## 2. 구현 내용
-* **Zod strict 스키마 및 zod-to-json-schema 동기화**:
-  * schema.ts 파일에 `creativeResultSchema` Zod 스키마를 선언하고 `.strict()` 제약을 가해 Unknown Field 유입을 완벽 차단했습니다.
-  * Zod Schema를 `zod-to-json-schema` 로 동적 파싱하여 프롬프트의 JSON Schema v7 플레이스홀더를 동적으로 바인딩했습니다.
-* **parser.ts 구현**:
-  * markdown 백틱 기호(```json), 외부 설명 텍스트를 제거하고 순수 JSON 본체만을 안전하게 분리해 Zod validator단으로 매핑합니다.
-* **validator.ts 구현 (Zod 검증 + Custom Validation)**:
-  * 1단계: Zod safeParse를 통한 타입, 필수 누락, null/undefined, 빈 문자열, strict check 검증.
-  * 2단계: 스토리보드 8개 Scene 정합성(정확히 8개, step 1~8 순차 오름차순 배치, 중복/누락 없음, 씬 타입/이름이 `Attention`, `Problem`, `Empathy`, `Solution`, `Differentiation`, `Trust`, `Offer`, `CTA` 와 완벽히 일치하는지)을 수동 순회 검사하여 불일치 시 명확한 에러를 throw 하도록 구축했습니다.
-* **provider.ts 구현 (FLUX API 및 추상화 인터페이스)**:
-  * `ImageGenerationProvider` 추상 인터페이스를 선언하여 향후 Stable Diffusion, Gemini Image 등으로의 교체 구조를 확보했습니다.
-  * `FluxImageProvider` 구현체 내에 Replicate/BFL API Spec에 매핑되는 Request Payload 빌드 및 fetch, 응답 URL 파싱 로직을 이식 완료했습니다.
-* **service.ts 및 index.ts 구현**:
-  * `AIProvider` 와 `ImageGenerationProvider`를 DI 방식으로 안전하게 주입받는 `CreativeService` 설계 및 오케스트레이션 구현.
-* **테스트 및 린트**:
-  * Vitest 유닛 테스트를 통해 경계값 분기, 에러 발생 상세, 결정론적 100회 실행, Mock DI Provider 연동, Replicate/BFL 응답 매핑 분기 테스트를 전개하여 **커버리지 100%** 및 린트/컴파일 무오류를 확인했습니다.
+* **API Client 및 Exception Mapping (`dashboard/api/`)**:
+  * `APIClient` 클래스를 구현해 requests 통신, Bearer 토큰 탑재, Timeout(10초) 설정 완료.
+  * `tenacity` 라이브러리를 사용해 3회 Exponential Backoff 재시도 탑재 완료.
+  * HTTP 400, 401, 403, 404, 429, 500 상태코드 및 Connection/Timeout 시 전용 커스텀 Exception Class 매핑 완료.
+* **Service Layer 설계 (`dashboard/services/`)**:
+  * `AnalysisService`, `JTBDService`, `StrategyService`, `CreativeService`를 신설하여 비즈니스 로직을 배제하고 오직 API 통신과 DTO 파싱/바인딩만 대행하도록 리팩터링 완료.
+* **Session State Wrapper (`dashboard/state/`)**:
+  * `SessionStateManager` 클래스를 구축하여 `st.session_state`로의 직접 접근을 전면 금지시키고 워크스페이스 UUID, 상품 UUID, 에러 메시지, 로딩 등을 프로퍼티로 중앙 관리 완료.
+* **Memory Cache Layer (`dashboard/cache/`)**:
+  * `DashboardCache` 클래스를 구현해 조회 API 전용 메모리 캐싱 및 `CACHE_TTL` (5분) 유효 기간 관리 완료. 캐시 키는 `workspaceId:productId:analysisId` 조합으로 자동 제어.
+* **공통 UI 컴포넌트 (`dashboard/components/`)**:
+  * `widgets.py` 에 `render_loading`, `render_error`, `render_empty`, `render_status`, `render_section_header`, `render_storyboard_card`, `render_image_card` 를 공통 UI로 분할하여 UI 중복 기입 전면 제거 완료.
+* **페이지 분할 라우팅 및 리팩터링 (`dashboard/pages/`, `dashboard.py`)**:
+  * `analysis_page`, `jtbd_page`, `strategy_page`, `creative_page`로 서브 렌더링 뷰를 완전 분할하고, `dashboard.py` 메인 파일에서는 사이드바 설정 및 메뉴이동 탭 오케스트레이션만 전담 완료.
+* **타입 DTO (`dashboard/types/`)**:
+  * AnalysisResponse, JTBDResponse, StrategyResponse, CreativeResponse 등 백엔드 API 스펙과 일대일 정합하는 strict TypedDict 선언 완료.
 
 ---
 
 ## 3. 변경 파일
-* **creative 모듈 (신규)**:
-  * [backend/src/modules/creative/types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/creative/types.ts)
-  * [backend/src/modules/creative/constants.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/creative/constants.ts)
-  * [backend/src/modules/creative/schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/creative/schema.ts)
-  * [backend/src/modules/creative/parser.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/creative/parser.ts)
-  * [backend/src/modules/creative/validator.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/creative/validator.ts)
-  * [backend/src/modules/creative/prompt.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/creative/prompt.ts)
-  * [backend/src/modules/creative/provider.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/creative/provider.ts)
-  * [backend/src/modules/creative/service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/creative/service.ts)
-  * [backend/src/modules/creative/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/creative/index.ts)
-* **테스트**:
-  * [backend/tests/creative.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/creative.test.ts)
+* **dashboard 패키지 (신규)**:
+  * [dashboard/api/client.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/api/client.py)
+  * [dashboard/api/endpoints.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/api/endpoints.py)
+  * [dashboard/services/analysis_service.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/services/analysis_service.py)
+  * [dashboard/services/jtbd_service.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/services/jtbd_service.py)
+  * [dashboard/services/strategy_service.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/services/strategy_service.py)
+  * [dashboard/services/creative_service.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/services/creative_service.py)
+  * [dashboard/state/session.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/state/session.py)
+  * [dashboard/cache/cache.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/cache/cache.py)
+  * [dashboard/components/widgets.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/components/widgets.py)
+  * [dashboard/pages/analysis_page.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/pages/analysis_page.py)
+  * [dashboard/pages/jtbd_page.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/pages/jtbd_page.py)
+  * [dashboard/pages/strategy_page.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/pages/strategy_page.py)
+  * [dashboard/pages/creative_page.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/pages/creative_page.py)
+  * [dashboard/types/__init__.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/types/__init__.py)
+  * [dashboard/constants/constants.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/constants/constants.py)
+  * [dashboard/utils/error_formatter.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/utils/error_formatter.py)
+  * [dashboard/utils/response_mapper.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/utils/response_mapper.py)
+  * [dashboard/utils/cache_key.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard/utils/cache_key.py)
+* **메인 대시보드 및 테스트**:
+  * [dashboard.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard.py) (리팩터링)
+  * [tests/dashboard/test_dashboard_unit.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/tests/dashboard/test_dashboard_unit.py) (신규 유닛 테스트)
 
 ---
 
 ## 4. 테스트 결과
 ```text
- RUN  v1.6.1 /Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend
-      Coverage enabled with v8
+============================= test session starts ==============================
+platform darwin -- Python 3.9.6, pytest-8.4.2, pluggy-1.6.0
+rootdir: /Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard
+plugins: cov-7.1.0, requests-mock-1.12.1
+collected 26 items
 
- ✓ tests/creative.test.ts  (26 tests) 68ms
+tests/dashboard/test_dashboard_unit.py ..........................        [100%]
 
- Test Files  1 passed (1)
-      Tests  26 passed (26)
-   Start at  22:40:15
-   Duration  285ms (transform 63ms, setup 0ms, collect 83ms, tests 68ms, environment 0ms, prepare 51ms)
+================================ tests coverage ================================
+_______________ coverage: platform darwin, python 3.9.6-final-0 ________________
 
- % Coverage report from v8
---------------|---------|----------|---------|---------|-------------------
-File          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
---------------|---------|----------|---------|---------|-------------------
-All files     |     100 |      100 |     100 |     100 |                   
- constants.ts |     100 |      100 |     100 |     100 |                   
- index.ts     |     100 |      100 |     100 |     100 |                   
- parser.ts    |     100 |      100 |     100 |     100 |                   
- prompt.ts    |     100 |      100 |     100 |     100 |                   
- provider.ts  |     100 |      100 |     100 |     100 |                   
- schema.ts    |     100 |      100 |     100 |     100 |                   
- service.ts   |     100 |      100 |     100 |     100 |                   
- types.ts     |     100 |      100 |     100 |     100 |                   
- validator.ts |     100 |      100 |     100 |     100 |                   
---------------|---------|----------|---------|---------|-------------------
+Name                                     Stmts   Miss  Cover
+------------------------------------------------------------
+dashboard/__init__.py                        0      0   100%
+dashboard/api/__init__.py                    3      0   100%
+dashboard/api/client.py                     77      0   100%
+... (중략) ...
+dashboard/utils/error_formatter.py          11      0   100%
+dashboard/utils/response_mapper.py          26      0   100%
+------------------------------------------------------------
+TOTAL                                      576      0   100%
+============================== 26 passed in 1.56s ==============================
 ```
+
+* **Ruff 린트 검사**: `All checks passed!` 통과 완료.
+* **Mypy 타입 검사**: `Success: no issues found in 28 source files` 통과 완료.
 
 ---
 
 ## 5. Self Review
-* [x] **Zod 및 Custom Double-Check 유효성 검사**: Zod 의 strict() 검출과 더불어 step 1~8 배치, 중복/누락, 씬 명칭이 스토리보드 순서와 정합하는지 수동 validator.ts에 추가 기입해 LLM의 논리적 이탈을 100% 차단합니다.
-* [x] **Markdown/자연어 설명 우회 정제**: 파서 단에서 trim 및 brace index tracking 을 이식해 LLM이 규격을 위반하고 마크다운 코드블록을 반환해도 에러 없이 안전하게 정제 파싱을 완료합니다.
-* [x] **외부 의존성 배제**: Math.random(), new Date(), DB/Repository 접근을 일절 금지하여 Pure한 Stateless Layer를 유지했습니다.
-* [x] **100% 커버리지 만족**: Statements, Lines, Branches, Functions 모두 누락 없이 커버리지 100% 만족.
+* [x] **관심사 분리(SoC)**: API 호출, 상태 관리, 비즈니스 로직(서비스), UI(페이지/컴포넌트) 영역을 엄격하게 모듈 단위로 해체 격리했습니다.
+* [x] **MyPy/Ruff 검증 만족**: 파이썬 타입 힌트를 TypedDict 명세와 캐스팅(cast)을 활용해 100% 만족시켰습니다.
+* [x] **로딩/에러 중앙 캡슐화**: SessionStateManager 와 error_formatter.py 가 공동 래핑하여 에러가 터지더라도 UI가 중단되지 않고 일관된 UI로 에러 메시지를 정렬해 냅니다.
+* [x] **테스트 커버리지 100%**: 예외 발생 상황 및 Streamlit Mock rendering 분기까지 100% 커버리지를 만족시켰습니다.
 
 ---
 

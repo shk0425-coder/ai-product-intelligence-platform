@@ -1,20 +1,13 @@
-- [x] Add `AIResponseValidationError` to `backend/src/common/errors/index.ts`
-- [x] Create `backend/src/modules/ai/types.ts` defining options, results, and interfaces
-- [x] Create `backend/src/modules/ai/provider.ts` defining provider interface
-- [x] Create `backend/src/modules/ai/provider-factory.ts` creating provider instances
-- [x] Create `backend/src/modules/ai/providers/gemini.provider.ts` implementing native fetch Gemini call with retry/timeout
-- [x] Create `backend/src/modules/ai/prompt-builder.ts` combining role/task/rules/schema/reviews
-- [x] Create `backend/src/modules/ai/token-manager.ts` truncating reviews by date and token limits
-- [x] Create `backend/src/modules/ai/parser.ts` extracting raw JSON block from raw response
-- [x] Create `backend/src/modules/ai/validator.ts` for Zod and 100% sentiment sum business checks
-- [x] Create `backend/src/modules/ai/service.ts` executing the analytical pipeline
-- [x] Create `backend/src/modules/ai/controller.ts` mediating request validation and API outputs
-- [x] Create `backend/src/modules/ai/schema.ts` for Zod request validators
-- [x] Create `backend/src/modules/ai/route.ts` mounting the analyze route
-- [x] Register review analyze routes in `backend/src/app.ts`
-- [x] Create integration tests in `backend/tests/review-analysis.test.ts`
-- [x] Verify TypeScript compile check (`npm run build`) and ESLint style checks (`npm run lint`)
-- [x] Verify Vitest test execution (`npx vitest run`)
-- [x] Generate `backend_review.zip` containing only Sprint 3-7 changed files
-- [x] Update `pm_review/REVIEW.md`, `pm_review/CONTEXT.md`, and `pm_review/DECISIONS.md`
-- [x] Commit and push changes to develop branch
+# Sprint 4-5 Task Board
+
+- `[x]` 1. `client.py` 구현 (Timeout, tenacity retry, Exception Mapping)
+- `[x]` 2. `endpoints.py` 구현 (API Endpoints 중앙 관리)
+- `[x]` 3. `services/` 구현 (Analysis, JTBD, Strategy, Creative DTO 서비스)
+- `[x]` 4. `state/session.py` 구현 (st.session_state 캡슐화 래핑)
+- `[x]` 5. `cache/cache.py` 구현 (조회 API 전용 캐시 및 TTL 제어)
+- `[x]` 6. `components/widgets.py` 구현 (공통 UI widgets 캡슐화)
+- `[x]` 7. `pages/` 구현 (analysis, jtbd, strategy, creative 서브렌더링 뷰 분할)
+- `[x]` 8. `dashboard.py` 리팩터링 (메뉴이동 라우팅 연동 및 호환)
+- `[x]` 9. `tests/dashboard/test_dashboard_unit.py` 구현 (Pytest 26개 유닛 테스트)
+- `[x]` 10. `types/` DTO 구조화 및 Mypy/Ruff 무오류 검증
+- `[x]` 11. 100% 테스트 커버리지 및 PM Review 산출물 갱신

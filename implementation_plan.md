@@ -1,118 +1,114 @@
-# Implementation Plan: Sprint 4-4 Creative Pipeline (FLUX API Integration & Image Prompt Builder)
+# Implementation Plan: Sprint 4-5 Dashboard Backend API Integration & Streamlit Refactoring
 
-본 스프린트(4-4)에서는 Product Strategy 가 도출한 8단계 상세페이지 스토리보드를 이미지 생성용 프롬프트 명세(Image Prompt, Negative Prompt, Style, Camera, Lighting, Composition)로 가공하고, FLUX 이미지 생성 요청 스펙을 완성하는 `creative` 모듈을 신설 구축합니다.
-
-이 모듈은 이미지 파일 로컬 저장 및 HTML 빌드 연동을 제외하고, 오직 씬별 프롬프트 구조화 생성, FLUX Provider 인터페이스 연동, AI 응답 파싱 및 엄격한 8개 씬 정합성 검증 흐름을 전담하는 Stateless Pure Function 레이어로 설계합니다.
-
----
-
-## User Review Required
-
-> [!IMPORTANT]
-> **1. Image Generation Provider 인터페이스 추상화**
-> 향후 Stable Diffusion, Gemini Image, OpenAI DALL-E 등으로의 플러그인 교체가 자유롭도록 `ImageGenerationProvider` 인터페이스를 `provider.ts`에 독립 수립하고, FLUX API 전용 payload를 조립하여 호출하는 `FluxImageProvider` 구현체를 이식합니다.
-> 
-> **2. 8개 Scene 정합성 검증 (Custom Validation)**
-> Zod basic validation을 거친 뒤, `validator.ts`에서 각 Scene의 `step` 번호(1~8 순차 오름차순), 중복 금지, 씬 이름(Attention~CTA)이 스토리보드 원본과 일대일 정합하는지 2차 정밀 수동 검사를 강제합니다.
+본 스프린트(4-5)에서는 기존의 단일 거대 스크립트였던 `dashboard.py` 를 백엔드 Fastify API 서버를 소비(Consume)하는 구조로 전면 리팩터링합니다. API Client, Cache, State Wrapper, Service Layer, Component, Page 분할을 포함한 관심사 분리(SoC) 아키텍처를 도입하며, Pytest Statement/Branch/Line/Function 100% 커버리지를 만족하는 테스트 환경을 수립합니다.
 
 ---
 
 ## Proposed Changes
 
-새로운 모듈을 생성합니다.
+신규 모듈 및 패키지들을 `dashboard/` 폴더 하위에 생성합니다.
 
 ```text
-backend/src/modules/creative/
+dashboard/
+    api/
+        client.py
+        endpoints.py
+    services/
+        analysis_service.py
+        jtbd_service.py
+        strategy_service.py
+        creative_service.py
+    state/
+        session.py
+    cache/
+        cache.py
+    components/
+        widgets.py
+    pages/
+        analysis_page.py
+        jtbd_page.py
+        strategy_page.py
+        creative_page.py
+    types/
+        __init__.py
+    constants/
+        constants.py
+    utils/
+        error_formatter.py
+        response_mapper.py
+        cache_key.py
 ```
 
-구성
+---
 
-```text
-creative/
-    prompt.ts
-    schema.ts
-    parser.ts
-    validator.ts
-    provider.ts
-    service.ts
-    types.ts
-    constants.ts
-    index.ts
-```
+## 1. dashboard/api/
+
+### [NEW] client.py
+* `APIClient` 클래스 정의.
+* `tenacity` 라이브러리를 활용한 Exponential Backoff Retry (3회) 적용.
+* HTTP Status Code (400, 401, 403, 404, 429, 500) 및 Connection/Timeout 예외에 대응하는 커스텀 Exception Class 정의 (`BadRequestError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `RateLimitError`, `ServerError`, `NetworkError`, `TimeoutError`).
+* Bearer Token 인증 헤더 바인딩.
+
+### [NEW] endpoints.py
+* `APIEndpoints` 정의: 로그인, 워크스페이스, 크롤링, 분석 결과 조회/요청 경로 중앙 관리.
 
 ---
 
-## 1. backend/src/modules/creative/
+## 2. dashboard/services/
 
-### [NEW] types.ts
-* `CreativeInput`, `CreativeResult`, `StoryboardScene`, `ImagePrompt`, `NegativePrompt`, `ImageStyle`, `CameraAngle`, `Lighting`, `Composition` 타입 정의.
-* `SceneType` ('Attention' | 'Problem' ...), `PromptLanguage`, `AspectRatio` Enum 정의.
-
-### [NEW] constants.ts
-* `PROMPT_VERSION` 상수 선언.
-* `PROMPT_TEMPLATE`: Role, Objective, Storyboard, Image Rules, Output Rules, JSON Schema, Constraints 플레이스홀더 정의.
-* `IMAGE_STYLE_RULES` 및 `FLUX_DEFAULT_OPTIONS` (aspect ratio, steps, guidance scale 등) 선언.
-* `VALIDATION_LIMITS` 문자열 제한 상수 선언.
-
-### [NEW] schema.ts
-* `creativeResultSchema`: Zod 기반 strict() 검증 스키마 정의 (8개 scenes 및 세부 DTO).
-* `getJsonSchemaString()`: `zod-to-json-schema`를 호출해 템플릿용 JSON Schema v7 문자열 반환.
-
-### [NEW] parser.ts
-* `parseResponse(raw)`: markdown 백틱 정제 및 JSON Parse 수행 (jtbd/product-strategy 와 동일 구조).
-
-### [NEW] validator.ts
-* `validateResult(parsed)`:
-  * 1단계: Zod schema validation (타입 오류, Required 누락, null/undefined, 빈 문자열, strict unknown key 체크).
-  * 2단계: 8개 Scene 여부, step 1~8 번호 검사, 중복/누락 검사, 순서 유지 검사, 단계 이름 일치 검사 (`STORYBOARD_STEPS` 테이블 순차 매칭).
-  * 실패 시 상세 에러 throw.
-
-### [NEW] provider.ts
-* `ImageGenerationProvider` 추상 인터페이스 정의.
-* `FluxImageProvider`: `ImageGenerationProvider`를 구현하며, FLUX API Request Payload를 생성하고 mock/실제 연동을 대행하는 역할 탑재.
-
-### [NEW] service.ts
-* `CreativeService`: `AIProvider` (텍스트 프롬프트 생성용) 및 `ImageGenerationProvider` (FLUX 이미지 생성용)를 DI 주입받아, Prompt 빌드 ➡️ AI 호출 ➡️ Parsing ➡️ Validation ➡️ DTO 반환의 Stateless 오케스트레이션 수행.
-
-### [NEW] index.ts
-* 외부 연동용 Service, Provider, Types, Constants 일괄 export.
+### [NEW] analysis_service.py / jtbd_service.py / strategy_service.py / creative_service.py
+* 서비스 클래스 구현: 오직 `APIClient` 만을 사용하여 데이터 통신을 대행하며, 비즈니스 로직을 배제하고 파싱 완료된 DTO 결과만을 리턴.
 
 ---
 
-## 2. 테스트 명세
+## 3. dashboard/state/
 
-### [NEW] tests/creative.test.ts
-
-* **Prompt Spec**: 동일 입력 100회 실행 시 항상 동일한 프롬프트 조립 문자열이 생성되는지 검증 (Date, Random 무의존성).
-* **Schema Spec**: Zod 스키마로부터 생성된 JSON Schema 가 Prompt 내용 내 `{jsonSchema}` 와 일치하는지 검증.
-* **Parser Spec**: 정상 JSON, 백틱 정제 파싱, 잘못된 포맷(Invalid JSON) 입력 시 에러 발산 검증.
-* **Validator Spec**:
-  * Scene 단계 개수 미달/초과(예: 7개 혹은 9개) 시 에러 검사.
-  * Step 순서가 뒤섞였거나 누락이 있는 경우(예: step 1, 3, 2, 4...) 에러 검사.
-  * Step 명칭이 불일치하는 경우 에러 검사.
-  * Required 필드 누락, Unknown field 존재 시 Zod.strict() 검출 검사.
-  * null, undefined, 빈 문자열, 최대 길이 초과 시 검출 검사.
-* **Provider Spec**:
-  * Request payload 조립 및 parameters 검증.
-  * Response mapping 검증 및 Mock Provider 검증.
-  * 호출 횟수 1회 보장 검증.
-* **Service Spec**: Prompt ➡️ AI Provider ➡️ Parser ➡️ Validator ➡️ DTO 전체 흐름 및 Provider 예외 전파 검증.
-* **Coverage**: `creative` 모듈 Statements/Branches/Lines/Functions 100% 커버리지 검증.
+### [NEW] session.py
+* `SessionStateManager` 클래스 구현: `st.session_state`로의 직접 접근을 완전히 격리 차단하며, 워크스페이스 ID, 상품 ID, 로딩 상태, 에러 메시지 등을 프로퍼티로 관리.
 
 ---
 
-## Verification Plan
+## 4. dashboard/cache/
+
+### [NEW] cache.py
+* `DashboardCache` 클래스 구현: 메모리 기반 조회 전용 캐시 기능 제공.
+* `constants` 에 정의된 `CACHE_TTL` 적용 및 `workspaceId:productId:analysisId` 조합 캐시 키 제어.
+
+---
+
+## 5. dashboard/components/
+
+### [NEW] widgets.py
+* 공통 UI 컴포넌트 렌더러 정의: `render_loading`, `render_error`, `render_empty`, `render_status`, `render_section_header`, `render_storyboard_card`, `render_image_card` 구현.
+
+---
+
+## 6. dashboard/pages/
+
+### [NEW] analysis_page.py / jtbd_page.py / strategy_page.py / creative_page.py
+* 각 도메인별 전용 렌더링 뷰 분할. 비즈니스 로직이나 API 직접 호출 없이, 오직 서비스로부터 전달받은 데이터의 조건부 컴포넌트 렌더링만을 담당.
+
+---
+
+## 7. dashboard.py (ROOT)
+
+### [MODIFY] [dashboard.py](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/dashboard.py)
+* 사이드바 워크스페이스 및 상품 UUID 입력 UI 바인딩.
+* 리팩터링된 서브페이지들로의 🧭 메뉴 이동 탭 라우터 연계 및 기존 네이버 쇼핑 실시간 수집 뷰 하방 호환성 유지.
+
+---
+
+## 8. Verification Plan
 
 ### Automated Tests
+* `tests/dashboard/test_dashboard_unit.py` 에서 Pytest 테스트 스위트 구동.
+* API Client(인증, Retry, 타임아웃, 예외 매핑), Service(DTO 바인딩, 호출 횟수), Cache(Hit, Miss, TTL), State(Getter, Setter, Exception handling), Pages(Mock Service 기반 Success/Error 렌더링 테스트) 26개 케이스 동작 검증.
+
 ```bash
-npx vitest run tests/creative.test.ts
-npm run lint
-npm run build
-npx vitest run --coverage --coverage.include="src/modules/creative/**" tests/creative.test.ts
+PYTHONPATH=. .venv/bin/pytest --cov=dashboard tests/dashboard/test_dashboard_unit.py
+.venv/bin/ruff check dashboard/ tests/dashboard/
+.venv/bin/mypy dashboard/ tests/dashboard/
 ```
 
-성공 조건
-* Vitest 전체 통과
-* ESLint 오류 0건
-* TypeScript Strict 오류 0건
-* `creative` 모듈 커버리지 100% 만족
+### Manual Verification
+* `streamlit run dashboard.py` 실행 후 사이드바 메뉴 탭 전환 및 버튼 액션 시 Mock/실제 API 로딩/에러/성공 렌더링 모니터링.

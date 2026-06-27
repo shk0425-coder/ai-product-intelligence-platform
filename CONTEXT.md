@@ -94,32 +94,33 @@ DECISIONS.md
 ## 1. Project Summary
 * **프로젝트명**: AI Product Intelligence Platform
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
-* **현재 버전**: v0.9.0
+* **현재 버전**: v0.9.5
 * **현재 단계**: Phase 4 - Evaluator & Generator Core Integration
-* **현재 Sprint**: Sprint 4-4 - Creative Pipeline (FLUX API Integration & Image Prompt Builder) 구현 완료 (PM 검토 대기)
+* **현재 Sprint**: Sprint 4-5 - Dashboard Backend API Integration & Streamlit Refactoring 완료 (PM 검토 대기)
 
 ---
 
 ## 2. Current Goal
-* **현재 Sprint**: Sprint 4-4 (Creative Pipeline 구현)
-* **현재 작업 (Task)**: Sprint 4-4 완료 검토 대기
+* **현재 Sprint**: Sprint 4-5 (Dashboard API Integration & Refactoring)
+* **현재 작업 (Task)**: Sprint 4-5 완료 검토 대기
 * **완료 조건 (Definition of Done)**:
-  1. ImageGenerationProvider 인터페이스 및 FluxImageProvider (BFL/Replicate 규격) API 연동 완료.
-  2. 8개 Storyboard Scene 정합성(순서, 중복, 타입/이름 매칭) custom validator 탑재.
-  3. Zod Schema strict() 및 zod-to-json-schema 를 이용해 JSON Schema 와 validator 단일 싱크 기법 적용 완료.
-  4. parser, validator, prompt, service 컴포넌트 분리 완료.
-  5. Vitest 유닛 테스트 작성 및 **100% 테스트 커버리지** 통과.
-  6. POS 문서 최신화 및 Git Push 자율 완수.
+  1. API Client (Timeout, tenacity retry, HTTP 예외 매핑) 구현 완료.
+  2. Workspace/Product UUID 드롭다운 연동 및 endpoints 중앙 집중화 완료.
+  3. SessionStateManager 세션 상태 캡슐화 완료.
+  4. Memory cache 및 CACHE_TTL 제어 완료.
+  5. UI widgets 컴포넌트 캡슐화 및 순수 서브페이지(pages) 라우팅 분할 완료.
+  6. Pytest 테스트 스위트 구동 및 커버리지 100% 만족 완료.
+  7. Ruff 린터 0건, MyPy 타입체커 0건 통과 완료.
 
 ---
 
 ## 3. Current Progress
-* [x] **Product Intelligence Framework v3.0 최종 사양 확정** (JTBD 상황 모델링, S~D 등급제)
-* [x] **AI Agent Architecture v1.1 설계 수립** (Task Planner 및 비동기 Orchestrator)
+* [x] **Product Intelligence Framework v3.0 최종 사양 확정**
+* [x] **AI Agent Architecture v1.1 설계 수립**
 * [x] **Database Architecture v1.1 Final 설계 확정 및 동결** 완료
-* [x] **Core Domain Database DDL 구현 완료** (`01_extensions.sql` ~ `07_triggers.sql`)
-* [x] **Market Domain Database DDL 구현 완료** (`08_market_tables.sql` ~ `11_market_triggers.sql`)
-* [x] **GitHub Repository 운영 규칙 반영 및 Git 저장소 구성 완료** (.gitignore 작성, develop 브랜치 운용)
+* [x] **Core Domain Database DDL 구현 완료**
+* [x] **Market Domain Database DDL 구현 완료**
+* [x] **GitHub Repository 운영 규칙 반영 및 Git 저장소 구성 완료**
 * [x] **Sprint 2-3 ~ 2-6: 데이터베이스 마이그레이션 DDL 구축 완료** [APPROVED]
 * [x] **Sprint 3-1: Backend Scaffold 및 Infrastructure 구축 완료** [APPROVED]
 * [x] **Sprint 3-2: Authentication Module 구축 완료** [APPROVED]
@@ -131,8 +132,9 @@ DECISIONS.md
 * [x] **Sprint 3-8: AI Review Analysis Persistence Pipeline & Storage 완료** [APPROVED]
 * [x] **Sprint 4-1: 결정론적 룰 엔진 등급 계산기 구현 완료** [APPROVED]
 * [x] **Sprint 4-2: JTBD 정보 모델 추출 프롬프트 엔진 구현 완료** [APPROVED]
-* [x] **Sprint 4-3: Product Strategy Generator (8-Step Storyboard Builder) 구현 완료** [APPROVED]
-* [x] **Sprint 4-4: Creative Pipeline (FLUX API Integration & Image Prompt Builder) 구현 완료** (types/constants/schema/parser/validator/provider/service/index 구현, 100% 커버리지 유닛 테스트 통과 완료)
+* [x] **Sprint 4-3: Product Strategy Generator 구현 완료** [APPROVED]
+* [x] **Sprint 4-4: Creative Pipeline 구현 완료** [APPROVED]
+* [x] **Sprint 4-5: Dashboard API Integration & Refactoring 구현 완료** (API Client, Endpoints, Cache, State, Services, Components, Pages 구현 및 100% 커버리지 Pytest 통과 완료)
 
 ---
 
@@ -142,24 +144,24 @@ DECISIONS.md
 ---
 
 ## 5. Recent Decisions (최근 핵심 의사결정 - 최대 5개)
-1. **Image Generation Provider 인터페이스 추상화 및 다중 포맷 파싱**: Stable Diffusion, Gemini Image 등과의 자유로운 플러그인 교체를 위해 ImageGenerationProvider 인터페이스를 수립하고, FluxImageProvider에 Replicate output 및 BFL sample response 구조를 동시 수용하게 설계함.
-2. **스토리보드 Scene 8개 정합성 2차 유효성 검증(Custom Validation)** (2026-06-27): Zod 의 기본 타입 파싱에 더해 step 1~8 순차 배치, 중복, 타입 및 이름 일치를 validator.ts에 구현해 LLM의 이탈 가능성을 완전 차단함.
-3. **zod-to-json-schema 동기화 아키텍처** (2026-06-27): Zod Schema를 `zod-to-json-schema` 로 동적 변환하여 프롬프트에 주입하고 Validator도 이를 공유해 스키마 변경 시 두 요소가 100% 자동 동기화되도록 설계함.
-4. **Markdown 및 코드 블록 우회 정제** (2026-06-27): LLM의 마크다운 포맷팅 위반에 대응하여, parser단에서 trim 및 brace tracking 을 탑재해 순수 JSON만 안전하게 통과시키도록 구현함.
-5. **Stateless Pure Layer 설계 및 AIProvider DI 의존성 주입** (2026-06-27): DB, Repository, Rule Engine, Retry, Fallback 등 외부 요소를 격리하고 AI 호출부를 DI 방식으로 구성해 결합도를 원천 차단함.
+1. **임포트 경로 충돌 우회를 위한 패키지 상대 임포트(Relative Import) 강제**: 루트의 `dashboard.py` 파일과 `dashboard/` 패키지명의 충돌을 피하기 위해, 패키지 내부에서는 무조건 `..api` 형식의 상대 임포트를 활용하여 결합도를 완전히 제거하고 독립적으로 구동 가능하게 설계함.
+2. **mypy 타입 검출을 위한 TypedDict 캐스팅(cast) 제어**: `response_mapper.py` 에서 JSON 파싱 리스트를 `List[StoryboardStep]`, `List[StoryboardScene]` 에 안전하게 대입하기 위해 `typing.cast`를 적용해 정적 검사를 완전 통과시킴.
+3. **SessionStateManager 데이터 형식 Optional[Any] 완화**: TypedDict DTO를 유연하게 수용하고 컴포넌트 간 Loosely Coupled 상태를 유지하도록 SessionStateManager 프로퍼티 타입을 느슨하게 확장함.
+4. **ErrorFormatter strict type check 선언**: `TimeoutError` 처럼 API 레벨에서 발생하는 예외를 `isinstance` 로 즉각 분기 판단해 NETWORK_ERROR 와 명확하게 식별하여 메시지를 사전 매핑하도록 보강함.
+5. **Memory Cache 전용 조회 캡슐화**: Mutation API는 캐시 대상에서 자동 차단하고, `workspaceId:productId:analysisId` 조합 캐시 키를 활용해 단일/결결적 캐싱 제어 스택 구축.
 
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **Sprint 4-4 Creative Pipeline 구현체 검토 및 승인 요청**:
-  - 대상 폴더/파일: `backend/src/modules/creative/` (Types, Constants, Schema, Parser, Validator, Provider, Service, Index), `backend/tests/creative.test.ts`
-  - 검토 요점: ImageGenerationProvider 규격 설계, FluxImageProvider의 Payload 조립 및 API fetch 처리, 8개 Scene 정합성(순서, 누락, 중복, 이름 매칭) 수동 검출의 정확성, Vitest 100% 커버리지 만족 여부.
+* **Sprint 4-5 Dashboard Refactoring 구현체 검토 및 승인 요청**:
+  - 대상 폴더/파일: `dashboard/` (api, services, state, cache, components, pages, types, constants, utils), `tests/dashboard/test_dashboard_unit.py`, `dashboard.py` (ROOT)
+  - 검토 요점: requests client 캡슐화의 견고성, tenacity retry 매핑, st.session_state 은닉 및 프로퍼티 관리, widgets를 통한 UI 코드 중복 제거의 완결성, Pytest 100% 커버리지 확인.
 
 ---
 
 ## 7. Next Action
 * **ChatGPT (PM)**:
-  1. 다음 마일스톤인 **[Sprint 4-5] Streamlit 대시보드 리팩토링 및 백엔드 API 연동 작업 지시서**를 작성해 주십시오.
+  1. 다음 마일스톤인 **[Phase 5] Closed-loop Learning & Production Setup** 에 해당하는 작업 지시서를 작성해 주십시오.
 
 ---
 
@@ -170,9 +172,8 @@ DECISIONS.md
 
 ## 9. Important Notes
 * **CONTEXT.md는 ChatGPT 전용 문서**입니다. 새로운 세션 시작 시 이 파일만 로드하면 이전 흐름이 완벽히 이어집니다.
-* **모든 신규 기능은 modules 기반으로 개발한다.**
 * **비즈니스 로직은 services 계층에서만 구현한다.**
-* **Repository는 Database 접근만 담당한다.**
+* **대시보드는 Backend API Consumer 역할만 수행한다.**
 
 ---
 
@@ -189,5 +190,5 @@ DECISIONS.md
 
 ## 11. Last Update
 * **업데이트 날짜**: 2026-06-27
-* **완료 Sprint**: Sprint 4-4 (Creative Pipeline)
-* **다음 Sprint**: Sprint 4-5 (Streamlit 대시보드 리팩토링 및 API 연동)
+* **완료 Sprint**: Sprint 4-5 (Dashboard API Integration & Streamlit Refactoring)
+* **다음 Sprint**: Phase 5 (Closed-loop Learning & Production Setup)

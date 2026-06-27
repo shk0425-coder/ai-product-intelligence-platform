@@ -9,20 +9,23 @@
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
 * **현재 버전**: v0.6.0
 * **현재 단계**: Phase 3 - Scaffolding Backend & Scraper
-* **현재 Sprint**: Sprint 3-3 - Workspace API & Database 연동 개발
+* **현재 Sprint**: Sprint 3-3 - Workspace API & Database 연동 개발 완료 (PM 검토 대기)
 
 ---
 
 ## 2. Current Goal
 * **현재 Sprint**: Sprint 3-3 (Workspace API 및 Database 연동)
-* **현재 작업 (Task)**: Workspace API 및 Database 연동 설계 수립
+* **현재 작업 (Task)**: Workspace API 및 Database 연동 완료 검토 대기
 * **완료 조건 (Definition of Done)**:
   1. Supabase Client와 연계하여 실제 Database의 `workspaces` 테이블 CRUD 연동 구현 완료.
   2. Workspace 생성, 조회, 수정, 삭제 API 구현 완료.
-  3. Auth Module의 Mock Repository를 실제 Supabase 연동 Repository로 대체 완료.
-  4. API Endpoint Zod Schema Validation 및 에러 처리 확인.
-  5. 관련 Route 및 Controller 테스트 작성 및 검증 성공.
-  6. `pm_review/REVIEW.md` 및 `pm_review/CONTEXT.md` 갱신 및 Git Commit & Push 자율 완수.
+  3. `BaseRepository` 및 `IBaseRepository` 인터페이스/구현체를 신설하여 페이지네이션 및 기본적인 CRUD 연산 쿼리 공통화 달성.
+  4. Workspace 조회, 수정, 삭제 시 호출한 유저(`request.user.userId`)와 Workspace 소유주(`org_id`) 간의 소유권(Owner) 일치 여부 철저히 검사.
+  5. DTO 분리를 통해 Entity 반환을 차단하고 `WorkspaceResponseDto`만을 반환하도록 맵퍼 구성 완료.
+  6. Zod 기반 UUID 포맷 검증 및 Workspace 이름 정책(Trim, 2-50자) 유효성 필터 미들웨어 바인딩 완료.
+  7. 신규 마이그레이션 `28_add_workspace_deleted_at.sql`을 작성하여 소프트 딜리트용 컬럼을 구성하고, Repository 조회 시 `deleted_at IS NULL` 필터링 강제 적용.
+  8. Vitest 14개 통합 검증 케이스를 포함한 총 27개 테스트 전체 통과 확인.
+  9. `REVIEW.md`, `CONTEXT.md`, `DECISIONS.md` 갱신 및 Git Commit & Push 완료.
 
 ---
 
@@ -37,9 +40,9 @@
 * [x] **Sprint 2-4: Sourcing / Margin Domain Database DDL 구현 완료** (`16_sourcing_tables.sql` ~ `19_sourcing_triggers.sql`)
 * [x] **Sprint 2-5: Strategy / Creative Domain Database DDL 구현 완료** (`20_strategy_tables.sql` ~ `23_strategy_triggers.sql`)
 * [x] **Sprint 2-6: Audit / Learning Domain Database DDL 구현 완료** (`24_audit_tables.sql` ~ `27_audit_triggers.sql`)
-* [x] **Sprint 3-1: Backend Scaffold 및 Infrastructure 구축 완료** (Fastify, TS Strict, Zod, Pino) [APPROVED]
-* [x] **Sprint 3-2: Authentication Module 구축 완료** (JWT TokenProvider 추상화, bcrypt 해싱, Zod 유효성 체크, Vitest 100% 성공) [APPROVED]
-* [x] **CONTEXT.md 자동 갱신 규칙 및 v2.5 강화 운영 체계 수립 완료** (AI_START.md 반영)
+* [x] **Sprint 3-1: Backend Scaffold 및 Infrastructure 구축 완료** [APPROVED]
+* [x] **Sprint 3-2: Authentication Module 구축 완료** [APPROVED]
+* [x] **Sprint 3-3: Workspace API & Database 연동 개발 완료** (BaseRepository 설계, 소유자 검증 보강, 소프트 딜리트 마이그레이션 탑재)
 
 ---
 
@@ -49,22 +52,24 @@
 ---
 
 ## 5. Recent Decisions (최근 핵심 의사결정 - 최대 5개)
-1. **TokenProvider 추상 인터페이스화 및 JwtTokenProvider 구현** (2026-06-27): jsonwebtoken 라이브러리와 서비스 결합도를 제거하여, 향후 Clerk/Auth0/Supabase Auth 등으로 서비스 코드 변경 없이 변경이 가능하도록 함.
-2. **UserRole Enum 적용** (2026-06-27): `ADMIN`, `MANAGER`, `USER` 구조의 Enum을 JWT 페이로드에 적용하여 향후 RBAC(역할기반 접근 제어) 구현 시 스키마 변경 최소화.
-3. **Repository Interface 분리** (2026-06-27): `IAuthRepository` 규격을 정의하고 `MockAuthRepository`가 이를 구현하여, 다음 Sprint에서 DB 테이블 연결용 Repository로의 쉬운 교체가 가능하도록 함.
-4. **CORS 및 API 버전 v1 통일** (2026-06-27): 모든 웹 API 엔드포인트 접두어를 `/api/v1` 경로로 일원화하고 CORS 모듈 부착.
-5. **Backend Framework로 Fastify 채택 및 TS Strict 모드 적용** (2026-06-27): 런타임 오류 방지와 any 타입 금지를 강제화함.
+1. **마이그레이션을 통한 workspaces.deleted_at 추가** (2026-06-27): 기존 DDL 파일 수정 없이 신규 마이그레이션 `28_add_workspace_deleted_at.sql`을 추가하여 데이터베이스 수준의 소프트 딜리트 정책을 준수함.
+2. **조회 API Owner 검증 추가** (2026-06-27): 멀티테넌트 최상위 리소스 특성을 반영해 수정/삭제뿐 아니라 단건 조회(`GET /:id`) 시에도 호출자 ID와 소유자(`org_id`) 일치 여부를 대조하도록 보안 강화.
+3. **BaseRepository.findAll 공통 페이징 조회 구현** (2026-06-27): `findAll(options: PaginationOptions)` 공통 인터페이스/구현체를 기획하여 향후 모든 도메인 리포지토리의 표준 템플릿으로 상속 재사용하도록 설계함.
+4. **TokenProvider 추상 인터페이스화 및 JwtTokenProvider 구현** (2026-06-27): jsonwebtoken 라이브러리와 서비스 결합도를 제거함.
+5. **UserRole Enum 적용** (2026-06-27): JWT 페이로드에 적용하여 향후 RBAC 확장 기반 마련.
 
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **None** (Sprint 3-2 승인 완료됨)
+* **Sprint 3-3 Workspace API & Supabase DB 연동 검토 및 승인 요청**:
+  * 대상 폴더/파일: `backend/src/modules/workspace/`, `backend/src/repositories/`, `database/migrations/28_add_workspace_deleted_at.sql`, `backend/tests/workspace.test.ts`
+  * 검토 요점: BaseRepository의 페이징 쿼리 및 CRUD 상속 모델, 단건조회/수정/삭제 시 소유주(`org_id` 와 `request.user.userId`) 대조 검증 논리, 소프트 딜리트 갱신 로직의 PostgREST 매핑 신뢰도.
 
 ---
 
 ## 7. Next Action
 * **ChatGPT (PM)**:
-  1. 다음 마일스톤인 **[Sprint 3-3] Workspace API 및 Supabase DB 연동 개발을 위한 세부 작업 지시서**를 작성해 주십시오.
+  1. 다음 마일스톤인 **[Sprint 3-4] Market Domain API 구축 또는 크롤러 관련 세부 작업 지시서**를 작성해 주십시오.
 
 ---
 
@@ -95,5 +100,5 @@
 
 ## 11. Last Update
 * **업데이트 날짜**: 2026-06-27
-* **완료 Sprint**: Sprint 3-2 (Authentication)
-* **다음 Sprint**: Sprint 3-3 (Workspace API & DB 연동)
+* **완료 Sprint**: Sprint 3-3 (Workspace API & DB Integration)
+* **다음 Sprint**: Sprint 3-4 (Market API / Scraping)

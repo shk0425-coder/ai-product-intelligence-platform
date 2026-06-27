@@ -1,5 +1,13 @@
 # Project Decisions
 
+## Sprint 3-3
+
+- **workspaces.deleted_at 신규 마이그레이션 적용**: DDL 직접 수정 금지 정책에 의거하여, `28_add_workspace_deleted_at.sql`을 새로 생성하여 소프트 딜리트 타임스탬프 필드를 점진적으로 안전하게 추가함.
+- **워크스페이스 조회(GET) Owner 검증 적용**: 테넌트 격리 원칙을 준수하기 위해 단건 조회 시에도 다른 계정의 워크스페이스에 대한 접근을 403 Forbidden으로 원천 차단함.
+- **BaseRepository 내 페이징 조회(findAll) 공통화**: 모든 도메인(Workspace, Market, Review 등)에서 다대일 페이징 쿼리가 동일 구조로 서빙되도록 `findAll(options: PaginationOptions): Promise<PaginatedResult<T>>` 메서드를 설계 수립함.
+
+---
+
 ## Sprint 3-2
 
 - **TokenProvider 추상 인터페이스화 및 JwtTokenProvider 구현**: jsonwebtoken 라이브러리와 서비스 레이어의 직접적인 결합을 제거하여, 향후 Clerk/Auth0/Supabase Auth 등으로 서비스 코드 변경 없이 변경이 가능하도록 아키텍처적 유연성을 확보함.

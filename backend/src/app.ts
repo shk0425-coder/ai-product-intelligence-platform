@@ -14,6 +14,7 @@ import supabasePlugin from '@/plugins/supabase.js';
 // Import Routes
 import healthRoutes from '@/routes/v1/health.js';
 import authRoutes from '@/modules/auth/route.js';
+import workspaceRoutes from '@/modules/workspace/route.js';
 
 export const createApp = async (): Promise<FastifyInstance> => {
   const app = Fastify({
@@ -35,6 +36,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
   // Register API Routes
   await app.register(healthRoutes, { prefix: API_PREFIX });
   await app.register(authRoutes, { prefix: `${API_PREFIX}/auth` });
+  await app.register(workspaceRoutes, { prefix: `${API_PREFIX}/workspaces` });
 
   // Test Protected Route for Verification
   app.get(`${API_PREFIX}/protected`, { preHandler: authMiddleware }, async (request, _reply) => {

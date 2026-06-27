@@ -1,68 +1,72 @@
-# REVIEW.md (Sprint 3-2 Authentication Module Review)
+# REVIEW.md (Sprint 3-3 Workspace API & Supabase DB Integration Review)
 
-본 문서는 **Sprint 3-2 (Authentication Module 구축)** 완료 후, **ChatGPT (Project Manager)**의 코드 리뷰와 승인을 지원하기 위해 자동으로 생성된 스프린트 리뷰 요약서입니다.
+본 문서는 **Sprint 3-3 (Workspace API & Supabase DB 연동)** 완료 후, **ChatGPT (Project Manager)**의 코드 리뷰와 승인을 지원하기 위해 작성된 스프린트 리뷰 보고서입니다.
 
 ---
 
 ## 1. Sprint 정보
-* **Sprint 번호**: Sprint 3-2
-* **대상 작업**: Authentication Module 구축 (로그인, 로그아웃, 토큰 재발급, JWT 미들웨어, 유닛 테스트)
-* **Commit Message**: `feat(auth): implement authentication module`
+* **Sprint 번호**: Sprint 3-3
+* **대상 작업**: Workspace API & Supabase DB 연동 (CRUD, BaseRepository, Soft Delete, DTO, Pagination)
+* **Commit Message**: `feat(workspace): implement workspace module`
 
 ---
 
 ## 2. 구현 내용
-* **JWT Token Provider 추상화**: `jsonwebtoken` 라이브러리에 직접 결합되지 않도록 `TokenProvider` 인터페이스를 수립하고, `JwtTokenProvider` 구현체가 이를 따르도록 설계했습니다. 향후 Clerk, Auth0 등으로 교체 시 서비스 레이어 수정 없이 주입만 교체 가능합니다.
-* **사용자 패스워드 암호화**: `bcrypt` (12 Salt Rounds) 유틸리티를 적용하여 암호 비밀번호를 안전하게 해싱 및 비교합니다.
-* **계정 데이터 모델 & 역할군(Role) 반영**: `UserRole` Enum (`ADMIN`, `MANAGER`, `USER`)을 추가하고 `JwtPayload` 구조에 바인딩하여 향후 역할 기반 접근 제어(RBAC) 확장의 기틀을 마련했습니다.
-* **Mock User Repository**: DB 없이 구동 가능한 독립형 `MockAuthRepository`를 설계하여, Sprint 3-3 실제 DB 연동 저장소 교체 시 충돌이 나지 않도록 인터페이스(`IAuthRepository`)로 분격 격리하였습니다.
-* **Zod 검증 정책**: 로그인 및 토큰 리프레시 요청 시 Zod 스키마 검증 훅을 Fastify 라우터와 연동하여 400 Validation Error가 규격 응답 포맷으로 발생하도록 제어하였습니다.
-* **토큰 재발급 제한**: Refresh Token은 오직 Access Token 재발급 용도로만 활용할 수 있도록 하고, 일반 Access Token을 전달한 오용 호출 시 즉시 401 Unauthorized 코드를 반환하게 강제했습니다.
-* **경로 권한 보호**: `auth.middleware.ts`를 구현하여 Authorization Bearer 토큰의 유무 및 서명/만료를 체크하고 `request.user`를 채워 넣는 공통 검증기(preHandler hook)를 제공합니다.
+* **BaseRepository 구현**: Supabase Client 기반의 공통 데이터베이스 연산(`findById`, `create`, `update`, `delete`, `exists`, `findAll`)을 추상화하여, 향후 다른 도메인(Market, Review 등)에서 코드 재사용이 용이하도록 상속 구조를 적용하였습니다.
+* **Workspace CRUD**: 작업 공간의 등록, 조회(단건/목록), 수정(이름), 삭제(소프트 딜리트) 기능을 완비했습니다.
+* **Owner 검증 강화**: Workspace는 멀티테넌트 최상위 리소스이므로 단건 조회(`GET /:id`), 수정(`PATCH /:id`), 삭제(`DELETE /:id`) 시에 로그인한 유저(`request.user.userId`)가 해당 Workspace의 Owner(`org_id`)와 일치하는지 철저하게 검증합니다.
+* **DTO 적용**: Controller 계층은 Entity를 직접 반환하지 않고, `WorkspaceResponseDto`를 사용하여 클라이언트에게 필요한 필드만 직렬화하고 스네이크 케이스를 카멜 케이스 구조로 정제하여 제공합니다.
+* **Zod UUID & Body Validation**: 파라미터 `:id`에 대한 UUID 규격 검사 및 생성/수정 요청 시 Zod Schema Validation을 적용하고 위반 시 규격화된 400 Validation Error 구조를 응답하도록 바인딩하였습니다.
+* **Soft Delete 정책**: 삭제 시 DB 로우를 실제로 제거하지 않고 `deleted_at` 컬럼에 타임스탬프를 기입하며, 기본 조회 시 `deleted_at IS NULL` 조건만 필터링하도록 구현하였습니다.
+* **Pagination 공통화**: 목록 조회(`GET /`) API 호출 시 `page`, `limit`, `sort`, `order` 쿼리 파라미터를 통해 페이징 처리를 수행하며, BaseRepository 수준에서 `PaginatedResult<T>` 규격으로 감싸서 리턴합니다.
+* **Supabase Error Mapping**: Unique Constraint 위반(예: 동일 워크스페이스 명 중복) 등의 DB 에러 코드를 감지하여 `WORKSPACE_ALREADY_EXISTS` 등 비즈니스 예외 예러로 정밀 매핑해 대응합니다.
+* **비동기 Hook 및 Transaction stubs**: 비즈니스 확장성을 고려해 트랜잭션 흐름 구조(TODO)와 감사 로그용 stubs(TODO) 주석을 서비스 레이어에 설계 반영했습니다.
 
 ---
 
 ## 3. 변경 파일
-* **설정 및 환경**:
-  * [package.json](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/package.json): `jsonwebtoken`, `bcrypt` 및 관련 타입 종속성 추가
-  * [.env.example](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.env.example) / [.env](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.env): JWT access/refresh secret 및 만료 시간 환경변수 적재
-  * [.gitignore](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/.gitignore): `node_modules/`, `dist/`, `.env` 등을 Git 추적에서 제외
-  * [env.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/config/env.ts): 새로운 JWT 환경변수들의 Zod 타입 검증 조건 추가
-  * [errors/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/common/errors/index.ts): `AUTH_INVALID_TOKEN`, `AUTH_EXPIRED_TOKEN`, `AUTH_INVALID_CREDENTIALS`, `AUTH_UNAUTHORIZED`에 매칭되는 예외 클래스 추가
-* **유틸리티 및 미들웨어**:
-  * [jwt.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/utils/jwt.ts): `TokenProvider` 인터페이스 및 `JwtTokenProvider` 구현체 작성
-  * [password.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/utils/password.ts): bcrypt 비밀번호 해싱 및 매칭 함수 정의
-  * [auth.middleware.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/middleware/auth.middleware.ts): 공통 HTTP Bearer 토큰 검사 미들웨어 훅 구축
-* **Auth 모듈**:
-  * [types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/types.ts): `UserRole` Enum, `JwtPayload`, `User` 인터페이스 및 FastifyRequest user 데코레이션 정의
-  * [schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/schema.ts): 로그인 및 토큰 리프레시 Zod 검증 스키마
-  * [repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/repository.ts): `IAuthRepository` 및 Mock 구현체 작성 (admin@test.com 계정 내장)
-  * [service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/service.ts): 비즈니스 로그인, 갱신 및 로그아웃 메서드 정의
-  * [controller.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/controller.ts): 요청 수용 및 성공 포맷 응답
-  * [route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/auth/route.ts): `/api/v1/auth` 세부 라우팅 및 검증 바인딩
+* **데이터베이스 마이그레이션**:
+  * [28_add_workspace_deleted_at.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/28_add_workspace_deleted_at.sql): `workspaces` 테이블에 `deleted_at` 컬럼 추가 마이그레이션
+* **공통 레이어 & 베이스 리포지토리**:
+  * [errors/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/common/errors/index.ts): `WORKSPACE_NOT_FOUND`, `WORKSPACE_ALREADY_EXISTS`, `WORKSPACE_FORBIDDEN` 커스텀 에러 정의 추가
+  * [base.repository.ts (Interface)](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/repositories/interfaces/base.repository.ts): `IBaseRepository`, `PaginationOptions`, `PaginatedResult` 정의
+  * [base.repository.ts (Implementation)](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/repositories/implementations/base.repository.ts): Supabase postgREST 기반 공통 DB 쿼리 구현체 작성
+* **Workspace 모듈**:
+  * [types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/types.ts): Entity 모델 및 `IWorkspaceRepository` 규격 정의
+  * [dto.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/dto.ts): `CreateWorkspaceDto`, `UpdateWorkspaceDto`, `WorkspaceResponseDto` 및 DTO 변환 헬퍼 정의
+  * [schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/schema.ts): Zod 파라미터 및 바디 검증 스키마 선언
+  * [repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/repository.ts): `BaseRepository<Workspace>`를 확장하고 중복명칭 조회 및 소유자 워크스페이스 페이징 목록 쿼리 추가
+  * [service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/service.ts): 소유주 검증 논리식, 소프트 딜리트 기입 지시, 예외 매핑, 트랜잭션/감사로그 stubs 배치
+  * [controller.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/controller.ts): 요청 핸들러 바인딩 및 성공 규격 응답 매핑
+  * [route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/route.ts): `/api/v1/workspaces` 경로 세부 등록 및 Zod 미들웨어 탑재
 * **애플리케이션 연동 및 테스트**:
-  * [app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts): authRoutes 모듈 등록 및 `/api/v1/protected` 테스트 전용 보호 경로 생성
-  * [auth.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/auth.test.ts): 로그인 성공/실패, 토큰 리프레시 재발급/오용 차단, JWT 유틸 서명/만료, 미들웨어 인증 무결성 테스트 추가
+  * [app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts): workspaceRoutes 모듈을 API 라우터에 바인딩
+  * [workspace.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/workspace.test.ts): Workspace 생성, 페이징 조회, 단건 조회, 소유자 검증 통과/차단(조회, 수정, 삭제), 중복 확인, UUID 규격 검사 실패 등 14개 통합 검증 시나리오 작성
 
 ---
 
 ## 4. 테스트 결과
-Vitest를 활용하여 13개 통합 테스트 케이스가 무결하게 통과함을 성공적으로 확인했습니다.
+Vitest를 활용하여 신규 작성된 14개 통합 테스트를 포함한 총 27개 케이스가 모두 정상 통과되었습니다.
 ```text
  ✓ tests/health.test.ts  (1 test) 58ms
- ✓ tests/auth.test.ts  (12 tests) 1605ms
+ ✓ tests/auth.test.ts  (12 tests) 1586ms
+ ✓ tests/workspace.test.ts  (14 tests) 150ms
 
- Test Files  2 passed (2)
-      Tests  13 passed (13)
+ Test Files  3 passed (3)
+      Tests  27 passed (27)
 ```
 
 ---
 
 ## 5. Self Review
-* [x] **비밀번호 평문 저장 금지**: bcrypt를 이용해 `admin@test.com`의 패스워드를 `$2b$12$...` 해시로 가공 적재했습니다.
-* [x] **JWT Secret 하드코딩 금지**: 모든 토큰 서명 키와 만료시간 설정은 Zod가 파싱/검증하는 환경 변수 파일(`.env`)로부터 로드됩니다.
-* [x] **모듈식 캡슐화**: 인증에 연관된 모든 제어기, 서비스, 스키마, 라우팅 정보가 `src/modules/auth/` 내부에 온전히 집적되어 있습니다.
-* [x] **ESLint / TypeScript 오류 없음**: TS Strict 모드 하에서 정상적으로 빌드 완료 및 린트 검사 0개 오류 상태를 통과하였습니다.
+* [x] **Workspace CRUD 완성**: Workspace 등록, 목록 조회, 단건 조회, 수정, 삭제 처리 전체 구현 성공.
+* [x] **Supabase Repository 연동**: BaseRepository와 상속체를 이용하여 PostgREST로 원활히 연동되도록 구현 완료.
+* [x] **JWT 인증 연동**: 모든 워크스페이스 엔드포인트에 `authMiddleware`가 적용되어 유효 토큰 및 `request.user`가 주입되는 환경 확인.
+* [x] **Owner 검증 성공 및 타인 차단**: 조회, 수정, 삭제 전 경로에 대해 소유자(`org_id`)와 호출자 ID 일치성을 점검하여 타인의 조작 및 불법 정보 유출 차단 검증.
+* [x] **Pagination 및 DTO 매핑**: 목록 요청 시 페이징 쿼리가 정상 주입되며 응답 DTO 규격으로 필터링되어 반환됨을 확인.
+* [x] **Soft Delete 적용**: 삭제 시 `deleted_at`이 업데이트되고, 조회 시 쿼리 조건 `deleted_at IS NULL`이 자동으로 필터링됨을 확인.
+* [x] **Zod Validation**: path parameter `:id`가 UUID 형식이 아닐 시 또는 바디 필드 규칙 위반 시 400 Validation Error가 표준 응답으로 반환됨을 확인.
+* [x] **ESLint / TypeScript 오류 없음**: Strict 모드 내에서 빌드 100% 컴파일 성공 및 style 린터 경고를 모두 해소하여 0개 에러 통과 확인.
 
 ---
 

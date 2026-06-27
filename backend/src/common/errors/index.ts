@@ -58,3 +58,22 @@ export class UnauthorizedError extends AppError {
   }
 }
 
+export class WorkspaceNotFoundError extends AppError {
+  constructor(message: string = 'Workspace not found') {
+    super(404, 'WORKSPACE_NOT_FOUND', message);
+  }
+}
+
+export class WorkspaceAlreadyExistsError extends AppError {
+  constructor(message: string = 'Workspace name already exists') {
+    super(409, 'WORKSPACE_ALREADY_EXISTS', message);
+  }
+}
+
+export class WorkspaceForbiddenError extends AppError {
+  constructor(message: string = 'Forbidden access to workspace') {
+    super(403, 'WORKSPACE_FORBIDDEN', message);
+  }
+}
+
+

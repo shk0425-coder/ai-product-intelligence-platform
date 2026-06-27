@@ -1,21 +1,18 @@
-- [x] Install jsonwebtoken, bcrypt, and their types
-- [x] Update `.env.example` and `.env` with JWT config variables
-- [x] Update `backend/src/config/env.ts` with Zod schema validation
-- [x] Update `backend/src/common/errors/index.ts` with custom Auth errors
-- [x] Create `backend/src/modules/auth/types.ts` defining UserRole enum, JwtPayload, and request interfaces
-- [x] Create `backend/src/utils/password.ts` with hashPassword and comparePassword
-- [x] Create token provider abstraction interface TokenProvider and class JwtTokenProvider in `backend/src/utils/jwt.ts`
-- [x] Create auth repository interface IAuthRepository and MockAuthRepository in `backend/src/modules/auth/repository.ts`
-- [x] Create schemas loginSchema and refreshSchema in `backend/src/modules/auth/schema.ts`
-- [x] Create `backend/src/modules/auth/service.ts` injecting IAuthRepository and TokenProvider
-- [x] Create `backend/src/modules/auth/controller.ts`
-- [x] Create `backend/src/modules/auth/route.ts`
-- [x] Create global `auth.middleware.ts` preHandler hook
-- [x] Register `/api/v1/auth` routes and test protected route `/api/v1/protected` in `app.ts`
-- [x] Create Vitest integration test suite `backend/tests/auth.test.ts`
-- [x] Run TypeScript build compile checks (`npm run build`)
-- [x] Run style linter checks (`npm run lint`)
-- [x] Verify unit tests (`npx vitest run`)
+- [x] Create `database/migrations/28_add_workspace_deleted_at.sql` and run it
+- [x] Update `backend/src/common/errors/index.ts` with custom Workspace errors
+- [x] Create base repository interface in `backend/src/repositories/interfaces/base.repository.ts`
+- [x] Create base repository implementation in `backend/src/repositories/implementations/base.repository.ts`
+- [x] Create workspace module types in `backend/src/modules/workspace/types.ts`
+- [x] Create workspace module DTOs in `backend/src/modules/workspace/dto.ts`
+- [x] Create workspace module Zod validation schemas in `backend/src/modules/workspace/schema.ts`
+- [x] Create workspace repository in `backend/src/modules/workspace/repository.ts`
+- [x] Create workspace service in `backend/src/modules/workspace/service.ts` with owner checks, soft-delete, and audit hook stubs
+- [x] Create workspace controller in `backend/src/modules/workspace/controller.ts`
+- [x] Create workspace routes in `backend/src/modules/workspace/route.ts`
+- [x] Register `/api/v1/workspaces` routes in `backend/src/app.ts`
+- [x] Create Vitest workspace integration tests in `backend/tests/workspace.test.ts`
+- [x] Verify TypeScript compile check (`npm run build`) and ESLint style checks (`npm run lint`)
+- [x] Verify Vitest test execution (`npx vitest run`)
 - [x] Generate `backend_review.zip` in `pm_review/`
 - [x] Update `pm_review/REVIEW.md`, `pm_review/CONTEXT.md`, and `pm_review/DECISIONS.md`
-- [x] Commit and push changes to develop branch
+- `[ ]` Commit and push changes to develop branch

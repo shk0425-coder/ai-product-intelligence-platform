@@ -9,26 +9,24 @@
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
 * **현재 버전**: v0.6.0
 * **현재 단계**: Phase 3 - Scaffolding Backend & Scraper
-* **현재 Sprint**: Sprint 3-1 - Backend Scaffolding & Infrastructure 구축
+* **현재 Sprint**: Sprint 3 - Backend 및 수집기 개발
 
 ---
 
 ## 2. Current Goal
-* **현재 Sprint**: Sprint 3-1 (Backend Scaffolding & Infrastructure 구축)
-* **현재 작업 (Task)**: Backend Scaffolding 완료 검토 대기
+* **현재 Sprint**: Sprint 3-2 (Authentication Module 개발)
+* **현재 작업 (Task)**: Authentication Module & Workspace API 개발 준비
 * **완료 조건 (Definition of Done)**:
-  1. Fastify 기반 TypeScript Strict Mode 백엔드 프로젝트 생성 완료.
-  2. 공통 Response Format, Global Error Handler, Logger (Pino) 및 미들웨어/플러그인 구축 완료.
-  3. Supabase Client 싱글톤 설정 및 dotenv/Zod 환경변수 Validation 구현 완료.
-  4. `GET /api/v1/health` API 및 이에 대응하는 Vitest 유닛 테스트 작성 완료.
-  5. 9개 도메인 모듈(auth, workspace, market, review, sourcing, strategy, creative, audit, learning) 플레이스홀더 디렉토리 및 파일 생성 완료.
-  6. Dockerfile 및 docker-compose 개발환경 설정 완료.
-  7. `REVIEW.md` 및 `CONTEXT.md` 갱신 및 Git Commit & Push 자율 완수.
+  1. Supabase Auth 연동 및 사용자 인증 토큰 처리 미들웨어 구현 완료.
+  2. Workspace 생성, 조회, 수정 API 설계 및 구현 완료.
+  3. API Endpoint Zod Schema Validation 및 에러 처리 확인.
+  4. 관련 Route 및 Controller 테스트 작성 및 검증 성공.
+  5. `pm_review/REVIEW.md` 및 `pm_review/CONTEXT.md` 갱신 및 Git Commit & Push 자율 완수.
 
 ---
 
 ## 3. Current Progress
-* [x] **Product Intelligence Framework v3.0 최종 사양 확정** (JTBD 상황 모델 모델링, S~D 등급제)
+* [x] **Product Intelligence Framework v3.0 최종 사양 확정** (JTBD 상황 모델링, S~D 등급제)
 * [x] **AI Agent Architecture v1.1 설계 수립** (Task Planner 및 비동기 Orchestrator)
 * [x] **Database Architecture v1.1 Final 설계 확정 및 동결(Freeze)** 완료
 * [x] **Core Domain Database DDL 구현 완료** (`01_extensions.sql` ~ `07_triggers.sql`)
@@ -38,7 +36,7 @@
 * [x] **Sprint 2-4: Sourcing / Margin Domain Database DDL 구현 완료** (`16_sourcing_tables.sql` ~ `19_sourcing_triggers.sql`)
 * [x] **Sprint 2-5: Strategy / Creative Domain Database DDL 구현 완료** (`20_strategy_tables.sql` ~ `23_strategy_triggers.sql`)
 * [x] **Sprint 2-6: Audit / Learning Domain Database DDL 구현 완료** (`24_audit_tables.sql` ~ `27_audit_triggers.sql`)
-* [x] **Backend Scaffold 및 Infrastructure 구축 완료** (Fastify, TS Strict, Zod, Pino)
+* [x] **Backend Scaffold 및 Infrastructure 구축 완료** (Fastify, TS Strict, Zod, Pino) [APPROVED]
 * [x] **CONTEXT.md 자동 갱신 규칙 및 v2.5 강화 운영 체계 수립 완료** (AI_START.md 반영)
 
 ---
@@ -58,9 +56,7 @@
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **Sprint 3-1 Backend Scaffolding 검토 및 승인 요청**:
-  * 대상 폴더/파일: `backend/` 내 소스코드, [REVIEW.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/REVIEW.md), [CONTEXT.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/CONTEXT.md)
-  * 검토 요점: `/api/v1/health` 라우트 성공 응답 포맷, TS Strict Mode 및 ESLint 무오류 적합성, 9대 모듈 홀더 구조.
+* **None** (Sprint 3-1 승인 완료됨)
 
 ---
 

@@ -18,4 +18,4 @@
 - [x] Verify unit tests (`npx vitest run`)
 - [x] Generate `backend_review.zip` in `pm_review/`
 - [x] Update `pm_review/REVIEW.md`, `pm_review/CONTEXT.md`, and `pm_review/DECISIONS.md`
-- `[ ]` Commit and push changes to develop branch
+- [x] Commit and push changes to develop branch

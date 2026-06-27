@@ -9,21 +9,20 @@
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
 * **현재 버전**: v0.6.0
 * **현재 단계**: Phase 3 - Scaffolding Backend & Scraper
-* **현재 Sprint**: Sprint 3-2 - Authentication Module 구축 완료 (PM 검토 대기)
+* **현재 Sprint**: Sprint 3-3 - Workspace API & Database 연동 개발
 
 ---
 
 ## 2. Current Goal
-* **현재 Sprint**: Sprint 3-2 (Authentication Module 구축)
-* **현재 작업 (Task)**: Authentication Module 완료 검토 대기
+* **현재 Sprint**: Sprint 3-3 (Workspace API 및 Database 연동)
+* **현재 작업 (Task)**: Workspace API 및 Database 연동 설계 수립
 * **완료 조건 (Definition of Done)**:
-  1. JWT Access / Refresh Token 발급 및 로그인/로그아웃/갱신 API 구현 완료.
-  2. bcrypt를 이용한 패스워드 검증 및 mock admin 데이터 탑재 완료.
-  3. `TokenProvider` 추상화 인터페이스 설계를 통해 jsonwebtoken 라이브러리와 서비스 레이어의 격리 확보.
-  4. `UserRole` Enum을 적용하여 향후 RBAC 확장 기반 마련.
-  5. `IAuthRepository` 및 `MockAuthRepository` 구조 적용으로 DB 연동 준비 완료.
-  6. `/api/v1/protected` 모의 경로와 12개 핵심 시나리오(인증 우회 차단, 만료 등) 검증 Vitest 통합 테스트 작성 완료.
-  7. `REVIEW.md`, `CONTEXT.md`, `DECISIONS.md` 갱신 및 Git Commit & Push 완료.
+  1. Supabase Client와 연계하여 실제 Database의 `workspaces` 테이블 CRUD 연동 구현 완료.
+  2. Workspace 생성, 조회, 수정, 삭제 API 구현 완료.
+  3. Auth Module의 Mock Repository를 실제 Supabase 연동 Repository로 대체 완료.
+  4. API Endpoint Zod Schema Validation 및 에러 처리 확인.
+  5. 관련 Route 및 Controller 테스트 작성 및 검증 성공.
+  6. `pm_review/REVIEW.md` 및 `pm_review/CONTEXT.md` 갱신 및 Git Commit & Push 자율 완수.
 
 ---
 
@@ -38,8 +37,9 @@
 * [x] **Sprint 2-4: Sourcing / Margin Domain Database DDL 구현 완료** (`16_sourcing_tables.sql` ~ `19_sourcing_triggers.sql`)
 * [x] **Sprint 2-5: Strategy / Creative Domain Database DDL 구현 완료** (`20_strategy_tables.sql` ~ `23_strategy_triggers.sql`)
 * [x] **Sprint 2-6: Audit / Learning Domain Database DDL 구현 완료** (`24_audit_tables.sql` ~ `27_audit_triggers.sql`)
-* [x] **Sprint 3-1: Backend Scaffold 및 Infrastructure 구축 완료** (Fastify, TS Strict, Zod, Pino)
-* [x] **Sprint 3-2: Authentication Module 구축 완료** (JWT TokenProvider 추상화, bcrypt 해싱, Zod 유효성 체크, Vitest 100% 성공)
+* [x] **Sprint 3-1: Backend Scaffold 및 Infrastructure 구축 완료** (Fastify, TS Strict, Zod, Pino) [APPROVED]
+* [x] **Sprint 3-2: Authentication Module 구축 완료** (JWT TokenProvider 추상화, bcrypt 해싱, Zod 유효성 체크, Vitest 100% 성공) [APPROVED]
+* [x] **CONTEXT.md 자동 갱신 규칙 및 v2.5 강화 운영 체계 수립 완료** (AI_START.md 반영)
 
 ---
 
@@ -58,9 +58,7 @@
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **Sprint 3-2 Authentication Module 구축 검토 및 승인 요청**:
-  * 대상 폴더/파일: `backend/src/modules/auth/`, `backend/src/middleware/auth.middleware.ts`, `backend/src/utils/`, [REVIEW.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/pm_review/REVIEW.md), [CONTEXT.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/pm_review/CONTEXT.md), [DECISIONS.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/pm_review/DECISIONS.md)
-  * 검토 요점: Zod 스키마 검증, bcrypt 패스워드 검사, TokenProvider/Repository 추상화 수준, Access/Refresh 토큰 갱신 시 오용 유효성 차단 논리.
+* **None** (Sprint 3-2 승인 완료됨)
 
 ---
 

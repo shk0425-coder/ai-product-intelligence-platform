@@ -1,3 +1,38 @@
+## 프로젝트 파일 생성 규칙 (최우선)
+
+모든 문서 파일은 반드시 프로젝트 루트(ROOT)에 생성한다.
+
+절대로 다음 위치에는 생성하지 않는다.
+
+- .antigravity/
+- antigravity/
+- .cursor/
+- .vscode/
+- node_modules/
+- backend/
+- frontend/
+- src/
+- docs/
+- temp/
+
+생성 대상
+
+- implementation_plan.md
+- REVIEW.md
+- CONTEXT.md
+- DECISIONS.md
+
+모든 문서는 프로젝트 루트에 위치해야 한다.
+
+이미 동일한 파일이 존재하면 반드시 프로젝트 루트의 파일을 수정(Update)한다.
+
+새로운 파일를 다른 폴더에 생성하지 않는다.
+
+작업 시작 전 반드시 프로젝트 루트를 확인하고,
+모든 파일 입출력은 프로젝트 루트를 기준으로 수행한다.
+
+이 규칙은 다른 모든 지시보다 우선한다.
+
 # AI_START.md (AI Project Entry Point v2.3)
 
 이 문서는 **AI Product Intelligence Platform** 프로젝트에 참여하는 모든 AI 에이전트가 작업을 개시할 때 **가장 먼저 읽고 작동 지침을 확인하는 시작점**입니다.

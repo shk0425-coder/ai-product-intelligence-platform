@@ -38,7 +38,7 @@
 - [x] Sprint 3-8: AI Review Analysis Persistence Pipeline & Storage 구축 완료
 
 ### [Phase 4] Evaluator & Generator Core Integration
-- [/] Sprint 4-1: 결정론적 룰 엔진(Deterministic Rule Engine) 등급 컷오프(S~D) 계산기 구현 (진행 예정)
+- [x] Sprint 4-1: 결정론적 룰 엔진(Deterministic Rule Engine) 등급 컷오프(S~D) 계산기 구현 완료
 - [ ] JTBD 정보 모델 추출 LLM 프롬프트 설계 (Sprint 4-2)
 - [ ] Product Strategy Generator 구현 (상세페이지 8단계 스토리보드 빌드) (Sprint 4-3)
 - [ ] Creative Pipeline (FLUX API 연동 및 이미지 프롬프트 빌더) 연동 (Sprint 4-4)

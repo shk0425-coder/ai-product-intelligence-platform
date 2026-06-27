@@ -13,9 +13,9 @@ export const workspaceIdParamSchema = z.object({
 });
 
 export const workspaceQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
+  page: z.coerce.number().int().positive().max(100000).default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
-  sort: z.string().default('created_at'),
+  sort: z.enum(['created_at', 'updated_at', 'name']).default('created_at'),
   order: z.enum(['asc', 'desc']).default('desc'),
 });
 

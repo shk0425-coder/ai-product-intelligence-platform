@@ -22,14 +22,27 @@ export class WorkspaceService {
     // 2. Create Default settings
     // 3. Create Audit log
 
-    const workspace = await this.workspaceRepository.create({
-      name: dto.name,
-      org_id: userId,
-    });
+    try {
+      const workspace = await this.workspaceRepository.create({
+        name: dto.name,
+        org_id: userId,
+      });
 
-    // TODO: Audit Hook: Log workspace creation audit event
+      // TODO: Audit Hook: Log workspace creation audit event
 
-    return workspace;
+      return workspace;
+    } catch (error: unknown) {
+      const err = error as { code?: string; message?: string };
+      if (
+        err.code === '23505' ||
+        err.message?.includes('23505') ||
+        err.message?.includes('uq_workspaces_name') ||
+        err.message?.includes('duplicate key')
+      ) {
+        throw new WorkspaceAlreadyExistsError(`Workspace name "${dto.name}" is already taken`);
+      }
+      throw error;
+    }
   }
 
   async findAll(userId: string, options: PaginationOptions): Promise<PaginatedResult<Workspace>> {

@@ -41,6 +41,7 @@ export class BaseRepository<T> implements IBaseRepository<T> {
       .from(this.tableName)
       .update(data as Record<string, unknown>)
       .eq(this.primaryKeyName, id)
+      .is('deleted_at', null)
       .select('*')
       .single();
 
@@ -55,6 +56,7 @@ export class BaseRepository<T> implements IBaseRepository<T> {
       .from(this.tableName)
       .update({ deleted_at: new Date().toISOString() } as Record<string, unknown>)
       .eq(this.primaryKeyName, id)
+      .is('deleted_at', null)
       .select()
       .maybeSingle();
 

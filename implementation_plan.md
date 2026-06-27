@@ -1,29 +1,20 @@
-# Sprint 3-3: Workspace API & Supabase Database Integration Implementation Plan
+# Sprint 3-4: Sprint 3-3 Reviews Refinement & Market Domain Foundation
 
-Implementation plan to build the Workspace API and connect to Supabase Database for the AI Product Intelligence Platform (v0.6.0) using Fastify, TypeScript, Supabase, Zod, and Vitest.
+Implementation plan for refining common database query structures and establishing the Market Domain API foundation in the AI Product Intelligence Platform (v0.6.0).
 
 ## User Review Required
 
 > [!IMPORTANT]
-> - All workspace API routes (`/api/v1/workspaces`) require authentication via `authMiddleware` and use `request.user.userId`.
-> - BaseRepository is introduced to decouple Supabase queries and allow reusability across all future domains.
-> - Transaction handling and Audit Logging are stubbed using TODO comments as requested.
-
-## Open Questions
-
-> [!WARNING]
-> ### `workspaces` Table Schema Mismatch vs. Soft Delete Requirement
-> - **The Issue**: The DDL in `database/migrations/03_tables.sql` and the specification in `database_architecture.md` define `workspaces` without a `deleted_at` column. However, the Sprint 3-3 instructions state: **"Soft Delete 정책 적용: deleted_at NULL -> 활성, NOT NULL -> 삭제"** and **"DDL DDL 수정은 금지한다 (DDL modification is forbidden)"**.
-> - **Proposed Solutions**:
->   - **Option A (Recommended)**: Allow a minor DDL migration extension to add `deleted_at TIMESTAMPTZ NULL` to the `workspaces` table so that database-level soft delete can function correctly.
->   - **Option B**: Simulate soft delete entirely at the application/mock level, which will not align with database queries.
->   - *Please advise on how to proceed.*
+> - **Soft Delete Refinement**: `BaseRepository.update()` and `delete()` will now append `.is('deleted_at', null)` to enforce that soft-deleted rows cannot be updated or re-deleted.
+> - **Database Constraint Check**: Duplicate checks on Workspace creation will catch database SQLSTATE `23505` constraints and map them to business error codes.
+> - **Pagination Limits & Sorting Whitelist**: Max pagination page (100,000) and limit (100) are enforced in Zod. Sort columns are strictly validated via Zod enum whitelist.
+> - **Market Domain (Read-Only)**: Only `GET /api/v1/markets` and `GET /api/v1/markets/:id` will be implemented. Mutation routes are out of scope.
 
 ---
 
 ## Proposed Changes
 
-We will implement the workspace module under `src/modules/workspace/`.
+We will apply modifications to the common layer and establish the Market module under `src/modules/market/`.
 
 ---
 
@@ -31,114 +22,104 @@ We will implement the workspace module under `src/modules/workspace/`.
 
 #### [MODIFY] [errors/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/common/errors/index.ts)
 Add custom error classes:
-- `WORKSPACE_NOT_FOUND` (404)
-- `WORKSPACE_ALREADY_EXISTS` (409)
-- `WORKSPACE_FORBIDDEN` (403)
+- `MARKET_NOT_FOUND` (404)
+- `MARKET_FORBIDDEN` (403)
 
 ---
 
-### Src - Base Repository
+### Src - Base Repository Refinement
 
-#### [NEW] [base.repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/repositories/interfaces/base.repository.ts)
-Interface declaration for reusable database operations:
+#### [MODIFY] [base.repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/repositories/implementations/base.repository.ts)
+- Update `update(id, data)` to include `.is('deleted_at', null)`.
+- Update `delete(id)` to include `.is('deleted_at', null)`.
+
+---
+
+### Src - Workspace Module Refinements
+
+#### [MODIFY] [schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/schema.ts)
+Enforce pagination boundaries and whitelist sorting columns via Zod:
 ```typescript
-export interface PaginationOptions {
-  page: number;
-  limit: number;
-  sort: string;
-  order: 'asc' | 'desc';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
-export interface IBaseRepository<T> {
-  findById(id: string): Promise<T | null>;
-  create(data: Partial<T>): Promise<T>;
-  update(id: string, data: Partial<T>): Promise<T>;
-  delete(id: string): Promise<void>;
-  exists(id: string): Promise<boolean>;
-}
+export const workspaceQuerySchema = z.object({
+  page: z.coerce.number().int().positive().max(100000).default(1),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+  sort: z.enum(['created_at', 'updated_at', 'name']).default('created_at'),
+  order: z.enum(['asc', 'desc']).default('desc'),
+});
 ```
 
-#### [NEW] [base.repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/repositories/implementations/base.repository.ts)
-Supabase concrete implementation of `IBaseRepository<T>`.
+#### [MODIFY] [service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/service.ts)
+Wrap `repository.create` in a try-catch to detect database constraint violation error code `23505` and map it to `WorkspaceAlreadyExistsError`.
 
 ---
 
-### Src - Workspace Module
+### Src - Market Migration
 
-#### [NEW] [types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/types.ts)
+#### [NEW] [29_add_market_deleted_at.sql](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/database/migrations/29_add_market_deleted_at.sql)
+Add `deleted_at` soft delete column to `market_metrics`:
+```sql
+ALTER TABLE market_metrics
+ADD COLUMN deleted_at TIMESTAMPTZ NULL;
+
+COMMENT ON COLUMN market_metrics.deleted_at IS '소프트 딜리트 삭제 처리 일시';
+```
+
+---
+
+### Src - Market Module
+
+#### [NEW] [types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/market/types.ts)
 Defines:
-- `Workspace` database entity interface matching DDL.
-- `IWorkspaceRepository` extending `IBaseRepository<Workspace>`.
+- `MarketMetric` database entity interface matching `market_metrics` DDL.
+- `IMarketRepository` extending `IBaseRepository<MarketMetric>`.
 
-#### [NEW] [dto.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/dto.ts)
-Defines DTO structures:
-- `CreateWorkspaceDto`
-- `UpdateWorkspaceDto`
-- `WorkspaceResponseDto`
-- Mapping helpers: `toResponseDto(entity: Workspace): WorkspaceResponseDto`
+#### [NEW] [dto.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/market/dto.ts)
+Defines:
+- `MarketResponseDto`
+- Mapping helpers: `toResponseDto(entity: MarketMetric): MarketResponseDto`
 
-#### [NEW] [schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/schema.ts)
+#### [NEW] [schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/market/schema.ts)
 Zod schemas:
-- `createWorkspaceSchema`: name (trimmed, 2-50 chars).
-- `updateWorkspaceSchema`: name (trimmed, 2-50 chars).
-- `workspaceIdParamSchema`: id (valid UUID).
-- `workspaceQuerySchema`: page, limit, sort, order.
+- `marketIdParamSchema`: id (valid UUID).
+- `marketQuerySchema`: page (max 100,000), limit (max 100), sort whitelisted columns (`total_monthly_search`, `trend_slope`, `seasonality_classification`), order (`asc`, `desc`).
 
-#### [NEW] [repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/repository.ts)
-Workspace repository:
-- `WorkspaceRepository` extends `BaseRepository<Workspace>` implements `IWorkspaceRepository`.
-- Exposes `findByName(name: string)` and `findAll(ownerId: string, options: PaginationOptions)`.
+#### [NEW] [repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/market/repository.ts)
+Market repository:
+- `MarketRepository` extends `BaseRepository<MarketMetric>` implements `IMarketRepository`.
+- Exposes:
+  - `findByIdWithOwner(id: string, ownerId: string): Promise<MarketMetric | null>`
+  - `findAllByOwner(ownerId: string, options: PaginationOptions): Promise<PaginatedResult<MarketMetric>>`
 
-#### [NEW] [service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/service.ts)
-Workspace Service:
-- `create(dto, userId)`: checks unique workspace name, creates workspace. Includes Audit Hook TODO comments and Transaction TODO structure.
-- `findAll(userId, options)`: fetches paginated workspaces.
-- `findById(id)`: fetches workspace by ID.
-- `update(id, dto, userId)`: checks owner matches userId (Owner verification), modifies name.
-- `delete(id, userId)`: checks owner matches userId, executes soft delete.
+#### [NEW] [service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/market/service.ts)
+Market Service:
+- `findAll(userId, options)`: fetches paginated market metrics belonging to workspaces owned by the user.
+- `findById(id, userId)`: fetches single market metric, verifying ownership.
 
-#### [NEW] [controller.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/controller.ts)
-Workspace Controller:
-- Processes input payloads, enforces DTO responses.
+#### [NEW] [controller.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/market/controller.ts)
+Market Controller:
+- Processes queries, maps entities to DTO responses.
 
-#### [NEW] [route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/workspace/route.ts)
-Sub-route registration:
-- `POST /`
+#### [NEW] [route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/market/route.ts)
+Routes registration:
 - `GET /`
 - `GET /:id`
-- `PATCH /:id`
-- `DELETE /:id`
-Enforces `authMiddleware` across all routes.
+Binds `authMiddleware` hook.
 
 ---
 
 ### Src - Application Route Registration
 
 #### [MODIFY] [app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts)
-Register workspace routes under `/api/v1/workspaces`.
+Register market routes under `/api/v1/markets`.
 
 ---
 
 ### Src - Unit & Integration Tests
 
-#### [NEW] [workspace.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/workspace.test.ts)
+#### [NEW] [market.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/market.test.ts)
 Integration tests via Vitest:
-- Create workspace successfully.
-- Get workspaces (pagination verification).
-- Get workspace by ID.
-- Update workspace successfully (owner check).
-- Update workspace failure (non-owner).
-- Delete workspace (soft delete verification).
-- Delete workspace failure (non-owner).
-- Duplicate workspace name prevention.
-- UUID validation checks on parameters.
+- Get markets (pagination validation, sort whitelist checking, pagination limit verification).
+- Get market by ID (UUID check, existence check, owner verification, soft-delete filtering).
 
 ---
 
@@ -151,7 +132,5 @@ Integration tests via Vitest:
 
 ### Manual Verification
 - Run local server `npm run dev` and test:
-  1. POST `http://localhost:3000/api/v1/workspaces`
-  2. GET `http://localhost:3000/api/v1/workspaces`
-  3. PATCH `http://localhost:3000/api/v1/workspaces/:id`
-  4. DELETE `http://localhost:3000/api/v1/workspaces/:id`
+  1. GET `http://localhost:3000/api/v1/markets`
+  2. GET `http://localhost:3000/api/v1/markets/:id`

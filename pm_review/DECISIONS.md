@@ -1,5 +1,15 @@
 # Project Decisions
 
+## Sprint 3-4
+
+- **BaseRepository 내 소프트 딜리트 수정/삭제 차단 정책**: Soft Delete 처리가 끝난 로우의 추가 수정 및 재삭제 연산을 차단하고자 `BaseRepository.update` 및 `delete`에 `.is('deleted_at', null)` 필터를 기본 기입함.
+- **Zod 기반의 페이징 상한 규격화 및 정렬 화이트리스트 검사**: page 최대 100,000, limit 최대 100 조건 및 명칭 화이트리스트 외 정렬을 라우트 Zod 검증 레이어에서 즉시 오류 반환 처리함.
+- **최종 중복 검사의 DB Constraint 위반 감지 이관**: 최종 중복 식별은 DB Unique Constraint를 의존하여 Supabase 23505 에러 감지를 통해 `WorkspaceAlreadyExistsError`로 변환하도록 구조 개선함.
+- **마켓 메트릭 다단계 조인 소유주 필터링**: `market_metrics` 테이블과 `workspaces`의 `org_id`를 연결하는 조인 경로 필터링을 Repository 단에 적용함.
+- **마켓 테이블 soft delete용 DDL 추가**: DDL 직접 수정 금지령에 맞추어 `29_add_market_deleted_at.sql` 마이그레이션을 신설 적용함.
+
+---
+
 ## Sprint 3-3
 
 - **workspaces.deleted_at 신규 마이그레이션 적용**: DDL 직접 수정 금지 정책에 의거하여, `28_add_workspace_deleted_at.sql`을 새로 생성하여 소프트 딜리트 타임스탬프 필드를 점진적으로 안전하게 추가함.
@@ -29,7 +39,7 @@
 
 ### [ADR-001] pgvector 기반 지식 메모리 아키텍처 채택
 * **날짜**: 2026-06-26
-* **결정**: 독립적인 Vector DB(예: Pinecone, Milvus)를 구축하는 대신, Supabase PostgreSQL의 `pgvector` 확장을 활용해 단일 하이브리드 데이터베이스로 운영합니다.
+* **결정**: 독립적인 Vector DB(예: Pinecone, Milvus)를 구축하는 대신, Supabase PostgreSQL of `pgvector` 확장을 활용해 단일 하이브리드 데이터베이스로 운영합니다.
 * **이유**:
   * **아키텍처 단순성**: 별도의 인프라 서버를 관리하지 않고, 트랜잭션 정보와 고밀도 임베딩 벡터 데이터를 단일 Supabase 인스턴스에서 통합 관계 조인(SQL JOIN)할 수 있습니다.
   * **보안 및 관리 편의성**: Supabase의 내장 인증(Auth) 및 RLS(Row Level Security) 정책을 그대로 벡터 데이터 검색 레이어에도 일관되게 적용할 수 있습니다.

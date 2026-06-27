@@ -1,1 +1,31 @@
-export class MarketController {}
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { MarketService } from './service.js';
+import { MarketQueryInput, MarketIdParamInput } from './schema.js';
+import { toResponseDto } from './dto.js';
+import { successResponse } from '@/common/responses/index.js';
+
+export class MarketController {
+  constructor(private readonly marketService: MarketService) {}
+
+  findAll = async (
+    request: FastifyRequest<{ Querystring: MarketQueryInput }>,
+    reply: FastifyReply
+  ): Promise<void> => {
+    const userId = request.user!.userId;
+    const paginated = await this.marketService.findAll(userId, request.query);
+    const result = {
+      ...paginated,
+      data: paginated.data.map(toResponseDto),
+    };
+    return reply.status(200).send(successResponse(result));
+  };
+
+  findById = async (
+    request: FastifyRequest<{ Params: MarketIdParamInput }>,
+    reply: FastifyReply
+  ): Promise<void> => {
+    const userId = request.user!.userId;
+    const metric = await this.marketService.findById(request.params.id, userId);
+    return reply.status(200).send(successResponse(toResponseDto(metric)));
+  };
+}

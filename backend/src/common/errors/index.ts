@@ -76,4 +76,16 @@ export class WorkspaceForbiddenError extends AppError {
   }
 }
 
+export class MarketNotFoundError extends AppError {
+  constructor(message: string = 'Market metric not found') {
+    super(404, 'MARKET_NOT_FOUND', message);
+  }
+}
+
+export class MarketForbiddenError extends AppError {
+  constructor(message: string = 'Forbidden access to market metric') {
+    super(403, 'MARKET_FORBIDDEN', message);
+  }
+}
+
 

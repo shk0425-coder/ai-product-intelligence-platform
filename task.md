@@ -1,16 +1,17 @@
-- [x] Create `database/migrations/28_add_workspace_deleted_at.sql` and run it
-- [x] Update `backend/src/common/errors/index.ts` with custom Workspace errors
-- [x] Create base repository interface in `backend/src/repositories/interfaces/base.repository.ts`
-- [x] Create base repository implementation in `backend/src/repositories/implementations/base.repository.ts`
-- [x] Create workspace module types in `backend/src/modules/workspace/types.ts`
-- [x] Create workspace module DTOs in `backend/src/modules/workspace/dto.ts`
-- [x] Create workspace module Zod validation schemas in `backend/src/modules/workspace/schema.ts`
-- [x] Create workspace repository in `backend/src/modules/workspace/repository.ts`
-- [x] Create workspace service in `backend/src/modules/workspace/service.ts` with owner checks, soft-delete, and audit hook stubs
-- [x] Create workspace controller in `backend/src/modules/workspace/controller.ts`
-- [x] Create workspace routes in `backend/src/modules/workspace/route.ts`
-- [x] Register `/api/v1/workspaces` routes in `backend/src/app.ts`
-- [x] Create Vitest workspace integration tests in `backend/tests/workspace.test.ts`
+- [x] Update `backend/src/repositories/implementations/base.repository.ts` with refined Soft Delete checks
+- [x] Update `backend/src/common/errors/index.ts` with custom Market errors
+- [x] Update `backend/src/modules/workspace/schema.ts` with pagination boundaries and sort whitelist
+- [x] Update `backend/src/modules/workspace/service.ts` with database unique constraint catch mapping
+- [x] Create `database/migrations/29_add_market_deleted_at.sql`
+- [x] Create market module types in `backend/src/modules/market/types.ts`
+- [x] Create market module DTOs in `backend/src/modules/market/dto.ts`
+- [x] Create market module Zod validation schemas in `backend/src/modules/market/schema.ts`
+- [x] Create market repository in `backend/src/modules/market/repository.ts`
+- [x] Create market service in `backend/src/modules/market/service.ts` with nested relational owner checks
+- [x] Create market controller in `backend/src/modules/market/controller.ts`
+- [x] Create market routes in `backend/src/modules/market/route.ts`
+- [x] Register `/api/v1/markets` routes in `backend/src/app.ts`
+- [x] Create Vitest market integration tests in `backend/tests/market.test.ts`
 - [x] Verify TypeScript compile check (`npm run build`) and ESLint style checks (`npm run lint`)
 - [x] Verify Vitest test execution (`npx vitest run`)
 - [x] Generate `backend_review.zip` in `pm_review/`

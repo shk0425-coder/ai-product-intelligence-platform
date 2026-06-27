@@ -96,18 +96,19 @@ DECISIONS.md
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
 * **현재 버전**: v0.9.0
 * **현재 단계**: Phase 4 - Evaluator & Generator Core Integration
-* **현재 Sprint**: Sprint 4-2 - JTBD 정보 모델 추출 프롬프트 엔진 모듈 구현 완료 (PM 검토 대기)
+* **현재 Sprint**: Sprint 4-3 - Product Strategy Generator (8-Step Storyboard Builder) 구현 완료 (PM 검토 대기)
 
 ---
 
 ## 2. Current Goal
-* **현재 Sprint**: Sprint 4-2 (JTBD 정보 모델 추출 프롬프트 엔진 모듈 구현)
-* **현재 작업 (Task)**: Sprint 4-2 완료 검토 대기
+* **현재 Sprint**: Sprint 4-3 (Product Strategy Generator 구현)
+* **현재 작업 (Task)**: Sprint 4-3 완료 검토 대기
 * **완료 조건 (Definition of Done)**:
-  1. Zod 스키마 및 zod-to-json-schema 를 이용해 JSON Schema 와 validator 단일 싱크 기법 적용 완료.
-  2. parser, validator, prompt, service 컴포넌트 분리 완료.
-  3. Vitest 유닛 테스트 작성 및 **100% 테스트 커버리지** 통과.
-  4. POS 문서 최신화 및 Git Push 자율 완수.
+  1. 8단계 상세페이지 스토리보드(Attention~CTA) 순서, 중복, 타입/이름 매칭 custom validator 탑재.
+  2. Zod Schema strict() 및 zod-to-json-schema 를 이용해 JSON Schema 와 validator 단일 싱크 기법 적용 완료.
+  3. parser, validator, prompt, service 컴포넌트 분리 완료.
+  4. Vitest 유닛 테스트 작성 및 **100% 테스트 커버리지** 통과.
+  5. POS 문서 최신화 및 Git Push 자율 완수.
 
 ---
 
@@ -128,7 +129,8 @@ DECISIONS.md
 * [x] **Sprint 3-7: AI Review Analyzer & JTBD Intelligence 완료** [APPROVED]
 * [x] **Sprint 3-8: AI Review Analysis Persistence Pipeline & Storage 완료** [APPROVED]
 * [x] **Sprint 4-1: 결정론적 룰 엔진 등급 계산기 구현 완료** [APPROVED]
-* [x] **Sprint 4-2: JTBD 정보 모델 추출 프롬프트 엔진 구현 완료** (schema/prompt/parser/validator/service/index 구현, 100% 커버리지 유닛 테스트 통과 완료)
+* [x] **Sprint 4-2: JTBD 정보 모델 추출 프롬프트 엔진 구현 완료** [APPROVED]
+* [x] **Sprint 4-3: Product Strategy Generator (8-Step Storyboard Builder) 구현 완료** (schema/prompt/parser/validator/service/index 구현, 100% 커버리지 유닛 테스트 통과 완료)
 
 ---
 
@@ -138,24 +140,24 @@ DECISIONS.md
 ---
 
 ## 5. Recent Decisions (최근 핵심 의사결정 - 최대 5개)
-1. **zod-to-json-schema 동기화 아키텍처** (2026-06-27): Zod Schema를 `zod-to-json-schema` 로 동적 변환하여 프롬프트에 주입하고 Validator도 이를 공유해 스키마 변경 시 두 요소가 100% 자동 동기화되도록 설계함.
-2. **Markdown 및 코드 블록 우회 정제** (2026-06-27): LLM의 마크다운 포맷팅 위반에 대응하여, parser단에서 trim 및 brace tracking 을 탑재해 순수 JSON만 안전하게 통과시키도록 구현함.
-3. **Stateless Pure Layer 설계 및 AIProvider DI 의존성 주입** (2026-06-27): DB, Repository, Rule Engine, Retry, Fallback 등 외부 요소를 격리하고 AI 호출부를 DI 방식으로 구성해 결합도를 원천 차단함.
-4. **결정론적 프롬프트 조립** (2026-06-27): 프롬프트 생성 시 Date, Random, Env의 개입을 금지하여 동일 입력 시 항상 동일한 프롬프트 문자열을 100% 결정론적으로 반환하도록 설계함.
-5. **엄격한 스키마 위반 감지(strict)** (2026-06-27): Zod 스키마 선언 시 `.strict()`를 설정하고 Validator 단에서 ZodError를 예외 throw 처리하여 LLM의 임의 필드 생성을 원천 차단함.
+1. **8단계 스토리보드 정합성 2차 유효성 검증(Custom Validation)** (2026-06-27): Zod 의 기본 타입 파싱에 더해 step 1~8 순차 배치, 중복, 타입 및 이름 일치를 validator.ts에 구현해 LLM의 이탈 가능성을 완전 차단함.
+2. **zod-to-json-schema 동기화 아키텍처** (2026-06-27): Zod Schema를 `zod-to-json-schema` 로 동적 변환하여 프롬프트에 주입하고 Validator도 이를 공유해 스키마 변경 시 두 요소가 100% 자동 동기화되도록 설계함.
+3. **Markdown 및 코드 블록 우회 정제** (2026-06-27): LLM의 마크다운 포맷팅 위반에 대응하여, parser단에서 trim 및 brace tracking 을 탑재해 순수 JSON만 안전하게 통과시키도록 구현함.
+4. **Stateless Pure Layer 설계 및 AIProvider DI 의존성 주입** (2026-06-27): DB, Repository, Rule Engine, Retry, Fallback 등 외부 요소를 격리하고 AI 호출부를 DI 방식으로 구성해 결합도를 원천 차단함.
+5. **결정론적 프롬프트 조립** (2026-06-27): 프롬프트 생성 시 Date, Random, Env의 개입을 금지하여 동일 입력 시 항상 동일한 프롬프트 문자열을 100% 결정론적으로 반환하도록 설계함.
 
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **Sprint 4-2 JTBD 정보 모델 추출 프롬프트 엔진 구현체 검토 및 승인 요청**:
-  - 대상 폴더/파일: `backend/src/modules/jtbd/` (Types, Constants, Schema, Parser, Validator, Prompt, Service, Index), `backend/tests/jtbd.test.ts`
-  - 검토 요점: Zod 기반 스키마 단일 싱크의 적정성, parser의 마크다운 백틱 정제성, validator의 타입/Enum/Nullability/길이 한계 검증 상세, Vitest 100% 커버리지 만족 여부.
+* **Sprint 4-3 Product Strategy Generator 구현체 검토 및 승인 요청**:
+  - 대상 폴더/파일: `backend/src/modules/product-strategy/` (Types, Constants, Schema, Parser, Validator, Prompt, Service, Index), `backend/tests/product-strategy.test.ts`
+  - 검토 요점: Zod 기반 스키마 단일 싱크의 적정성, 8단계 스토리보드(Attention~CTA) 순차 정합성 수동 검출의 정확성, parser의 마크다운 백틱 정제성, Vitest 100% 커버리지 만족 여부.
 
 ---
 
 ## 7. Next Action
 * **ChatGPT (PM)**:
-  1. 다음 마일스톤인 **[Sprint 4-3] Product Strategy Generator 구현 (상세페이지 8단계 스토리보드 빌드) 작업 지시서**를 작성해 주십시오.
+  1. 다음 마일스톤인 **[Sprint 4-4] Creative Pipeline (FLUX API 연동 및 이미지 프롬프트 빌더) 연동 작업 지시서**를 작성해 주십시오.
 
 ---
 
@@ -185,5 +187,5 @@ DECISIONS.md
 
 ## 11. Last Update
 * **업데이트 날짜**: 2026-06-27
-* **완료 Sprint**: Sprint 4-2 (JTBD 정보 모델 추출 프롬프트 엔진)
-* **다음 Sprint**: Sprint 4-3 (Product Strategy Generator 구현)
+* **완료 Sprint**: Sprint 4-3 (Product Strategy Generator)
+* **다음 Sprint**: Sprint 4-4 (Creative Pipeline 연동)

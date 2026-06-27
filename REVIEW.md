@@ -1,46 +1,46 @@
-# REVIEW.md (Sprint 4-2 Review)
+# REVIEW.md (Sprint 4-3 Review)
 
-본 문서는 **Sprint 4-2 (JTBD Information Extraction Prompt Engine)** 완료 후, **ChatGPT (Project Manager)**의 코드 리뷰와 승인을 지원하기 위해 작성된 스프린트 리뷰 보고서입니다.
+본 문서는 **Sprint 4-3 (Product Strategy Generator - 8-Step Storyboard Builder)** 완료 후, **ChatGPT (Project Manager)**의 코드 리뷰와 승인을 지원하기 위해 작성된 스프린트 리뷰 보고서입니다.
 
 ---
 
 ## 1. Sprint 정보
-* **Sprint 번호**: Sprint 4-2
-* **대상 작업**: AI Review Analyzer 수집 리뷰를 가공해 JTBD 정보(고객 요구)를 구조화하여 추출하는 프롬프트 엔진(`jtbd`) 모듈 설계 및 검증
-* **Commit Message**: `feat(jtbd): Sprint 4-2 JTBD Information Extraction Prompt Engine`
+* **Sprint 번호**: Sprint 4-3
+* **대상 작업**: JTBD 분석 결과와 AI Review Analysis 결과를 기반으로 판매 전략 중심의 상세페이지 8단계 스토리보드를 생성하는 `product-strategy` 모듈 설계 및 검증
+* **Commit Message**: `feat(product-strategy): Sprint 4-3 Product Strategy Generator`
 
 ---
 
 ## 2. 구현 내용
-* **Zod 기반 스키마 단일 정의 및 strict() 제한**:
-  * schema.ts 파일에 `jtbdAnalysisResultSchema` Zod 스키마를 정의하고 `.strict()` 제약을 설정하여 LLM 응답 시 규격 외 Unknown Field 차단 검증을 수행합니다.
-* **zod-to-json-schema 동기화**:
-  * Zod Schema를 `zod-to-json-schema` 라이브러리로 컴파일하여 Prompt String에 내장될 JSON Schema 7을 동적으로 생성하고, 이를 통해 스키마 변경 시 Prompt와 Validator가 단 하나의 선언으로 자동 100% 동기화되도록 아키텍처를 단순화했습니다.
+* **Zod strict 스키마 및 zod-to-json-schema 동기화**:
+  * schema.ts 파일에 `productStrategySchema` Zod 스키마를 선언하고 `.strict()` 제약을 인가해 Unknown Field 유입을 완벽 차단했습니다.
+  * Zod Schema를 `zod-to-json-schema` 로 동적 파싱하여 프롬프트의 JSON Schema 7 플레이스홀더를 채움으로써, 두 영역 간의 단일 지점 동기화 아키텍처를 계승했습니다.
 * **parser.ts 구현**:
-  * 마크다운 기호(\`\`\`json 등), 코드 블록, 설명 텍스트 등이 유입될 경우 JSON 괄호 시작과 끝을 감지해 순수 JSON만 발취해 내어 Zod 파싱 전단에서 완벽하게 정제합니다.
-* **validator.ts 구현**:
-  * Zod의 `safeParse` 를 통해 null/undefined 누락, 빈 문자열, Enum 범위 이탈, 문자/배열 최대 길이 한계 초과 등을 검사하며, 오류 발생 시 필드별 원인을 합산해 명확한 Error 메시지를 발생시킵니다.
+  * 마크다운 기호, 코드 블록, 설명글 등을 trim 및 brace index tracking 으로 걸러내어, 순수 JSON 본체만을 안전하게 분리해 Zod validator단으로 매핑합니다.
+* **validator.ts 구현 (Zod 검증 + Custom Validation)**:
+  * 1단계: Zod safeParse를 통한 타입, 필수 누락, null/undefined, 빈 문자열, strict check 검증.
+  * 2단계: 스토리보드 8단계 규격(정확히 8개 단계, step 1~8 순차 오름차순, 중복 없음, 단계 이름 및 타입이 `Attention`, `Problem`, `Empathy`, `Solution`, `Differentiation`, `Trust`, `Offer`, `CTA` 와 완벽히 일치하는지)을 순회 검사하여 불일치 시 명확한 에러를 throw 하도록 구축했습니다.
 * **prompt.ts 구현**:
-  * constants.ts 의 템플릿에 데이터(상품명, 키워드, 리뷰 목록, AI Review Analysis 요약) 및 JSON Schema를 포맷팅 주입하며, Date/Random/Env 등의 의존성이 전혀 없어 동일 인풋 시 100% 동일한 프롬프트 문자열이 결정론적으로 생성되도록 구축했습니다.
+  * constants.ts 의 템플릿에 데이터(상품명, 키워드, AI 분석 결과, JTBD 분석 결과) 및 JSON Schema를 매핑해 100회 결정성 보장 조립식 프롬프트 생성 엔진 구현.
 * **service.ts 및 index.ts 구현**:
-  * `AIProvider` 인터페이스를 주입(DI)받아 연동 오케스트레이션(Prompt ➡️ 호출 ➡️ Parsing ➡️ Validation ➡️ DTO 반환)을 수행하는 Stateless 계산 서비스 구조를 채택했습니다.
+  * 외부 자원에 무의존성인 Stateless Pure Function 구조를 유지하고 AIProvider를 DI 방식으로 안전하게 주입받는 계산 레이어 완비.
 * **테스트 및 린트**:
   * Vitest 유닛 테스트를 통해 경계값 분기, 에러 발생 상세, 결정론적 100회 실행, Mock DI Provider 연동을 입증하여 **커버리지 100%** 및 린트/컴파일 무오류를 확인했습니다.
 
 ---
 
 ## 3. 변경 파일
-* **jtbd 모듈 (신규)**:
-  * [backend/src/modules/jtbd/types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/jtbd/types.ts)
-  * [backend/src/modules/jtbd/constants.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/jtbd/constants.ts)
-  * [backend/src/modules/jtbd/schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/jtbd/schema.ts)
-  * [backend/src/modules/jtbd/parser.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/jtbd/parser.ts)
-  * [backend/src/modules/jtbd/validator.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/jtbd/validator.ts)
-  * [backend/src/modules/jtbd/prompt.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/jtbd/prompt.ts)
-  * [backend/src/modules/jtbd/service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/jtbd/service.ts)
-  * [backend/src/modules/jtbd/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/jtbd/index.ts)
+* **product-strategy 모듈 (신규)**:
+  * [backend/src/modules/product-strategy/types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/product-strategy/types.ts)
+  * [backend/src/modules/product-strategy/constants.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/product-strategy/constants.ts)
+  * [backend/src/modules/product-strategy/schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/product-strategy/schema.ts)
+  * [backend/src/modules/product-strategy/parser.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/product-strategy/parser.ts)
+  * [backend/src/modules/product-strategy/validator.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/product-strategy/validator.ts)
+  * [backend/src/modules/product-strategy/prompt.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/product-strategy/prompt.ts)
+  * [backend/src/modules/product-strategy/service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/product-strategy/service.ts)
+  * [backend/src/modules/product-strategy/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/product-strategy/index.ts)
 * **테스트**:
-  * [backend/tests/jtbd.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/jtbd.test.ts)
+  * [backend/tests/product-strategy.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/product-strategy.test.ts)
 
 ---
 
@@ -49,12 +49,12 @@
  RUN  v1.6.1 /Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend
       Coverage enabled with v8
 
- ✓ tests/jtbd.test.ts  (19 tests) 22ms
+ ✓ tests/product-strategy.test.ts  (19 tests) 25ms
 
  Test Files  1 passed (1)
       Tests  19 passed (19)
-   Start at  22:20:31
-   Duration  246ms (transform 50ms, setup 0ms, collect 70ms, tests 21ms, environment 0ms, prepare 68ms)
+   Start at  22:28:41
+   Duration  241ms (transform 61ms, setup 0ms, collect 75ms, tests 25ms, environment 0ms, prepare 54ms)
 
  % Coverage report from v8
 --------------|---------|----------|---------|---------|-------------------
@@ -75,7 +75,7 @@ All files     |     100 |      100 |     100 |     100 |
 ---
 
 ## 5. Self Review
-* [x] **Zod 및 JSON Schema 단일 정의 준수**: `zod-to-json-schema` 를 통해 validator용 Zod 와 프롬프트용 스키마 문자열을 중복 없이 한곳에서 싱크 처리했습니다.
+* [x] **Zod 및 Custom Double-Check 유효성 검사**: Zod 의 syntax 체크에 머무르지 않고 8단계 배치, 중복/누락, 타입/이름 매칭을 수동 validator.ts에 추가 이식해 LLM의 논리적 이탈을 100% 검출합니다.
 * [x] **Markdown/자연어 설명 우회 정제**: 파서 단에서 trim 및 brace index tracking 을 이식해 LLM이 규격을 위반하고 마크다운 코드블록을 반환해도 에러 없이 안전하게 정제 파싱을 완료합니다.
 * [x] **외부 의존성 배제**: Math.random(), new Date(), DB/Repository/Rule Engine 접근을 일절 금지하여 Pure한 Stateless Layer를 유지했습니다.
 * [x] **100% 커버리지 만족**: Statements, Lines, Branches, Functions 모두 누락 없이 커버리지 100% 만족.

@@ -1,5 +1,15 @@
 # Project Decisions
 
+## Sprint 4-3
+
+- **8단계 스토리보드 정합성 2차 유효성 검증(Custom Validation)**: Zod 의 기본 타입 파싱에 더해 step 1~8 순차 배치, 중복, 타입 및 이름 일치를 validator.ts에 구현해 LLM의 이탈 가능성을 완전 차단함.
+- **zod-to-json-schema 동기화 아키텍처**: Zod Schema를 `zod-to-json-schema` 로 동적 변환하여 프롬프트에 주입하고 Validator도 이를 공유해 스키마 변경 시 두 요소가 100% 자동 동기화되도록 설계함.
+- **Markdown 및 코드 블록 우회 정제**: LLM의 마크다운 포맷팅 위반에 대응하여, parser단에서 trim 및 brace tracking 을 탑재해 순수 JSON만 안전하게 통과시키도록 구현함.
+- **Stateless Pure Layer 설계 및 AIProvider DI 의존성 주입**: DB, Repository, Rule Engine, Retry, Fallback 등 외부 요소를 격리하고 AI 호출부를 DI 방식으로 구성해 결합도를 원천 차단함.
+- **결정론적 프롬프트 조립**: 프롬프트 생성 시 Date, Random, Env의 개입을 금지하여 동일 입력 시 항상 동일한 프롬프트 문자열을 100% 결정론적으로 반환하도록 설계함.
+
+---
+
 ## Sprint 4-2
 
 - **zod-to-json-schema 동기화 아키텍처**: Zod Schema를 `zod-to-json-schema` 로 동적 변환하여 프롬프트에 주입하고 Validator도 이를 공유해 스키마 변경 시 두 요소가 100% 자동 동기화되도록 설계함.

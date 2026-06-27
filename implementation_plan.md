@@ -1,23 +1,35 @@
-# Implementation Plan: Sprint 4-2 JTBD Information Extraction Prompt Engine
+# Implementation Plan: Sprint 4-3 Product Strategy Generator (8-Step Storyboard Builder)
 
-본 스프린트(4-2)에서는 AI Review Analyzer가 수집한 리뷰 데이터를 기반으로 JTBD(Job To Be Done) 정보를 구조화하여 추출하는 `jtbd` 모듈을 구축합니다.
+본 스프린트(4-3)에서는 JTBD 분석 결과와 AI Review Analysis 결과를 기반으로 판매 전략 중심의 상세페이지 8단계 스토리보드를 생성하는 `product-strategy` 모듈을 신설 구축합니다.
 
-본 모듈은 Database, Repository, Rule Engine과 완전히 분리된 독립 모듈이며, Prompt 생성, AI 호출, 응답 Parsing, Schema Validation만 담당하는 Stateless 레이어로 구현합니다.
+이 모듈은 데이터베이스 저장 및 HTML/이미지 렌더링 파이프라인과 격리되어, 오직 입력 가공, 8단계 구조 정합성 검증, AI 호출 및 DTO 반환 흐름만을 전담하는 Stateless Pure Function 레이어로 완성합니다.
 
 ---
 
-# Proposed Changes
+## User Review Required
 
-신규 모듈 생성
+> [!IMPORTANT]
+> **1. 8단계 스토리보드 정합성 2차 유효성 검증 (Custom Validation)**
+> Zod의 기본 JSON 타입 검증을 마친 후, `validator.ts`에서 상세페이지 8단계 스토리보드 규격(정확히 8개 단계, Step 1~8 순차 배치, 중복 금지, 타입 및 이름 일치)에 대해 2차 정밀 수동 검사를 강제합니다. 이로써 LLM의 구조적 이탈 가능성을 100% 방어합니다.
+> 
+> **2. 8단계 스토리보드 강제 순서 (Storyboard Rules)**
+> Prompt에 아래 순서를 강제하여 생성 품질과 정합성을 보장합니다.
+> `1 Attention ➡️ 2 Problem ➡️ 3 Empathy ➡️ 4 Solution ➡️ 5 Differentiation ➡️ 6 Trust ➡️ 7 Offer ➡️ 8 CTA`
+
+---
+
+## Proposed Changes
+
+새로운 모듈을 생성합니다.
 
 ```text
-backend/src/modules/jtbd/
+backend/src/modules/product-strategy/
 ```
 
 구성
 
 ```text
-jtbd/
+product-strategy/
     prompt.ts
     schema.ts
     parser.ts
@@ -30,302 +42,74 @@ jtbd/
 
 ---
 
-# backend/src/modules/jtbd/
+## 1. backend/src/modules/product-strategy/
 
-## [NEW] types.ts
+### [NEW] types.ts
+* `ProductStrategyInput`, `ProductStrategyResult`, `Storyboard`, `StoryboardStep`, `CustomerEmotion`, `CustomerQuestion`, `SellingPoint`, `RecommendedContent`, `CTA` 타입 정의.
+* `StoryboardStepType` Enum 타입('Attention' | 'Problem' | 'Empathy' | 'Solution' | 'Differentiation' | 'Trust' | 'Offer' | 'CTA') 선언.
 
-정의
+### [NEW] constants.ts
+* `PROMPT_VERSION` 상수 선언.
+* `PROMPT_TEMPLATE`: Role, Objective, Input Data, Storyboard Rules, JSON Schema, Constraints 플레이스홀더 템플릿 정의.
+* `STORYBOARD_STEPS`: 스텝별 번호(1~8), 타입(StoryboardStepType), 이름 매칭 테이블 상수 정의.
+* `VALIDATION_LIMITS`: 문자열 최대/최소 길이 선언.
+* `MAX_TOKENS`, `TEMPERATURE`: AI 호출용 하이퍼 파라미터.
+* `OUTPUT_RULES` 선언.
 
-* JTBDAnalysisInput
-* JTBDAnalysisResult
-* JTBD
-* PainPoint
-* DesiredOutcome
-* PurchaseMotivation
-* PurchaseBarrier
-* UsageContext
-* CustomerSegment
-* UnexpectedInsight
+### [NEW] schema.ts
+* `productStrategySchema`: Zod 기반 strict() 검증 스키마 정의 (스토리보드 array min(8)/max(8) 및 세부 DTO).
+* `getJsonSchemaString()`: `zod-to-json-schema`를 호출해 템플릿용 JSON Schema v7 문자열 반환.
 
-Enum
+### [NEW] parser.ts
+* `parseResponse(raw)`: markdown 백틱 정제 및 JSON Parse 수행 (jtbd 파서 정제식 이식).
 
-* Severity
-* Priority
+### [NEW] validator.ts
+* `validateResult(parsed)`:
+  * 1단계: Zod schema validation (타입 오류, Required 누락, null/undefined, 빈 문자열, strict unknown key 체크).
+  * 2단계: 8개 단계 여부, step 1~8 번호 검사, 중복/누락 검사, 순서 유지 검사, 단계 이름 일치 검사 (`STORYBOARD_STEPS` 테이블 순차 매칭).
+  * 실패 시 상세 에러 throw.
 
----
+### [NEW] prompt.ts
+* `buildPrompt(input)`: 상품명, 키워드, JTBD 결과, AI 감성/리뷰 요약을 템플릿에 이식해 결정론적 스토리보드 생성 프롬프트 빌드.
 
-## [NEW] constants.ts
+### [NEW] service.ts
+* `ProductStrategyService`: `AIProvider` 를 DI 방식으로 주입받아 Prompt 빌드 ➡️ AI 호출 ➡️ Parsing ➡️ Validation ➡️ DTO 반환의 Stateless 오케스트레이션 수행.
 
-관리 대상
-
-* PROMPT_VERSION
-* PROMPT_TEMPLATE
-* MAX_REVIEWS
-* MAX_TOKENS
-* TEMPERATURE
-* VALIDATION_LIMITS
-* OUTPUT_RULES
-
-Prompt 내부 문자열 및 Validation 관련 상수는 모두 이 파일에서만 관리한다.
+### [NEW] index.ts
+* 외부 연동용 Service, Types, Constants 일괄 export.
 
 ---
 
-## [NEW] schema.ts
+## 2. 테스트 명세
 
-Zod Schema 단일 정의
+### [NEW] tests/product-strategy.test.ts
 
-```text
-jtbdAnalysisResultSchema
-```
-
-Schema는 반드시 `.strict()`를 사용한다.
-
-Prompt용 JSON Schema와 Runtime Validator는 동일한 Zod Schema를 공유한다.
-
-JSON Schema는
-
-```text
-zod-to-json-schema
-```
-
-를 이용하여 생성한다.
-
-Schema를 중복 작성하지 않는다.
+* **Prompt Spec**: 동일 입력 100회 실행 시 항상 동일한 프롬프트 조립 문자열이 생성되는지 검증 (Date, Random 무의존성).
+* **Schema Spec**: Zod 스키마로부터 생성된 JSON Schema 가 Prompt 내용 내 `{jsonSchema}` 와 일치하는지 검증.
+* **Parser Spec**: 정상 JSON, 백틱 정제 파싱, 잘못된 포맷(Invalid JSON) 입력 시 에러 발산 검증.
+* **Validator Spec**:
+  * Storyboard 단계 개수 미달/초과(예: 7개 혹은 9개) 시 에러 검사.
+  * Step 순서가 뒤섞였거나 누락이 있는 경우(예: step 1, 3, 2, 4...) 에러 검사.
+  * Step 타입/이름 명칭이 불일치하는 경우 에러 검사.
+  * Required 필드 누락, Unknown field 존재 시 Zod.strict() 검출 검사.
+  * null, undefined, 빈 문자열, 최대 길이 초과 시 검출 검사.
+* **Service Spec**: Prompt ➡️ AI ➡️ Parser ➡️ Validator ➡️ DTO 전체 흐름 및 Mock Provider 1회 호출 정합성 검증.
+* **Coverage**: `product-strategy` 모듈 Statements/Branches/Lines/Functions 100% 커버리지 검증.
 
 ---
 
-## [NEW] parser.ts
+## Verification Plan
 
-역할
-
-* Markdown 제거
-* Code Block 제거
-* JSON 추출
-* JSON Parse
-
-Validation 수행 금지
-
-비즈니스 로직 금지
-
-Prompt 수정 금지
-
----
-
-## [NEW] validator.ts
-
-검증
-
-* Required Field
-* Unknown Field
-* Enum
-* Number
-* String
-* Array
-* Object
-* null
-* undefined
-* 빈 문자열
-* 최대 길이
-* 최소 길이
-
-Validation 실패 시 명확한 Error를 발생시킨다.
-
----
-
-## [NEW] prompt.ts
-
-Prompt 생성 전담
-
-입력
-
-* 상품명
-* 키워드
-* 리뷰 목록
-* AI Review Analysis 결과
-
-출력
-
-Prompt String
-
-Prompt에는 반드시 포함
-
-* Role
-* Objective
-* Input Data
-* Output Rules
-* JSON Schema
-* Constraints
-
-동일 입력는 항상 동일 Prompt를 생성해야 한다.
-
----
-
-## [NEW] service.ts
-
-실행 순서
-
-```text
-Prompt 생성
-
-↓
-
-AI 호출
-
-↓
-
-Parser
-
-↓
-
-Validator
-
-↓
-
-DTO 반환
-```
-
-Retry
-
-Fallback
-
-Database
-
-Repository
-
-Rule Engine
-
-비즈니스 로직
-
-모두 금지
-
-AI Provider는 생성하지 않고 DI(Dependency Injection) 방식으로 주입받아 사용한다.
-
----
-
-## [NEW] index.ts
-
-Export
-
-* Service
-* Types
-* Constants
-
----
-
-# AI 출력 규칙
-
-AI는 반드시 JSON만 반환한다.
-
-금지
-
-* Markdown
-* Code Block
-* 설명
-* 자연어
-* 주석
-* Schema 외 Field
-
----
-
-# 테스트
-
-## tests/jtbd.test.ts
-
-### Prompt
-
-동일 입력
-
-100회 실행
-
-동일 Prompt 생성
-
----
-
-### Schema
-
-Prompt에 포함된 JSON Schema와
-
-Validator가 사용하는 Zod Schema가 항상 동일함을 검증
-
----
-
-### Parser
-
-* 정상 JSON
-* Markdown JSON
-* Code Block JSON
-* Invalid JSON
-* 설명 포함 JSON
-
----
-
-### Validator
-
-* Required Field 누락
-* Unknown Field
-* Enum 오류
-* 잘못된 타입
-* null
-* undefined
-* 빈 문자열
-* 최대 길이 초과
-
----
-
-### Service
-
-* Prompt → AI → Parser → Validator → DTO 전체 흐름 검증
-* AI Provider Mock 주입 검증
-* Provider 호출 횟수 검증(1회)
-* Validation 실패 시 예외 전파 검증
-
----
-
-### Coverage
-
-jtbd 모듈
-
-Statements 100%
-
-Lines 100%
-
-Functions 100%
-
-Branches 100%
-
----
-
-# Verification Plan
-
+### Automated Tests
 ```bash
-npx vitest run tests/jtbd.test.ts
+npx vitest run tests/product-strategy.test.ts
 npm run lint
 npm run build
-npx vitest run --coverage --coverage.include="src/modules/jtbd/**" tests/jtbd.test.ts
+npx vitest run --coverage --coverage.include="src/modules/product-strategy/**" tests/product-strategy.test.ts
 ```
 
 성공 조건
-
 * Vitest 전체 통과
 * ESLint 오류 0건
 * TypeScript Strict 오류 0건
-* jtbd 모듈 Coverage 100%
-
----
-
-# 구현 원칙
-
-다음 기능은 구현하지 않는다.
-
-* Database 접근
-* Repository 사용
-* Rule Engine 호출
-* Retry
-* Fallback
-* Date
-* Date.now()
-* new Date()
-* Math.random()
-* Environment 접근
-
-입력 → 출력만 수행하는 Stateless 구조를 유지한다.
+* `product-strategy` 모듈 커버리지 100% 만족

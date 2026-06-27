@@ -7,24 +7,25 @@
 ## 1. Project Summary
 * **프로젝트명**: AI Product Intelligence Platform
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
-* **현재 버전**: v0.6.0
+* **현재 버전**: v0.7.0
 * **현재 단계**: Phase 3 - Scaffolding Backend & Scraper
-* **현재 Sprint**: Sprint 3-6 - Review Intelligence Pipeline & First Provider Integration 완료 (PM 검토 대기)
+* **현재 Sprint**: Sprint 3-7 - AI Review Analyzer & JTBD Intelligence 완료 (PM 검토 대기)
 
 ---
 
 ## 2. Current Goal
-* **현재 Sprint**: Sprint 3-6 (Review Intelligence Pipeline & First Provider Integration)
-* **현재 작업 (Task)**: Sprint 3-6 완료 검토 대기
+* **현재 Sprint**: Sprint 3-7 (AI Review Analyzer & JTBD Intelligence)
+* **현재 작업 (Task)**: Sprint 3-7 완료 검토 대기
 * **완료 조건 (Definition of Done)**:
-  1. Keyword ➡️ Review Provider ➡️ Review Mapper ➡️ Review Repository ➡️ customer_reviews 흐름 완비.
-  2. 실제 Naver Shopping Smartstore API 연동 프로바이더 개발 및 AbortController 기반 10초 타임아웃, 3회 재시도, 1s/2s/4s Exponential Backoff 장애 처리 장착.
-  3. DTO 표준 구조 설계 및 Mapper를 통한 Null 필드 기본값 가공. 중복 삽입 감지를 위해 `provider`, `productId`, `reviewId` 조합의 deterministic UUID 생성기 장착.
-  4. Repository 내 `ON CONFLICT (review_id, collected_at) DO NOTHING` 기반 `upsert` 실행으로 중복은 `duplicateCount`로 분류하고 그 외 DB 오류는 `failedCount`로 정확히 분류 반환.
-  5. DB DDL 스키마 및 마이그레이션 변경 없이, NOT NULL 외래키 제약조건(`run_id`) 충족을 위해 DB 내 기존 `run_id` 동적 바인딩 및 fallback UUID 장치 구현.
-  6. API endpoint `POST /api/v1/reviews/crawl` 개발, JWT 인증 및 Zod 유효성 검증 적용.
-  7. Vitest를 활용하여 Provider, Mapper, Repository, API 모의/통합 테스트 총 57개 성공 완수.
-  8. `REVIEW.md`, `CONTEXT.md`, `DECISIONS.md` 갱신 및 Git Commit & Push 완료.
+  1. AI 모듈(`modules/ai/`)을 독립 설계하여 비즈니스 레이어 격리.
+  2. Gemini API 호출용 `GeminiProvider`를 Node.js 내장 `fetch` 기반으로 무의존성 경량 구현 및 60초 타임아웃, 2회 재시도, Exponential backoff(1s, 2s) 이식.
+  3. `PromptBuilder`를 Role -> Task -> Rules -> Output JSON Schema -> Review Data 구조로 컴파일하도록 제어.
+  4. 토큰 연산식 및 4096 한계 도달 시 수집 일시 기준 최신 리뷰 목록만 유지하고 자동 절단하는 `TokenManager` 이식.
+  5. Markdown 백틱을 제거하고 파싱하는 `ResponseParser` 및 Zod / 100% 비율 검사를 수행하는 2단계 `AIValidator` 구축.
+  6. Database 저장 금지 정책 준수 (DB 적재 생략 및 스키마 변경 미수행).
+  7. API endpoint `POST /api/v1/reviews/analyze` 개발, JWT 인증 및 Zod 유효성 검증 적용.
+  8. Vitest를 활용하여 7개 테스트 파일 총 73개 성공 완수.
+  9. `REVIEW.md`, `CONTEXT.md`, `DECISIONS.md` 갱신 및 Git Commit & Push 완료.
 
 ---
 
@@ -41,7 +42,8 @@
 * [x] **Sprint 3-3: Workspace API & Database 연동 개발 완료** [APPROVED]
 * [x] **Sprint 3-4: Sprint 3-3 개선사항 반영 및 Market Domain 구축 완료** [APPROVED]
 * [x] **Sprint 3-5: Market Mutations & Scraper Infrastructure Setup 완료** [APPROVED]
-* [x] **Sprint 3-6: Review Intelligence Pipeline & First Provider Integration 완료** (Smartstore 실연동, Mapper, Repo, Crawl API, Timeout/Retry 회복성 연동 및 DB Freeze 유지 완료)
+* [x] **Sprint 3-6: Review Intelligence Pipeline & First Provider Integration 완료** [APPROVED]
+* [x] **Sprint 3-7: AI Review Analyzer & JTBD Intelligence 완료** (AI 분석 엔진 분리, TokenManager, Gemini Provider, Parser, Validator, Analyze API 구현 완료 및 DB 저장 생략 준수)
 
 ---
 
@@ -51,24 +53,24 @@
 ---
 
 ## 5. Recent Decisions (최근 핵심 의사결정 - 최대 5개)
-1. **Database Freeze 원칙 준수** (2026-06-27): 스키마 변경, 신규 컬럼 추가 및 마이그레이션 생성을 완전히 지양하고, 기존 `customer_reviews` 테이블의 NOT NULL 외래키 제약조건(`run_id`) 충족을 위해 DB 내 기존 `run_id` 동적 바인딩 및 fallback UUID 장치를 통해 데이터 삽입을 처리함.
-2. **Exponential Backoff Retry 및 AbortController Timeout 적용** (2026-06-27): HTTP 429/403/Timeout 에러 발생 시 최대 3회 재시도를 지원하며 Exponential Backoff (1초 -> 2초 -> 4초) 및 요청당 최대 10초 타임아웃 제한을 Naver Shopping Provider에 적용하여 회복성을 강화함.
-3. **Deterministic UUID 생성기를 통한 Duplicate 감지** (2026-06-27): 중복 리뷰가 데이터베이스의 composite primary key `(review_id, collected_at)` 상에서 동일 UUID 충돌을 일으키도록 `provider`, `productId`, `reviewId` 조합의 SHA-256 해싱 deterministic UUID 생성기를 Mapper에 설계함.
-4. **의존성 추가 배제 목적의 Node.js 내장 fetch 및 AbortController 활용** (2026-06-27): `axios` 설치를 피해 패키지 종속성을 최소화하고자 Node.js v18+ 글로벌 내장 fetch 및 AbortController API를 도입함.
-5. **Crawl API 역할 한정** (2026-06-27): AI 분석 및 감성 분석을 제외하고 순수 수집/매핑/DB 적재 및 결과 카운트 반환 단계로만 역할을 한정하여 파이프라인의 결합도를 낮춤.
+1. **AI 분석 영속 저장 배제 정책** (2026-06-27): 이번 스프린트에서는 데이터 저장을 완전히 금지하고 분석 수행 후 API Response까지만 결과를 구성해 반환하도록 아키텍처를 단순화함.
+2. **Token Manager 컴포넌트 신설 및 Truncation** (2026-06-27): 프롬프트 토큰 계산(`Math.ceil(length / 3)`) 및 최대 토큰 제한(4096 tokens)을 도입하고, 토큰 한계 초과 시 수집 일시(`collected_at`)를 기준으로 정렬하여 최신 리뷰는 유지하고 초과 분을 절단하는 기능을 TokenManager에 설계함.
+3. **AI Provider Framework 및 Request Options 표준화** (2026-06-27): `AIProvider` 인터페이스 시그니처에 `options: AIRequestOptions`를 통합 적용하여 모델 정보, 온도(`0.2`), 타임아웃(`60초`), 최대 출력 토큰(`4096`), 버전(`v1`) 등을 유연하게 주입받도록 구성함.
+4. **다단계 유효성 검증 적용** (2026-06-27): AI 응답의 구조 및 신뢰성을 검증하기 위해 Zod schema validation과 긍정/부정 비율 백분율 합산 100% 조건 불충족 시 `AIResponseValidationError`를 throw 하는 Business validation 레이어를 통합함.
+5. **무의존성 Gemini Provider 이식** (2026-06-27): 외부 npm 의존성을 늘리지 않고 native fetch와 AbortController를 사용하여 60초 Timeout, 2회 Retry, Exponential Backoff를 안전하게 처리함.
 
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **Sprint 3-6 Review Pipeline & Naver Smartstore API 실연동 구현체 검토 및 승인 요청**:
-  * 대상 폴더/파일: `backend/src/modules/review/`, `backend/src/modules/scraper/providers/naver-review.provider.ts`, `backend/tests/review-pipeline.test.ts`
-  * 검토 요점: 내장 fetch 기반 Naver Smartstore JSON 수집 및 Retry/Timeout 동작성, Mapper Null 기본값 처리, Repo Bulk Insert 및 Skip 카운트 테스트 정합성.
+* **Sprint 3-7 AI Review Analyzer Engine 구현체 검토 및 승인 요청**:
+  * 대상 폴더/파일: `backend/src/modules/ai/`, `backend/tests/review-analysis.test.ts`
+  * 검토 요점: TokenManager 한도 연산 및 최신 순 Truncation, 2단계 Validation(Zod 및 sentiment 합산 100%), Gemini fetch Retry/Timeout 및 DB 미저장 정책 준수 여부.
 
 ---
 
 ## 7. Next Action
 * **ChatGPT (PM)**:
-  1. 다음 마일스톤인 **[Sprint 3-7] AI Review Analyzer & JTBD 분석 작업 지시서**를 작성해 주십시오.
+  1. 다음 마일스톤인 **[Sprint 3-8] AI Review Analysis Persistent Pipeline & Storage 작업 지시서**를 작성해 주십시오.
 
 ---
 
@@ -99,5 +101,5 @@
 
 ## 11. Last Update
 * **업데이트 날짜**: 2026-06-27
-* **완료 Sprint**: Sprint 3-6 (Review Intelligence Pipeline & First Provider Integration)
-* **다음 Sprint**: Sprint 3-7 (AI Review Analyzer)
+* **완료 Sprint**: Sprint 3-7 (AI Review Analyzer & JTBD Intelligence)
+* **다음 Sprint**: Sprint 3-8 (Analysis Persistence Pipeline)

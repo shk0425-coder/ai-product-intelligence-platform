@@ -94,4 +94,10 @@ export class MarketMetricAlreadyExistsError extends AppError {
   }
 }
 
+export class AIResponseValidationError extends AppError {
+  constructor(message: string = 'AI response validation failed') {
+    super(422, 'AI_RESPONSE_VALIDATION_ERROR', message);
+  }
+}
+
 

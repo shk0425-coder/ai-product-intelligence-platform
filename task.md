@@ -1,16 +1,20 @@
-- [x] Create `backend/src/modules/review/types.ts` defining ReviewDto and Repository interface
-- [x] Create `backend/src/modules/review/dto.ts` defining request/response structures
-- [x] Create `backend/src/modules/review/mapper.ts` implementing DTO translation and default mapping
-- [x] Create `backend/src/modules/review/repository.ts` implementing bulk inserts with conflict handling
-- [x] Create `backend/src/modules/review/service.ts` implementing the crawling pipeline flow
-- [x] Create `backend/src/modules/review/controller.ts` processing crawl requests
-- [x] Create `backend/src/modules/review/schema.ts` for Zod validations
-- [x] Create `backend/src/modules/review/route.ts` registering crawl route
-- [x] Create `backend/src/modules/scraper/providers/naver-review.provider.ts` with timeout and backoff retry logic
-- [x] Register review routes in `backend/src/app.ts`
-- [x] Create integration tests in `backend/tests/review-pipeline.test.ts`
+- [x] Add `AIResponseValidationError` to `backend/src/common/errors/index.ts`
+- [x] Create `backend/src/modules/ai/types.ts` defining options, results, and interfaces
+- [x] Create `backend/src/modules/ai/provider.ts` defining provider interface
+- [x] Create `backend/src/modules/ai/provider-factory.ts` creating provider instances
+- [x] Create `backend/src/modules/ai/providers/gemini.provider.ts` implementing native fetch Gemini call with retry/timeout
+- [x] Create `backend/src/modules/ai/prompt-builder.ts` combining role/task/rules/schema/reviews
+- [x] Create `backend/src/modules/ai/token-manager.ts` truncating reviews by date and token limits
+- [x] Create `backend/src/modules/ai/parser.ts` extracting raw JSON block from raw response
+- [x] Create `backend/src/modules/ai/validator.ts` for Zod and 100% sentiment sum business checks
+- [x] Create `backend/src/modules/ai/service.ts` executing the analytical pipeline
+- [x] Create `backend/src/modules/ai/controller.ts` mediating request validation and API outputs
+- [x] Create `backend/src/modules/ai/schema.ts` for Zod request validators
+- [x] Create `backend/src/modules/ai/route.ts` mounting the analyze route
+- [x] Register review analyze routes in `backend/src/app.ts`
+- [x] Create integration tests in `backend/tests/review-analysis.test.ts`
 - [x] Verify TypeScript compile check (`npm run build`) and ESLint style checks (`npm run lint`)
 - [x] Verify Vitest test execution (`npx vitest run`)
-- [x] Generate `backend_review.zip` containing only Sprint 3-6 changed files
-- [x] Update `pm_review/REVIEW.md`, `pm_review/CONTEXT.md`, and `pm_review/DECISIONS.md`
-- [x] Commit and push changes to develop branch
+- `[ ]` Generate `backend_review.zip` containing only Sprint 3-7 changed files
+- `[ ]` Update `pm_review/REVIEW.md`, `pm_review/CONTEXT.md`, and `pm_review/DECISIONS.md`
+- `[ ]` Commit and push changes to develop branch

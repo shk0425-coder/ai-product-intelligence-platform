@@ -1,188 +1,132 @@
-# Sprint 3-6: Review Intelligence Pipeline & First Provider Integration Implementation Plan (Final Approved)
+# Sprint 3-7: AI Review Analyzer & JTBD Intelligence Implementation Plan (Final Approved)
 
-Implementation plan to build the Review Intelligence Pipeline, define the standard Review DTO, construct the Review Mapper, implement the Review Repository, and build the Crawl API under a frozen database schema.
+Implementation plan to build the AI Review Analyzer Engine, including PromptBuilder, TokenManager, ProviderFactory, GeminiProvider, ResponseParser, Zod/Business validators, and the Analyze API.
 
 ---
 
 ## 1. Sprint 목표
-* **Review Pipeline 구축**: Keyword -> Provider -> Mapper -> Repository -> Database로 이어지는 플랫폼 비종속적인 수집 파이프라인 구축.
-* **첫 번째 Provider 연동**: 실제 Naver Shopping 상품 리뷰 공개 API를 첫 번째 수집 Provider로 연동 (Timeout, Retry, Backoff 포함).
-* **Crawl API 개발**: `POST /api/v1/reviews/crawl` API 개발 및 Zod 유효성 검사 (runId 배제).
+* **AI Module 구축**: `modules/ai/` 하위에 AI 분석 기능 설계 및 독립성 유지.
+* **Gemini Provider 연동**: Gemini API를 이용한 정교한 프롬프트 제어, Timeout(60초) 및 Retry(최대 2회) exponential backoff 탑재.
+* **Token Manager 개발**: Prompt 길이 계산, 최대 Token 제한(4096 tokens), 초과 시 최신 리뷰부터 보존하여 리뷰 자동 축소하는 Token 관리 기능 구축.
+* **Zod 및 비즈니스 유효성 검증**: JSON 스키마 강제 파싱 후 Zod 유효성 및 긍정/부정 합산 100% 검증.
+* **Database 저장 금지**: 이번 스프린트에서는 Database 스키마 수정 및 데이터 저장을 완전히 금지하며, API 응답으로만 결과를 반환합니다.
 
 ---
 
 ## 2. 구현 범위
 
 ### 구현 대상 (In-Scope)
-* **First Review Provider (Naver Shopping)**:
-  * 네이버 스마트스토어 상품 리뷰 공개 API (`smartstore.naver.com/i/v1/contents/reviews`) 연동.
-  * Timeout(10초), Retry(3회), Exponential Backoff(1초, 2초, 4초) 회복성 로직 장착.
-* **Review 표준 DTO 및 Mapper**:
-  * 플랫폼 간 비종속적인 표준 `ReviewDto` 정의.
-  * 타입 형변환, Null 가공, 기본값 지정을 수행하는 `ReviewMapper` 구현.
-* **Review Repository**:
-  * 데이터베이스 DDL 변경 없이 기존 `customer_reviews` 테이블 구조 (`review_id`, `run_id`, `raw_text`, `rating`, `collected_at`)를 그대로 재사용.
-  * 데이터베이스 constraints (NOT NULL `run_id`) 충족을 위해 DB 내 임의의 기존 `run_id` 자동 조회 후 임시 바인딩 (Default fallback UUID 지정).
-  * Bulk Insert 및 중복 방지(`ON CONFLICT (review_id, collected_at) DO NOTHING`) 연동.
-  * Bulk Insert 결과 반환 설계 (`insertedCount`, `duplicateCount`, `failedCount`).
-* **Crawl API**:
-  * `POST /api/v1/reviews/crawl` (body: `provider`, `keyword`).
-* **Vitest 통합 테스트**:
-  * Provider(JSON fetch, Timeout, Retry), Mapper(Null 처리, DTO 변환), Repository(Insert, Duplicate 처리, failedCount 처리), API(401, 400, 200) 통합 테스트 수립.
+* **AI Provider Framework & Gemini Provider**:
+  * `AIProvider` 인터페이스, `AIRequestOptions` DTO, `ProviderFactory` 개발.
+  * Node.js native `fetch` API를 사용하여 60초 Timeout, 2회 Retry, Exponential backoff (1초, 2초)가 장착된 `GeminiProvider` 구현.
+* **Prompt Builder**:
+  * Role, Task, Rules, Output JSON Schema, Review Data 순으로 조립하는 `PromptBuilder` 모듈.
+* **Token Manager**:
+  * 문자수 비례 Token 추정식(`Math.ceil(length / 3)`)을 활용한 Token 계산기.
+  * Token 초과 방지를 위해 최신 리뷰 날짜(`collected_at`)순으로 우선 정렬 후 누적 Token 한계 도달 시까지 리뷰 목록을 유지/축소하는 Truncation 기능 구현.
+* **Response Parser**:
+  * AI가 반환한 Markdown 및 코드 블록(\`\`\`json)을 정밀 정제하는 Parser.
+* **Validators (Zod & Business)**:
+  * Zod Schema를 사용해 구조 유효성 검사 수행. 실패 시 `AIResponseValidationError` 발생.
+  * Business Validation: `summary` 존재, `strengths`/`weaknesses` 최소 1개, `sentiment` 총합 100% 검증.
+* **Analyze API**:
+  * `POST /api/v1/reviews/analyze` (validation, pipeline execution, return DTO).
 
 ### 제외 대상 (Out-Scope)
-* AI 감성 분석 및 JTBD 분류.
-* Database Schema 변경, Migration 생성, 기존 DDL 수정.
+* Database 저장 및 DDL 변경, 신규 마이그레이션 생성.
+* 시장성 등급 산출 및 점수화.
+* 상품 전략 및 Creative 시안 도출.
 
 ---
 
 ## 3. 수정 대상 파일
-* [app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts): 신규 review 라우트 프리픽스 연동 등록
+* [app.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/app.ts): 신규 AI 라우트 프리픽스 등록 연동.
+* [common/errors/index.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/common/errors/index.ts): `AIResponseValidationError` 추가.
 
 ---
 
 ## 4. 신규 생성 파일
-* **Review Module**:
-  * [modules/review/types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/types.ts): 표준 `Review` 엔티티 정의, `ReviewDto` 및 리포지토리 인터페이스 정의
-  * [modules/review/dto.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/dto.ts): DTO 규격 선언
-  * [modules/review/mapper.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/mapper.ts): Provider raw json 데이터 ➡️ 표준 DTO 매퍼
-  * [modules/review/repository.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/repository.ts): `customer_reviews` 테이블 Bulk Insert 구현
-  * [modules/review/service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/service.ts): 파이프라인 흐름 제어
-  * [modules/review/controller.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/controller.ts): Crawl 요청 중계 및 결과 건수 반환
-  * [modules/review/schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/schema.ts): Zod를 이용한 API 요청 유효성 스키마 선언
-  * [modules/review/route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/review/route.ts): 라우트 등록
-* **Scraper Module/Interface 확장**:
-  * [modules/scraper/providers/naver-review.provider.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/scraper/providers/naver-review.provider.ts): Naver Smartstore 리뷰 실 연동 프로바이더 (Timeout, Retry 포함)
+* **AI Module**:
+  * [modules/ai/types.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/ai/types.ts): DTO 및 AIRequestOptions, Provider 인터페이스 선언
+  * [modules/ai/provider.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/ai/provider.ts): `AIProvider` 추상 인터페이스 정의
+  * [modules/ai/provider-factory.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/ai/provider-factory.ts): `ProviderFactory` 팩토리
+  * [modules/ai/providers/gemini.provider.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/ai/providers/gemini.provider.ts): Gemini API 호출기 (fetch, Retry/Timeout 내장)
+  * [modules/ai/prompt-builder.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/ai/prompt-builder.ts): 프롬프트 템플릿 제어
+  * [modules/ai/token-manager.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/ai/token-manager.ts): Token 연산 및 리뷰 축소기
+  * [modules/ai/parser.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/ai/parser.ts): Markdown & Json Parser
+  * [modules/ai/validator.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/ai/validator.ts): Zod 및 100% 합산 등 Business Validator
+  * [modules/ai/service.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/ai/service.ts): AI 리뷰 분석 통합 서비스 (데이터베이스 저장 제거)
+  * [modules/ai/controller.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/ai/controller.ts): Fastify 요청 컨트롤러
+  * [modules/ai/schema.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/ai/schema.ts): API 요청 Zod 스키마
+  * [modules/ai/route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/src/modules/ai/route.ts): API 라우터 등록
 * **테스트**:
-  * [tests/review-pipeline.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/review-pipeline.test.ts): 통합 검증 테스트
+  * [tests/review-analysis.test.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/backend/tests/review-analysis.test.ts): AI 분석 전체 레이어 및 API 통합 테스트
 
 ---
 
-## 5. Database 정책 및 데이터 매핑 전략
-
-### 5-1. Database Schema 동결 (Freeze)
-* DDL 수정, 컬럼 추가 및 신규 Migration 파일 생성을 일체 진행하지 않고 기존 스키마를 재사용합니다.
-
-### 5-2. 데이터 매핑 전략
-* `ReviewDto`의 플랫폼 독립 필드 중 데이터베이스 컬럼에 상응하는 정보만 선별 매핑하여 `customer_reviews`에 삽입합니다:
-  * `review_id` ⬅️ `ReviewDto.reviewId` (UUID)
-  * `raw_text` ⬅️ `ReviewDto.reviewContent` (원본 텍스트)
-  * `rating` ⬅️ `ReviewDto.rating` (별점)
-  * `collected_at` ⬅️ `ReviewDto.collectedAt` (수집 일시)
-* `run_id`는 외래키 제약조건 및 NOT NULL 제약을 충족하기 위해 데이터베이스 내 임의의 기존 `run_id`를 자동 조회 후 임시 바인딩 (Default fallback UUID 지정).
+## 5. Database 정책
+* **Database 저장 금지**: 이번 Sprint에서는 분석 결과를 DB에 영속화하지 않고 API Response까지만 생성해 반환합니다.
 
 ---
 
 ## 6. API 설계
 
-### POST `/api/v1/reviews/crawl` (리뷰 수집 실행)
+### POST `/api/v1/reviews/analyze` (AI 리뷰 분석 실행)
 * **Headers**: `Authorization: Bearer <JWT>`
 * **Request Body**:
   ```json
   {
-    "provider": "naver",
-    "keyword": "강아지 유모차"
+    "provider": "gemini",
+    "keyword": "강아지 유모차",
+    "maxReviews": 100
   }
   ```
 * **Validation 규칙**:
-  * `provider`: `'naver'` 필수.
+  * `provider`: `'gemini'` 필수.
   * `keyword`: 필수 입력, 앞뒤 공백 제거(Trim), 빈 문자열(Empty) 차단, 최대 50자 제한.
+  * `maxReviews`: 100 기본값, 최대 500 제한.
 * **Response (200 OK)**:
   ```json
   {
     "success": true,
     "data": {
-      "provider": "naver",
-      "keyword": "강아지 유모차",
-      "insertedCount": 20,
-      "duplicateCount": 0,
-      "failedCount": 0
+      "reviewCount": 100,
+      "summary": "안정성이 돋보이지만 바퀴 조작성이 다소 아쉽다는 평이 지배적입니다.",
+      "strengths": ["높은 프레임 안정성", "디자인 우수"],
+      "weaknesses": ["바퀴 휠 유격", "무거운 무게"],
+      "complaints": ["접고 펼 때 뻑뻑함"],
+      "jtbd": ["강아지와 안전하고 쾌적하게 산책하기"],
+      "keywords": ["안정성", "유모차", "강아지"],
+      "sentiment": {
+        "positive": 70,
+        "neutral": 20,
+        "negative": 10
+      }
     },
-    "message": "Successfully crawled reviews"
+    "message": "Analysis completed"
   }
   ```
 
 ---
 
-## 7. Retry 및 Timeout 상세 사양
-* **Timeout**: 각 HTTP 요청당 최대 10초 대기 제한.
-* **Retry 정책**: HTTP 429 (Too Many Requests), HTTP 403 (Forbidden), Timeout 에러 발생 시 최대 3회 재시도.
+## 7. AI 호출 및 Retry 상세 사양
+* **Temperature**: `0.2`로 고정하여 결정론적 완성도를 제고.
+* **Response Format**: `JSON` 포맷 강제 지정.
+* **Timeout**: 최대 60초 대기 제한.
+* **Retry 정책**: HTTP 429, 500, 503, Network Error, Timeout 발생 시 최대 2회 재시도.
 * **Exponential Backoff**:
   * 1차 재시도 대기 시간: 1초
   * 2차 재시도 대기 시간: 2초
-  * 3차 재시도 대기 시간: 4초
 
 ---
 
-## 8. 확장 가능한 Provider Interface 설계
-```typescript
-export interface CrawlRequest {
-  keyword: string;
-  maxReviews?: number;
-  sort?: 'latest' | 'best';
-}
-
-export interface RawReviewData {
-  id: string;
-  productName: string;
-  rating: number;
-  title: string;
-  content: string;
-  date: string;
-  reviewer: string;
-  helpfulCount: number;
-  brand?: string;
-  optionName?: string;
-  raw: Record<string, unknown>;
-}
-
-export interface IReviewProvider {
-  getName(): string;
-  crawl(request: CrawlRequest): Promise<RawReviewData[]>;
-}
-```
-
----
-
-## 9. Review Mapper 및 DTO 설계
-* 표준 `ReviewDto` 구조:
-  ```typescript
-  export interface ReviewDto {
-    provider: string;
-    keyword: string;
-    reviewId: string;
-    providerProductId: string;
-    providerReviewId: string;
-    productName: string;
-    rating: number;
-    reviewTitle: string;
-    reviewContent: string;
-    reviewer: string;
-    reviewDate: string;
-    helpfulCount: number;
-    brand: string;
-    optionName: string;
-    collectedAt: string;
-    metadata: Record<string, unknown>;
-  }
-  ```
-
----
-
-## 10. Review Repository & Bulk Insert 결과 구조
-* **Bulk Insert 결과 규격**:
-  ```typescript
-  export interface BulkInsertResult {
-    insertedCount: number;
-    duplicateCount: number;
-    failedCount: number;
-  }
-  ```
-
----
-
-## 11. 테스트 계획
-* **Provider**: JSON Fetch 성공 케이스, Timeout 강제 에러 처리, 3회 Retry 동작 검증.
-* **Mapper**: Null 처리 기본값 변환, DTO 맵핑 완료, metadata 보존 여부 검사.
-* **Repository**: 대량 삽입 성공, 중복 레코드 DO NOTHING 무시, 제약조건 위반 실패 카운트 처리.
-* **API**: 401 Unauthorized, 400 Validation, 200 OK 동작 확인.
+## 8. 테스트 계획
+* **Prompt Builder**: 조립된 Prompt에 JSON Schema, 키워드, 리뷰 목록이 정상 머지되는지 확인.
+* **Token Manager**: 문자수 비례 Token 계산 정합성, Token 한도 초과 시 최신 리뷰 순서대로 자동 축소 및 정렬 유지 여부 검증.
+* **Provider**: Gemini API 호출 mock 처리, Timeout 예외 동작, Network error에 따른 2회 Retry 및 Backoff 동작 검사.
+* **Parser**: Markdown 백틱(\`\`\`json) 정제 및 JSON Parse 정합성 테스트.
+* **Validation**:
+  * Schema Validation 및 Sentiment 합산 100% 비즈니스 규칙 위반 시 `AIResponseValidationError` 처리.
+* **Service & API**:
+  * DB 저장 없이 파이프라인 수행 후 API response 정밀 검증.
+  * 400, 401, 500 상황별 응답 확인.

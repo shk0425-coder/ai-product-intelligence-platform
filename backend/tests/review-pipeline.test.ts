@@ -92,7 +92,7 @@ describe('Review Pipeline Tests', () => {
     });
 
     it('should throw an error on timeout', async () => {
-      const fetchSpy = vi.spyOn(global, 'fetch').mockRejectedValueOnce({
+      const fetchSpy = vi.spyOn(global, 'fetch').mockRejectedValue({
         name: 'AbortError',
         message: 'The user aborted a request.',
       });

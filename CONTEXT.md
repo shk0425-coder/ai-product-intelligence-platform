@@ -1,90 +1,3 @@
-# 🔴 ChatGPT PM 최우선 작업 원칙 (Highest Priority)
-
-아래 규칙은 CONTEXT.md의 다른 모든 내용보다 우선한다.
-
-## 1. 작업지시서 작성 원칙
-
-모든 작업지시서(Implementation Plan)는 내부적으로 최소 4회 이상 재검토를 수행한 후 작성한다.
-
-재검토 항목
-
-* 아키텍처
-* 확장성
-* 유지보수성
-* 테스트 전략
-* 다음 Sprint와의 연계성
-* 리팩터링 가능성
-* 중복 및 모호한 표현
-* 누락 사항
-
-검토 과정은 출력하지 않는다.
-
-최종본만 작성한다.
-
----
-
-## 2. 리뷰 응답 원칙
-
-사용자가
-
-* 재검토
-* 검토
-* 수정
-* 더 수정사항 없지?
-* 승인 가능?
-
-등을 요청한 경우,
-
-수정사항을 설명하지 않는다.
-
-내부적으로 검토 후 필요한 내용을 모두 반영하여 **최종 수정본**만 제출한다.
-
-변경 이유나 리뷰 과정은 사용자가 별도로 요청하지 않는 한 출력하지 않는다.
-
----
-
-## 3. 최종본 원칙
-
-사용자가 받을 문서는 항상 바로 개발 가능한 최종본이어야 한다.
-
-미완성 초안
-
-체크리스트
-
-수정 제안
-
-추천사항
-
-설명
-
-등은 출력하지 않는다.
-
----
-
-## 4. 프로젝트 문서 원칙
-
-Implementation Plan
-
-REVIEW.md
-
-CONTEXT.md
-
-DECISIONS.md
-
-모든 프로젝트 문서는 프로젝트 루트에서만 관리한다.
-
-다른 폴더에 생성하거나 복사하지 않는다.
-
----
-
-## 5. 품질 기준
-
-모든 작업지시서는 리팩터링 없이 다음 Sprint까지 이어질 수준의 품질을 목표로 한다.
-
-확장성, 재사용성, 결정론적 동작(Deterministic), 테스트 가능성을 항상 우선 고려한다.
-
----
-
 # CONTEXT.md (Project Handover Document for ChatGPT PM)
 
 이 문서는 **ChatGPT (프로젝트 매니저/PM)**가 새로운 대화 세션을 시작할 때, 이전 개발 흐름과 프로젝트 상태를 즉시 동기화하고 연계 작업을 이어가기 위한 **프로젝트 인계 문서**입니다.
@@ -94,17 +7,18 @@ DECISIONS.md
 ## 1. Project Summary
 * **프로젝트명**: AI Product Intelligence Platform
 * **프로젝트 목적**: 고객 결핍(JTBD) 기반 시장성 평가, S~D 등급 분류, 상품 기획 및 크리에이티브 시안 도출과 판매 피드백 학습을 자동화하는 AI 플랫폼 구축.
-* **현재 버전**: v1.0.0
-* **현재 단계**: Phase 5 - Closed-loop Learning & Production Setup
-* **현재 Sprint**: Sprint 4-5 - Dashboard Backend API Integration & Streamlit Refactoring 완료 [APPROVED]
+* **현재 버전**: v2.1.0
+* **현재 단계**: Phase 8-0 - Product Design Sprint & UX Architecture Foundation
+* **현재 Sprint**: Sprint 8-0 완료 [APPROVED 대기]
 
 ---
 
 ## 2. Current Goal
-* **현재 Sprint**: Phase 5 준비 단계 (Closed-loop Learning & Production Setup)
-* **현재 작업 (Task)**: ChatGPT PM의 Phase 5 (피드백 루프 연계 및 Supabase 배포) 작업 지시 대기
+* **현재 Sprint**: Phase 8-0 - Product Design Sprint & UX Architecture Foundation
+* **현재 작업 (Task)**: ChatGPT PM의 Sprint 8-0 UX/UI 설계 산출물 검토 및 승인 대기
 * **완료 조건 (Definition of Done)**:
-  * 차기 스프린트 계획 수립 완료.
+  - 22개 디자인 사양서 및 1개 디자인 토큰 JSON 생성 완료.
+  - Sprint 8-0 최종 승인 획득.
 
 ---
 
@@ -116,19 +30,12 @@ DECISIONS.md
 * [x] **Market Domain Database DDL 구현 완료**
 * [x] **GitHub Repository 운영 규칙 반영 및 Git 저장소 구성 완료**
 * [x] **Sprint 2-3 ~ 2-6: 데이터베이스 마이그레이션 DDL 구축 완료** [APPROVED]
-* [x] **Sprint 3-1: Backend Scaffold 및 Infrastructure 구축 완료** [APPROVED]
-* [x] **Sprint 3-2: Authentication Module 구축 완료** [APPROVED]
-* [x] **Sprint 3-3: Workspace API & Database 연동 개발 완료** [APPROVED]
-* [x] **Sprint 3-4: Sprint 3-3 개선사항 반영 및 Market Domain 구축 완료** [APPROVED]
-* [x] **Sprint 3-5: Market Mutations & Scraper Infrastructure Setup 완료** [APPROVED]
-* [x] **Sprint 3-6: Review Intelligence Pipeline & First Provider Integration 완료** [APPROVED]
-* [x] **Sprint 3-7: AI Review Analyzer & JTBD Intelligence 완료** [APPROVED]
-* [x] **Sprint 3-8: AI Review Analysis Persistence Pipeline & Storage 완료** [APPROVED]
-* [x] **Sprint 4-1: 결정론적 룰 엔진 등급 계산기 구현 완료** [APPROVED]
-* [x] **Sprint 4-2: JTBD 정보 모델 추출 프롬프트 엔진 구현 완료** [APPROVED]
-* [x] **Sprint 4-3: Product Strategy Generator 구현 완료** [APPROVED]
-* [x] **Sprint 4-4: Creative Pipeline 구현 완료** [APPROVED]
-* [x] **Sprint 4-5: Dashboard API Integration & Refactoring 구현 완료** [APPROVED]
+* [x] **Sprint 3-1 ~ 3-8: Backend Scaffold, Auth, Workspace, Scraper, AI Review Analyzer 및 Persistence 완료** [APPROVED]
+* [x] **Sprint 4-1 ~ 4-5: 룰 엔진, JTBD 추출 프롬프트, Product Strategy, Creative Pipeline, Dashboard API 연동 및 리팩터링 완료** [APPROVED]
+* [x] **Sprint 5-1 ~ 5-5: 성능 피드백 토대, 등급 산정 엔진, 자가학습 인텔리전스 및 배포 자동화 완료** [APPROVED]
+* [x] **Sprint 6-1 ~ 6-5: Distributed Async Job Worker 및 Multi-Agent Workflow Core 완료** [APPROVED]
+* [x] **Sprint 7-1 ~ 7-5: 분산 락, 멱등 복구, 감사 로그, 기능 Capability 통제 등 엔터프라이즈 기능 고도화 완료** [APPROVED]
+* [x] **Sprint 8-0: Product Design Sprint & UX Architecture Foundation 완료** [APPROVED 대기]
 
 ---
 
@@ -138,22 +45,25 @@ DECISIONS.md
 ---
 
 ## 5. Recent Decisions (최근 핵심 의사결정 - 최대 5개)
-1. **임포트 경로 충돌 우회를 위한 패키지 상대 임포트(Relative Import) 강제**: 루트의 `dashboard.py` 파일과 `dashboard/` 패키지명의 충돌을 피하기 위해, 패키지 내부에서는 무조건 `..api` 형식의 상대 임포트를 활용하여 결합도를 완전히 제거하고 독립적으로 구동 가능하게 설계함.
-2. **mypy 타입 검출을 위한 TypedDict 캐스팅(cast) 제어**: `response_mapper.py` 에서 JSON 파싱 리스트를 `List[StoryboardStep]`, `List[StoryboardScene]` 에 안전하게 대입하기 위해 `typing.cast`를 적용해 정적 검사를 완전 통과시킴.
-3. **SessionStateManager 데이터 형식 Optional[Any] 완화**: TypedDict DTO를 유연하게 수용하고 컴포넌트 간 Loosely Coupled 상태를 유지하도록 SessionStateManager 프로퍼티 타입을 느슨하게 확장함.
-4. **ErrorFormatter strict type check 선언**: `TimeoutError` 처럼 API 레벨에서 발생하는 예외를 `isinstance` 로 즉각 분기 판단해 NETWORK_ERROR 와 명확하게 식별하여 메시지를 사전 매핑하도록 보강함.
-5. **Memory Cache 전용 조회 캡슐화**: Mutation API는 캐시 대상에서 자동 차단하고, `workspaceId:productId:analysisId` 조합 캐시 키를 활용해 단일/결결적 캐싱 제어 스택 구축.
+1. **[DDL-01] 슬레이트(Slate) 기반의 프리미엄 다크 테마 기본 채택**: HSL Hues와 Indigo primary 조합을 선정하여 미래지향적인 비주얼 완성.
+2. **[DDL-02] 상품 상세 뷰 내 로컬 탭(Local Tab) 네비게이션 적용**: 잦은 페이지 라우팅에 의한 리로드 지연을 억제하기 위해 단일 상품 레이아웃 내 동적 탭 전환 방식 적용.
+3. **[DDL-03] AI 스토리보드 단계적 Progressive Disclosure 적용**: 8단계 상세페이지 기획의 인지 부하를 차단하기 위해 아코디언 토글 전개 방식 강제.
+4. **[DDL-04] 감사 이력 조회 시 페이지네이션(Pagination) 단일 표준 채택**: 정확한 시점 검색 및 스크롤 유지를 위해 무한 스크롤 대신 표준 페이지네이터 도입.
+5. **[DDL-05] Frontend Next.js 14 App Router 고정**: Radix UI 및 Tailwind, shadcn/ui 템플릿의 안정적인 결합을 보장하기 위해 Next.js 14 버전을 프론트엔드 기준 스택으로 선택.
 
 ---
 
 ## 6. Pending Review (최우선 검토 목적)
-* **없음** (Phase 4 전체 완료 및 승인 획득)
+* **Sprint 8-0 완료 검토 요청**:
+  - [pm_review/REVIEW.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/pm_review/REVIEW.md)
+  - [design/](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/) 디렉터리 내 22개 마크다운 문서 및 `tokens/design-tokens.json` 파일 내용.
 
 ---
 
 ## 7. Next Action
 * **ChatGPT (PM)**:
-  1. **Phase 5 (Closed-loop Learning & Production Setup)** 첫 번째 스프린트인 **Sprint 5-1** 작업 지시서(출시 상품 실적 수집 모듈 및 피드백 루프 연계)를 작성해 주십시오.
+  1. **Sprint 8-0** 설계 산출물의 품질을 검토하고 승인을 확정해주십시오.
+  2. 승인 완료 후 다음 구현 연계 스프린트인 **Sprint 8-1** (Next.js 골격 생성 및 로그인/워크스페이스 스위처 연동) 개시를 지시해주십시오.
 
 ---
 
@@ -164,8 +74,8 @@ DECISIONS.md
 
 ## 9. Important Notes
 * **CONTEXT.md는 ChatGPT 전용 문서**입니다. 새로운 세션 시작 시 이 파일만 로드하면 이전 흐름이 완벽히 이어집니다.
-* **비즈니스 로직은 services 계층에서만 구현한다.**
-* **대시보드는 Backend API Consumer 역할만 수행한다.**
+* **대시보드는 Backend API Consumer 역할만 수행하며, 핵심 비즈니스 로직을 프론트엔드단에 직접 탑재하지 않는다.**
+* **모든 디자인/설계 산출물은 `design/` 폴더에 구조화한다.**
 
 ---
 
@@ -181,6 +91,6 @@ DECISIONS.md
 ---
 
 ## 11. Last Update
-* **업데이트 날짜**: 2026-06-27
-* **완료 Sprint**: Sprint 4-5 (Dashboard API Integration & Streamlit Refactoring) [APPROVED]
-* **다음 Sprint**: Sprint 5-1 (Closed-loop Learning & Feedback Loop Setup)
+* **업데이트 날짜**: 2026-06-28
+* **완료 Sprint**: Sprint 8-0 (Product Design Sprint & UX Architecture Foundation) [APPROVED 대기]
+* **다음 Sprint**: Sprint 8-1 (Next.js Scaffolding & Auth/Workspace Integration)

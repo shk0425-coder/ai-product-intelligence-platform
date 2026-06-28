@@ -1,4 +1,4 @@
-# Implementation Plan - Sprint 8-1 (Final v2.1)
+# Implementation Plan - Sprint 8-1 (Final v2.2)
 
 # Next.js Scaffolding & Auth / Workspace Integration
 
@@ -67,15 +67,13 @@ src/
 
 ## 3. Provider 구축
 
-구현
-
 * Theme Provider
 * React Query Provider
 * Auth Provider
 * Workspace Provider
 * Toast Provider
 
-Root Layout 등록
+Root Layout에 등록한다.
 
 ---
 
@@ -131,8 +129,6 @@ Zustand
 * Auth Store
 * Workspace Store
 * UI Store
-
-비즈니스 데이터 저장 금지
 
 비즈니스 데이터는 React Query만 사용한다.
 
@@ -294,8 +290,8 @@ Commit Message는 Conventional Commits 규칙을 따른다.
 
 Design 산출물이 변경된 Sprint인 경우에만 아래 파일을 갱신하여 포함한다.
 
-* design_review.zip (PM 핵심 검토 문서)
-* design_full.zip (전체 설계 문서)
+* design_review.zip
+* design_full.zip
 
 Design 변경이 없는 Sprint에서는 기존 파일을 그대로 유지하며 재생성하지 않는다.
 
@@ -303,13 +299,13 @@ Design 변경이 없는 Sprint에서는 기존 파일을 그대로 유지하며 
 
 ## 5. PM_REVIEW_PACKAGE.md 생성
 
-다음 내용을 포함한다.
-
 ### Sprint 정보
 
+* Sprint 번호
 * Sprint 목적
 * 구현 범위
 * 구현 요약
+* 완료 여부
 
 ### 변경 내역
 
@@ -333,9 +329,48 @@ Design 변경이 없는 Sprint에서는 기존 파일을 그대로 유지하며 
 
 ### Known Issues
 
+### Review Blockers
+
+PM 승인을 막을 수 있는 항목을 작성한다.
+
+예시
+
+* Build 실패
+* ESLint Error 존재
+* Test 실패
+* API Mapping 불일치
+* Deliverables 누락
+
+없으면
+
+```text
+None
+```
+
+으로 작성한다.
+
 ### Definition of Done 충족 여부
 
 ### 다음 Sprint 진입 조건
+
+### Submission Manifest
+
+```text
+backend_code.zip
+frontend_code.zip
+database_and_reviews.zip
+
+CONTEXT.md
+REVIEW.md
+DECISIONS.md
+walkthrough.md
+
+PM_REVIEW_PACKAGE.md
+
+(Design 변경 시)
+design_review.zip
+design_full.zip
+```
 
 ### PM Review Priority
 
@@ -376,7 +411,26 @@ PM Review 요청 전에 반드시 아래 항목을 확인한다.
 
 ---
 
-## 7. 제출
+## 7. 완료 보고
+
+PM Review Package 생성이 완료되면 아래 형식으로 완료 보고를 작성한다.
+
+* Sprint 완료 여부
+* Definition of Done 충족 여부
+* Build 결과
+* Test 결과
+* ESLint 결과
+* 생성된 Deliverables 수
+* 생성된 코드 파일 수
+* 생성된 문서 수
+* Known Issues
+* 제출 파일 목록
+
+완료 보고와 함께 PM Review를 요청한다.
+
+---
+
+## 8. 제출
 
 PM에게는 `pm_review` 폴더 전체를 제출한다.
 
@@ -413,6 +467,7 @@ Sprint 종료 전 아래 항목을 모두 완료해야 한다.
 * database_and_reviews.zip 생성
 * Design 변경 시 design_review.zip 및 design_full.zip 갱신
 * PM Review Self Validation 완료
+* 완료 보고 작성
 * pm_review 폴더 최종 검증 완료
 
-Sprint는 위 체크리스트를 모두 만족하고 PM Review Package 생성이 완료된 경우에만 종료된 것으로 간주한다.
+Sprint는 위 체크리스트를 모두 만족하고 PM Review Package 생성 및 완료 보고까지 끝난 경우에만 종료된 것으로 간주한다.

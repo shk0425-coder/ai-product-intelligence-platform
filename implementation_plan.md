@@ -1,281 +1,375 @@
-# Implementation Plan - Sprint 8-1 (Final v2.2)
+# Implementation Plan - Sprint 8-2 (Final v2.0)
 
-# Next.js Scaffolding & Auth / Workspace Integration
+# Dashboard Foundation & Product List Integration
 
 ---
 
 # Sprint 목적
 
-Sprint 8-0에서 확정된 Design Freeze를 기반으로 Frontend 프로젝트를 시작한다.
+Sprint 8-1에서 구축한 Frontend Foundation(App Router, Authentication, Workspace)을 기반으로 실제 서비스를 사용할 수 있는 첫 번째 사용자 화면을 구현한다.
 
-Backend API는 Sprint 7-5 Freeze 버전을 그대로 사용하며, Frontend는 API Consumer 역할만 수행한다.
+이번 Sprint에서는 Dashboard와 Product List를 구축하고 Backend API와 실제 연동을 완료한다.
 
-이번 Sprint의 목표는 Frontend 프로젝트의 기반 아키텍처를 구축하고 Authentication 및 Workspace 연동을 완료하는 것이다.
+Frontend는 API Consumer 역할만 수행하며 Backend의 비즈니스 로직을 절대 구현하지 않는다.
+
+Backend Sprint 7-5 Freeze API를 그대로 사용한다.
 
 ---
 
 # 구현 범위
 
-## 1. Frontend 프로젝트 생성
+## 1. Dashboard 구축
 
-기술스택
+구현 화면
 
-* Next.js 14 (App Router)
-* React
-* TypeScript
-* Tailwind CSS
-* shadcn/ui
-* Radix UI
+* Dashboard Home
+* KPI Summary Cards
+* Recent Analyses
+* Recent Activities
+* Quick Actions
+
+KPI 계산은 Backend 결과만 출력한다.
+
+Frontend 계산 금지.
+
+---
+
+## 2. Dashboard API Integration
+
+연동 대상
+
+* Dashboard Summary
+* Dashboard Statistics
+* Recent Analyses
+* Recent Activities
+
+구현
+
 * React Query
-* Zustand
-* React Hook Form
-* Zod
-* Axios
-
-구성
-
-* ESLint
-* Prettier
-* Husky
-* lint-staged
-
----
-
-## 2. 프로젝트 구조
-
-FRONTEND_ARCHITECTURE.md를 기준으로 구성한다.
-
-```text
-frontend/
-
-src/
- ├── app/
- ├── components/
- ├── features/
- ├── hooks/
- ├── layouts/
- ├── lib/
- ├── providers/
- ├── services/
- ├── stores/
- ├── styles/
- ├── types/
- └── utils/
-```
-
----
-
-## 3. Provider 구축
-
-* Theme Provider
-* React Query Provider
-* Auth Provider
-* Workspace Provider
-* Toast Provider
-
-Root Layout에 등록한다.
-
----
-
-## 4. Authentication
-
-구현
-
-* Login
-* Logout
-* Session Restore
-* Token Refresh
-* Unauthorized Redirect
-
-규칙
-
-* JWT는 HttpOnly Cookie 정책 사용
-* Frontend는 Access Token을 직접 저장하지 않는다.
-
----
-
-## 5. Workspace
-
-구현
-
-* Workspace 목록
-* Workspace 선택
-* Workspace Context
-* Workspace 전환
-
-모든 API는 Workspace Context 기반으로 동작한다.
-
----
-
-## 6. Axios Client
-
-구현
-
-* Base Client
-* Request Interceptor
-* Response Interceptor
-* Timeout
+* Loading
+* Error
+* Empty
 * Retry
-* Error Handler
+* Suspense
 
-API_INTEGRATION_GUIDE.md를 그대로 따른다.
-
----
-
-## 7. Global State
-
-Zustand
-
-* Auth Store
-* Workspace Store
-* UI Store
-
-비즈니스 데이터는 React Query만 사용한다.
+Query Key 표준을 적용한다.
 
 ---
 
-## 8. React Query
+## 3. Product List
 
 구현
 
-* QueryClient
-* Cache
-* Invalidation
-* Error Handling
+* Product Table
+* Search
+* Filter
+* Sorting
+* Pagination
+* Status Badge
+
+표시 컬럼
+
+* Product Name
+* Brand
+* Category
+* Market Score
+* Grade
+* Status
+* Created At
+* Updated At
 
 ---
 
-## 9. Layout
+## 4. Product Detail Routing
 
-구현
+Product List → Product Detail
 
-* Sidebar
+라우팅만 생성한다.
+
+Product Detail은 Skeleton Layout까지만 구현한다.
+
+실제 기능은 Sprint 8-3에서 구현한다.
+
+---
+
+## 5. Search
+
+지원
+
+* 상품명
+* 브랜드
+* 카테고리
+
+Debounce 적용
+
+React Query와 연동한다.
+
+---
+
+## 6. Filter
+
+지원
+
+* Grade
+* Category
+* Status
+
+Workspace 기준으로 동작한다.
+
+---
+
+## 7. Pagination
+
+Server Pagination만 사용한다.
+
+Frontend Pagination 금지.
+
+지원
+
+* Page
+* Page Size
+
+Cursor Pagination은 사용하지 않는다.
+
+---
+
+## 8. Table Component
+
+공통 컴포넌트 생성
+
+* Table
 * Header
-* Content Layout
+* Empty State
+* Loading Skeleton
+* Badge
+* Pagination
 
-디자인 변경 금지
+Component Catalog를 그대로 따른다.
 
 ---
 
-## 10. Routing
+## 9. React Query
 
 생성
 
-* /
-* /login
-* /dashboard
-* /workspace
-* /settings
+* Dashboard Query
+* Product Query
+
+규칙
+
+* Query Key 표준화
+* staleTime
+* cacheTime
+* invalidateQueries
+* retry 정책
+* refetchOnWindowFocus 정책
 
 ---
 
-## 11. Error 처리
+## 10. API Service Layer
+
+생성
+
+services/
+
+* dashboard.service.ts
+* product.service.ts
+
+Axios Client만 사용한다.
+
+직접 fetch 사용 금지.
+
+---
+
+## 11. DTO 및 Type
+
+생성
+
+types/
+
+* dashboard.ts
+* product.ts
+
+Backend DTO와 동일하게 유지한다.
+
+Frontend DTO 수정 금지.
+
+---
+
+## 12. Global State
+
+Zustand 사용
+
+허용
+
+* UI State
+* Sidebar
+* Theme
+
+금지
+
+* Server Data 저장
+
+Server Data는 React Query만 사용한다.
+
+---
+
+## 13. Route Guard
 
 구현
 
-* Loading
-* Error
+* Protected Route
+* Login Redirect
+* Unauthorized Redirect
+* Workspace Validation
+
+---
+
+## 14. Error Handling
+
+구현
+
+* Error Boundary
+* API Error
+* Forbidden
+* Unauthorized
 * NotFound
-* Suspense
+* Network Error
+
+UX Guideline을 따른다.
 
 ---
 
-## 12. Environment
+## 15. Loading UX
 
 구현
 
-* .env.example
-* API Endpoint
-* Build Config
+* Skeleton
+* Spinner
+* Suspense
+* Progressive Loading
+
+---
+
+## 16. Empty State
+
+구현
+
+* Dashboard Empty
+* Product Empty
+* Search Empty
+
+UX Writing 문서를 그대로 따른다.
+
+---
+
+## 17. Responsive
+
+지원
+
+* Desktop
+* Tablet
+* Mobile
+
+반응형 규칙 변경 금지.
 
 ---
 
 # 구현 규칙
 
-* Sprint 8-0 Design Freeze를 변경하지 않는다.
-* Backend API를 변경하지 않는다.
-* Backend 비즈니스 로직을 Frontend로 이동하지 않는다.
-* 구현은 DESIGN_SYSTEM.md, FRONTEND_ARCHITECTURE.md, API_INTEGRATION_GUIDE.md를 그대로 따른다.
-* implementation_plan.md는 수정하지 않는다.
+* Sprint 8-0 Design Freeze 변경 금지
+* Backend API 변경 금지
+* Backend 비즈니스 로직 구현 금지
+* Hard Coding 금지
+* Mock Data 금지
+* TypeScript any 금지
+* fetch 사용 금지
+* Axios Client만 사용
+* React Query만 Server State 관리
+* Zustand는 UI State만 관리
+* API Contract 변경 금지
+* Component Catalog 준수
+* API_INTEGRATION_GUIDE.md 준수
+* DESIGN_SYSTEM.md 준수
+* FRONTEND_ARCHITECTURE.md 준수
 
 ---
 
 # Deliverables
 
-* Next.js Project
-* App Router
-* Providers
-* Authentication
-* Workspace Integration
-* Axios Client
-* React Query
-* Zustand
-* Common Layout
-* Routing
-* Environment Configuration
+* Dashboard
+* Dashboard API Integration
+* Product List
+* Search
+* Filter
+* Pagination
+* Product Detail Skeleton
+* Dashboard Service
+* Product Service
+* Dashboard Types
+* Product Types
+* Common Table Components
+* Route Guard
+* Error Boundary
 
 ---
 
-# 완료 조건 (Definition of Done)
+# Definition of Done
 
-* Next.js 프로젝트 생성 완료
-* App Router 정상 동작
-* Authentication 연동 완료
-* Workspace 연동 완료
-* Axios Client 구축 완료
-* React Query 구축 완료
-* Zustand 구축 완료
-* 공통 Layout 구축 완료
-* Routing 완료
-* TypeScript Build 성공
+* Dashboard 정상 동작
+* Dashboard API 연동 완료
+* KPI 정상 출력
+* Product List 정상 출력
+* Search 정상
+* Filter 정상
+* Pagination 정상
+* Product Detail Routing 완료
+* Route Guard 정상
+* Error Boundary 정상
+* Responsive 확인
+* Build 성공
+* TypeScript Compile 성공
 * ESLint Error 0
-* 프로젝트 정상 실행 확인
+* Test 통과
+* 프로젝트 정상 실행
 
 ---
 
 # Sprint 종료 후 필수 작업
 
-## 1. 프로젝트 검증
-
 반드시 수행한다.
+
+## 프로젝트 검증
 
 * Build 성공
 * TypeScript Compile 성공
 * ESLint Error 0
 * Test 통과
-* 프로젝트 정상 실행 확인
+* 프로젝트 실행 확인
 
----
-
-## 2. Git 관리
-
-반드시 아래 순서를 수행한다.
+## Git
 
 * 변경사항 검토
-* Commit 생성
-* Commit Message 작성
-* 작업 브랜치 최신 상태 확인
+* Conventional Commit 작성
+* 최신 브랜치 확인
 
-Commit Message는 Conventional Commits 규칙을 따른다.
-
----
-
-## 3. 프로젝트 문서 업데이트
-
-최신 Sprint 기준으로 업데이트한다.
+## 문서 업데이트
 
 * CONTEXT.md
 * REVIEW.md
 * DECISIONS.md
 * walkthrough.md
 
----
+## Code Review 문서 생성
 
-## 4. PM Review Package 생성
+반드시 생성한다.
 
-`pm_review` 폴더를 최신 상태로 갱신한다.
+* FRONTEND_REVIEW.md
+* API_MAPPING_REPORT.md
 
-### 포함 파일
+## PM Review Package 생성
+
+생성
 
 * backend_code.zip
 * frontend_code.zip
@@ -286,76 +380,127 @@ Commit Message는 Conventional Commits 규칙을 따른다.
 * walkthrough.md
 * PM_REVIEW_PACKAGE.md
 
-### Design 문서
-
-Design 산출물이 변경된 Sprint인 경우에만 아래 파일을 갱신하여 포함한다.
+Design 변경 시
 
 * design_review.zip
 * design_full.zip
 
-Design 변경이 없는 Sprint에서는 기존 파일을 그대로 유지하며 재생성하지 않는다.
+기존 Design 변경이 없으면 재생성하지 않는다.
 
 ---
 
-## 5. PM_REVIEW_PACKAGE.md 생성
+# PM Review Self Validation
 
-### Sprint 정보
+반드시 확인한다.
 
-* Sprint 번호
-* Sprint 목적
-* 구현 범위
-* 구현 요약
-* 완료 여부
+* Dashboard 정상
+* Product List 정상
+* API Mapping 확인
+* Query Key 확인
+* DTO 일치
+* Build 성공
+* Test 통과
+* ESLint Error 0
+* TypeScript Compile 성공
+* Review 문서 생성
+* walkthrough 최신화
+* CONTEXT 최신화
+* DECISIONS 최신화
+* PM Review Package 생성 완료
 
-### 변경 내역
+---
 
-* 신규 파일
-* 수정 파일
-* 삭제 파일
+# 완료 보고
 
-### 시스템 변경
+포함
 
-* Backend 변경 사항
-* Frontend 변경 사항
-* Database 변경 사항
-* API 변경 사항
-
-### 검증 결과
-
+* Sprint 완료 여부
+* DoD 충족 여부
+* Dashboard 결과
+* Product List 결과
+* API 연동 결과
 * Build 결과
-* TypeScript 결과
-* ESLint 결과
 * Test 결과
+* ESLint 결과
+* 생성 코드 수
+* 생성 문서 수
+* Known Issues
+* 제출 파일 목록
 
-### Known Issues
+완료 후 PM Review를 요청한다.
 
-### Review Blockers
+---
 
-PM 승인을 막을 수 있는 항목을 작성한다.
+# 제출
 
-예시
+pm_review 폴더 전체 제출
 
-* Build 실패
-* ESLint Error 존재
-* Test 실패
-* API Mapping 불일치
-* Deliverables 누락
+검토 순서
 
-없으면
+1. PM_REVIEW_PACKAGE.md
+2. REVIEW.md
+3. CONTEXT.md
+4. backend_code.zip
+5. frontend_code.zip
+6. database_and_reviews.zip
+7. design_review.zip(변경 시)
+8. design_full.zip(변경 시)
 
-```text
-None
+---
+
+# Sprint 종료 체크리스트
+
+* Dashboard 완료
+* Product List 완료
+* Dashboard API 완료
+* Search 완료
+* Filter 완료
+* Pagination 완료
+* Route Guard 완료
+* Error Boundary 완료
+* Build 성공
+* TypeScript Compile 성공
+* ESLint Error 0
+* Test 통과
+* 실행 확인
+* Git Commit 완료
+* CONTEXT 업데이트
+* REVIEW 작성
+* DECISIONS 업데이트
+* walkthrough 작성
+* FRONTEND_REVIEW.md 생성
+* API_MAPPING_REPORT.md 생성
+* PM_REVIEW_PACKAGE.md 생성
+* backend_code.zip 생성
+* frontend_code.zip 생성
+* database_and_reviews.zip 생성
+* Design 변경 시 design_review.zip 및 design_full.zip 갱신
+* PM Review Self Validation 완료
+* 완료 보고 작성
+* pm_review 폴더 최종 검증 완료
+
+Sprint는 위 체크리스트를 모두 만족한 경우에만 종료된 것으로 간주한다.
+
+
+# 리뷰 자료 제출 (필수)
+
+Sprint 완료 후 PM Review 요청 전에 아래 자료를 반드시 생성하여 제출한다.
+
+---
+
+# 1. PM Review Package
+
+`pm_review/` 폴더를 최신 상태로 갱신한다.
+
+반드시 포함한다.
+
 ```
+pm_review/
 
-으로 작성한다.
+PM_REVIEW_PACKAGE.md
+README.md
+CODE_REVIEW_GUIDE.md
 
-### Definition of Done 충족 여부
-
-### 다음 Sprint 진입 조건
-
-### Submission Manifest
-
-```text
 backend_code.zip
 frontend_code.zip
 database_and_reviews.zip
@@ -365,109 +510,237 @@ REVIEW.md
 DECISIONS.md
 walkthrough.md
 
-PM_REVIEW_PACKAGE.md
+FRONTEND_REVIEW.md
+BACKEND_REVIEW.md
+API_MAPPING_REPORT.md
+IMPLEMENTATION_SUMMARY.md
+CHANGELOG.md
 
 (Design 변경 시)
 design_review.zip
 design_full.zip
 ```
 
-### PM Review Priority
+---
 
-★★★★★ 반드시 검토
+# 2. 코드 리뷰 문서
 
-★★★★☆
+## FRONTEND_REVIEW.md
 
-★★★☆☆
+반드시 포함
 
-각 파일마다
-
-* 목적
-* 변경 내용
-* 검토 포인트
-
-를 작성한다.
+* Sprint 목표
+* 구현 기능
+* 생성 파일
+* 수정 파일
+* 삭제 파일
+* 주요 컴포넌트
+* 주요 Hook
+* Provider 변경
+* React Query 변경
+* Zustand 변경
+* Routing 변경
+* API 연동 결과
+* Self Review
+* Known Issues
 
 ---
 
-## 6. PM Review Self Validation
+## BACKEND_REVIEW.md
 
-PM Review 요청 전에 반드시 아래 항목을 확인한다.
+Backend 변경이 있는 Sprint에서만 생성한다.
 
-* 모든 Deliverables 생성 완료
+포함
+
+* 변경 API
+* 변경 Service
+* 변경 Repository
+* 변경 Entity
+* 변경 DTO
+* 변경 Middleware
+* Database 영향
+* 기존 API 영향
+
+Backend 변경이 없으면 아래와 같이 작성한다.
+
+```
+No Backend Changes
+```
+
+---
+
+# 3. API Mapping Report
+
+API_MAPPING_REPORT.md 생성
+
+반드시 포함
+
+* Endpoint
+* Method
+* Request DTO
+* Response DTO
+* Frontend Service
+* React Query
+* 화면 위치
+* 테스트 결과
+
+누락 API가 없어야 한다.
+
+---
+
+# 4. Implementation Summary
+
+IMPLEMENTATION_SUMMARY.md 생성
+
+포함
+
+* Sprint 목표
+* 구현 결과
+* 주요 기능
+* 주요 아키텍처
+* 변경 규모
+* 생성 코드 수
+* 수정 코드 수
+* 생성 문서 수
+* 신규 컴포넌트
+* 신규 Provider
+* 신규 Hook
+* 신규 Service
+
+---
+
+# 5. Change Log
+
+CHANGELOG.md 생성
+
+포함
+
+## Added
+
+## Changed
+
+## Fixed
+
+## Refactored
+
+## Removed
+
+Conventional Commit 기준으로 작성한다.
+
+---
+
+# 6. 실행 검증 자료
+
+반드시 수행한다.
+
 * Build 성공
 * TypeScript Compile 성공
 * ESLint Error 0
 * Test 통과
-* API Mapping 최신 상태
-* CONTEXT.md 최신화
-* REVIEW.md 최신화
-* DECISIONS.md 최신화
-* walkthrough.md 최신화
-* PM_REVIEW_PACKAGE.md 최신화
-* pm_review 폴더 누락 파일 없음
+* 프로젝트 정상 실행
 
-모든 항목이 완료된 경우에만 PM Review를 요청한다.
+검증 결과를 REVIEW.md와 PM_REVIEW_PACKAGE.md에 모두 기록한다.
 
 ---
 
-## 7. 완료 보고
+# 7. 스크린샷 제출
 
-PM Review Package 생성이 완료되면 아래 형식으로 완료 보고를 작성한다.
+Frontend 변경이 있는 Sprint에서는 반드시 제출한다.
 
+```
+screenshots/
+
+login.png
+dashboard.png
+product-list.png
+product-detail.png
+responsive-desktop.png
+responsive-tablet.png
+responsive-mobile.png
+loading.png
+empty.png
+error.png
+```
+
+UI 변경이 없는 Sprint는 생략 가능하다.
+
+---
+
+# 8. 리뷰용 ZIP 생성
+
+반드시 생성한다.
+
+```
+backend_code.zip
+frontend_code.zip
+database_and_reviews.zip
+```
+
+압축 기준
+
+backend_code.zip
+
+* backend 전체 소스
+* package.json
+* migrations
+
+frontend_code.zip
+
+* frontend 전체 소스
+* package.json
+
+database_and_reviews.zip
+
+* REVIEW.md
+* DECISIONS.md
+* CONTEXT.md
+* walkthrough.md
+* PM_REVIEW_PACKAGE.md
+* FRONTEND_REVIEW.md
+* BACKEND_REVIEW.md
+* API_MAPPING_REPORT.md
+* IMPLEMENTATION_SUMMARY.md
+* CHANGELOG.md
+
+---
+
+# 9. PM 제출 체크리스트
+
+제출 전 반드시 확인한다.
+
+* Deliverables 완료
+* Build 성공
+* TypeScript 성공
+* ESLint Error 0
+* Test 통과
+* API Mapping 확인
+* Query Key 확인
+* DTO 일치 확인
+* Context 최신화
+* Decisions 최신화
+* Walkthrough 최신화
+* Review 최신화
+* PM Review Package 생성
+* Screenshots 생성(해당 시)
+* ZIP 생성 완료
+
+---
+
+# 10. PM Review 요청
+
+아래 형식으로 완료 보고를 작성한다.
+
+* Sprint 번호
 * Sprint 완료 여부
 * Definition of Done 충족 여부
+* 구현 기능 요약
 * Build 결과
-* Test 결과
+* TypeScript 결과
 * ESLint 결과
-* 생성된 Deliverables 수
-* 생성된 코드 파일 수
-* 생성된 문서 수
+* Test 결과
+* 생성 코드 파일 수
+* 생성 문서 수
 * Known Issues
 * 제출 파일 목록
 
-완료 보고와 함께 PM Review를 요청한다.
-
----
-
-## 8. 제출
-
-PM에게는 `pm_review` 폴더 전체를 제출한다.
-
-PM은 아래 순서로 검토를 진행한다.
-
-1. PM_REVIEW_PACKAGE.md
-2. REVIEW.md
-3. CONTEXT.md
-4. backend_code.zip
-5. frontend_code.zip
-6. database_and_reviews.zip
-7. (Design 변경 시) design_review.zip
-8. 필요 시 design_full.zip
-
----
-
-# Sprint 종료 체크리스트
-
-Sprint 종료 전 아래 항목을 모두 완료해야 한다.
-
-* Build 성공
-* TypeScript Compile 성공
-* ESLint Error 0
-* Test 통과
-* 프로젝트 실행 확인
-* Git Commit 완료
-* CONTEXT.md 업데이트
-* REVIEW.md 작성
-* DECISIONS.md 업데이트
-* walkthrough.md 작성
-* PM_REVIEW_PACKAGE.md 작성
-* backend_code.zip 생성
-* frontend_code.zip 생성
-* database_and_reviews.zip 생성
-* Design 변경 시 design_review.zip 및 design_full.zip 갱신
-* PM Review Self Validation 완료
-* 완료 보고 작성
-* pm_review 폴더 최종 검증 완료
-
-Sprint는 위 체크리스트를 모두 만족하고 PM Review Package 생성 및 완료 보고까지 끝난 경우에만 종료된 것으로 간주한다.
+위 자료가 모두 준비된 경우에만 PM Review를 요청한다.

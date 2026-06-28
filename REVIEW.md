@@ -1,72 +1,69 @@
-# REVIEW.md (Sprint 8-0 최종 Review)
+# REVIEW.md (Sprint 8-1 최종 Review)
 
-본 문서는 **Sprint 8-0 (Product Design Sprint & UX Architecture Foundation)** 완료 후, **ChatGPT (Project Manager)**의 코드 리뷰와 승인을 지원하기 위해 작성된 스프린트 리뷰 보고서입니다.
+본 문서는 **Sprint 8-1 (Next.js Scaffolding & Auth / Workspace Integration)** 완료 후, **작업자(Antigravity)**의 자체 점검 및 검토 결과를 요약 기술한 스프린트 보고서입니다.
 
 ---
 
 ## 1. Sprint 정보
-* **Sprint 번호**: Sprint 8-0
-* **대상 작업**: Product Design Sprint & UX Architecture Foundation (설계 전용)
-* **Commit Message**: `docs(design): Sprint 8-0 UX/UI and Frontend Architecture documents completed`
+* **Sprint 번호**: Sprint 8-1
+* **대상 작업**: Next.js Scaffolding & Auth / Workspace Integration (프론트엔드 인프라 구축)
+* **Commit Message**: `feat(sprint-8-1): next.js scaffolding and auth/workspace integration completed`
 
 ---
 
 ## 2. 변경된 파일 (Created & Modified Files)
 
-* **디자인 및 설계 사양서 산출물 (신규 생성)**:
-  - [design/INFORMATION_ARCHITECTURE.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/INFORMATION_ARCHITECTURE.md)
-  - [design/SCREEN_INVENTORY.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/SCREEN_INVENTORY.md)
-  - [design/USER_FLOW.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/USER_FLOW.md)
-  - [design/UX_GUIDELINE.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/UX_GUIDELINE.md)
-  - [design/UI_GUIDELINE.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/UI_GUIDELINE.md)
-  - [design/UX_WRITING.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/UX_WRITING.md)
-  - [design/DESIGN_TOKEN.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/DESIGN_TOKEN.md)
-  - [design/tokens/design-tokens.json](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/tokens/design-tokens.json)
-  - [design/DESIGN_SYSTEM.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/DESIGN_SYSTEM.md)
-  - [design/UX_PATTERN.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/UX_PATTERN.md)
-  - [design/COMPONENT_CATALOG.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/COMPONENT_CATALOG.md)
-  - [design/FRONTEND_ARCHITECTURE.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/FRONTEND_ARCHITECTURE.md)
-  - [design/API_INTEGRATION_GUIDE.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/API_INTEGRATION_GUIDE.md)
-  - [design/RESPONSIVE_ACCESSIBILITY.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/RESPONSIVE_ACCESSIBILITY.md)
-  - [design/USER_TEST_SCENARIO.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/USER_TEST_SCENARIO.md)
-  - [design/DESIGN_DECISION_LOG.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/DESIGN_DECISION_LOG.md)
-  - [design/WIREFRAME.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/WIREFRAME.md)
-  - [design/PHASE8_ROADMAP.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/design/PHASE8_ROADMAP.md)
-* **프로젝트 제어 문서 (수정)**:
+* **프론트엔드 프로젝트 인프라 및 소스코드 (신규 생성)**:
+  - [frontend/package.json](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/package.json)
+  - [frontend/tailwind.config.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/tailwind.config.ts)
+  - [frontend/src/app/globals.css](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/app/globals.css)
+  - [frontend/src/app/layout.tsx](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/app/layout.tsx)
+  - [frontend/src/lib/api-client.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/lib/api-client.ts)
+  - [frontend/src/stores/useAuthStore.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/stores/useAuthStore.ts)
+  - [frontend/src/stores/useWorkspaceStore.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/stores/useWorkspaceStore.ts)
+  - [frontend/src/stores/useUiStore.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/stores/useUiStore.ts)
+  - [frontend/src/providers/AuthProvider.tsx](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/providers/AuthProvider.tsx)
+  - [frontend/src/providers/WorkspaceProvider.tsx](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/providers/WorkspaceProvider.tsx)
+  - [frontend/src/app/api/auth/login/route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/app/api/auth/login/route.ts)
+  - [frontend/src/app/api/[...path]/route.ts](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/app/api/%5B...path%5D/route.ts)
+  - [frontend/src/layouts/Sidebar.tsx](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/layouts/Sidebar.tsx)
+  - [frontend/src/app/login/page.tsx](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/app/login/page.tsx)
+  - [frontend/src/app/dashboard/page.tsx](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/frontend/src/app/dashboard/page.tsx)
+* **스프린트 통제 문서 (수정)**:
   - [task.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/task.md)
   - [CONTEXT.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/CONTEXT.md)
   - [DECISIONS.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/DECISIONS.md)
-  - [pm_review/CONTEXT.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/pm_review/CONTEXT.md)
-  - [pm_review/DECISIONS.md](file:///Users/kimsanghyeon/Projects/앱개발/naver_shopping_dashboard/pm_review/DECISIONS.md)
 
 ---
 
 ## 3. 변경 요약 (Summary of Changes)
-* **정보 구조 및 화면 식별**: Next.js App Router URL 매핑 및 화면 구성 요소, 그리고 인터랙티브 동작 상태(Loading, Empty, Error) 명시화.
-* **디자인 토큰 및 시스템 구성**: Tailwind CSS 설정과 shadcn/ui에 직접 매핑 가능한 `design-tokens.json` 및 테마 규칙 정비.
-* **통합 아키텍처 및 API 매핑**: Next.js 프론트엔드 상태(Zustand) 및 통신(React Query) 구조 설계, 실제 동결된 백엔드 API 라우트 매핑 완성.
-* **사용성 및 검증**: 접근성 규칙(WCAG 2.1 AA) 및 터치 영역 설계, 프로토타입 Usability 검증을 위한 사용자 테스트 태스크 시나리오 작성.
+* **프론트엔드 스택 구축**: Next.js 14 App Router 골격 하에 ESLint, Prettier, TypeScript 설정을 완수하고, `FRONTEND_ARCHITECTURE.md` 기준에 준하는 12대 디렉터리 구조를 완성했습니다.
+* **디자인 시스템 연동**: `design-tokens.json`의 HSL slate-dark 색상표 및 테두리 반경 값 등을 `globals.css` 및 `tailwind.config.ts`에 동적으로 주입하여 브랜드 고유의 다크 스타일 테마를 기본 바인딩했습니다.
+* **HttpOnly API 인증 프록시**: 로컬 스토리지에 토큰을 절대 누출하지 않기 위해 Next.js Route Handler를 보안 브릿지(Proxy)로 가동, 로그인 시 Access/Refresh Token을 HttpOnly 쿠키로 유지하고 백엔드 API 요청 시 `Authorization: Bearer` 헤더로 자동 가속 변환해주는 구조를 실현했습니다.
+* **Zustand 및 React Query 상태 관리**: `useAuthStore`와 `useWorkspaceStore`를 연동하여 현재 사용중인 `x-workspace-id` 컨텍스트 헤더를 Axios 공통 클라이언트에 매 요청마다 주입하는 흐름을 제어했으며, 비즈니스 데이터는 React Query 캐시로 독립 격리했습니다.
+* **공통 Layout 및 라우팅**: 사이드바(워크스페이스 컨텍스트 스위처 포함), 헤더(프로필 상태바), 메인 뷰포트 레이아웃 프레임을 조립하고 5대 라우터(`/, /login, /dashboard, /workspace, /settings`)를 구축했습니다.
 
 ---
 
 ## 4. Migration 정보
-* **해당 사항 없음** (코드 변경 및 DB 마이그레이션이 없는 100% 설계 스프린트).
+* **해당 사항 없음** (프론트엔드 프로젝트 기동 스프린트로 백엔드 및 Supabase 데이터베이스 마이그레이션 변경사항 없음).
 
 ---
 
 ## 5. Self Review (자체 점검)
-* [x] **Deliverables 완결성**: `implementation_plan.md`가 요구하는 모든 설계 문서와 디자인 토큰 파일이 명칭 및 구조 변경 없이 `design/` 디렉터리에 완벽히 적재되었는가?
-* [x] **백엔드 동결 API 정합성**: `API_INTEGRATION_GUIDE.md`의 라우트 매핑이 실제 `backend/src/app.ts`에 정의된 라우트들과 100% 일치하는가?
-* [x] **디자인 일관성**: 모든 신규 문서들이 Phase 1의 제품 비전 및 철학("AI Assistant, Not a Tool")과 충돌 없이 일관되게 서술되었는가?
+* [x] **TypeScript 빌드 정합성**: `npm run build`를 수행하여 static page 빌드 최적화 및 컴파일 검증이 정상 통과되었는가?
+* [x] **ESLint 0 에러 유지**: 프론트엔드 프로젝트 내 코드 작성 검사 결과 ESLint 경고 및 오류가 단 1건도 없는가?
+* [x] **보안 요구사항 만족**: 토큰이 브라우저 클라이언트 로컬 메모리/스토리지에 직접 노출되지 않고 HttpOnly 쿠키를 이용한 Next.js 프록시로만 연동되는가?
+* [x] **워크스페이스 연동**: 워크스페이스 선택 변경 시 `x-workspace-id` 헤더가 Axios 공통 클라이언트에 실시간 주입되는가?
 
 ---
 
 ## 6. Known Issues
-* 없음.
+* **없음**
 
 ---
 
 ## 7. Review Request
 * **핵심 검토 대상**:
-  - `API_INTEGRATION_GUIDE.md`의 백엔드 호출 매핑이 기존 백엔드 비즈니스 플로우와 조화를 이루는지.
-  - `WIREFRAME.md`에 정의된 화면 흐름이 기획 관점에서 의도한 사용자 여정과 완벽히 매치되는지 확인 부탁드립니다.
+  - `frontend/src/app/api/[...path]/route.ts`에 위치한 리버스 프록시 연동 및 투명한 토큰 리프레시(Token Refresh) 메커니즘을 중점 검토해 주십시오.
+  - 로그인 성공 후 대시보드 로드 시 Capability Registry API를 통해 권한 등급을 동적으로 판별하는 연동 상태를 확인해 주십시오.

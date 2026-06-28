@@ -1,5 +1,14 @@
 # Project Decisions
 
+## Sprint 8-1
+
+- **[DDL-06] Next.js Route Handler 기반 HttpOnly 쿠키 프록시 기법 도입**: 프론트엔드 단독으로 Access Token을 로컬 스토리지에 노출시키지 않기 위해 Next.js 서버를 프록시로 사용하여 HttpOnly 쿠키를 세팅하고, 백엔드로의 요청 시 Bearer 토큰을 자동으로 가로채 주입하는 구조 채택.
+- **[DDL-07] Zustand 전역 스토어와 React Query 역할 엄격 분리**: 비즈니스 정보(워크스페이스 리스트, 상품 분석 목록 등)는 React Query 캐시로만 관리하며, Zustand 스토어(`useAuthStore`, `useWorkspaceStore`, `useUiStore`)는 오직 유저 세션 및 선택된 활성 컨텍스트 ID 등 순수 UI 메타 정보 관리용으로 격리.
+- **[DDL-08] API 통신용 Axios 인터셉터 내 워크스페이스 헤더 자동 주입**: 모든 백엔드 요청에 활성 워크스페이스 컨텍스트를 주입하기 위해 `apiClient` 인터셉터가 `useWorkspaceStore`에서 `currentWorkspaceId`를 실시간 취득하여 `x-workspace-id` 헤더에 삽입하도록 처리.
+- **[DDL-09] 401 오류 처리 통합 및 동적 리프레시 바이패스**: 토큰이 만료되어 백엔드에서 401 Unauthorized를 응답할 시, Next.js 프록시가 내부적으로 `refreshToken` 쿠키를 읽어 토큰을 자동 갱신(Retry)하고, 리프레시조차 실패할 경우에만 클라이언트 세션을 삭제하여 로그인 페이지로 강제 리다이렉트 처리.
+
+---
+
 ## Sprint 8-0
 
 - **[DDL-01] 슬레이트(Slate) 기반의 프리미엄 다크 테마 기본 채택**: HSL Hues and Indigo primary.
